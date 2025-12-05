@@ -1,0 +1,130 @@
+<!doctype html> <html lang="ko"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>상담 등록 - KWH 지식관리시스템</title> <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet"> <style> body { box-sizing: border-box; margin: 0; padding: 0; font-family: "Noto Sans KR", "Apple SD Gothic Neo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; line-height: 1.5; color: #212121; background-color: #FAFAFA; 높이: 100%; } *, *::before, *::after { box-sizing: inherit; } html { 높이: 100%; } /* 앱 헤더 */ .app-header { 높이: 60px; 배경색: #FFFFFF; 테두리 하단: 1px 단색 #E0E0E0; 패딩: 0 24px; 디스플레이: flex; 정렬 항목: 가운데 정렬; 내용 정렬: 공백; } .app-header-left h1 { 여백: 0; 글꼴 크기: 18px; 글꼴 두께: 700; 색상: #005BAC; } .app-header-left p { 여백: 0; 글꼴 크기: 12px; 색상: #6E6E6E; } .app-header-right { 디스플레이: flex; 정렬 항목: 가운데 정렬; 간격: 12px; 글꼴 크기: 13px; 색상: #424242; } .app-header-divider { 색상: #BDBDBD; } .role-badge { 디스플레이: 인라인 블록; 배경색: #E8F1FB; 색상: #1A73E8; 테두리 반경: 999px; 글꼴 크기: 11px; 글꼴 무게: 600; 패딩: 2px 8px; } .btn-logout { 배경색: #FFFFFF; 색상: #005BAC; 테두리: 1px 단색 #005BAC; 테두리 반경: 4px; 패딩: 4px 12px; 글꼴 크기: 13px; 글꼴 무게: 600; 커서: 포인터; 전환: 배경색 0.2초; } .btn-logout:hover { 배경색: #E8F1FB; } /* 레이아웃 컨테이너 */ .app-container { display: flex; height: calc(100% - 60px); } /* 사이드바 */ .app-sidebar { width: 240px; background-color: #F5F7FB; border-right: 1px solid #E0E0E0; overflow-y: auto; padding: 16px 0; } .menu-section { margin-bottom: 24px; } .menu-section-title { font-size: 11px; font-weight: 600; color: #6E6E6E; text-transform: uppercase; padding: 8px 16px; margin-bottom: 4px; } .menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 14px; 색상: #424242; 커서: 포인터; 전환: 모두 0.2초; 텍스트 장식: 없음; 테두리 왼쪽: 3px 단색 투명; } .menu-item:hover { 배경색: #E8F1FB; 색상: #005BAC; } .메뉴 항목.활성 { 배경색: #D2E4FA; 색상: #005BAC; 테두리 왼쪽 색상: #005BAC; 글꼴 가중치: 600; } .menu-icon { 너비: 18px; 높이: 18px; flex-shrink: 0; } /* 주요 콘텐츠 */ .main-content { flex: 1; overflow-y: auto; 패딩: 24px; } .page-header { 여백 하단: 24px; } .page-title { 글꼴 크기: 24px; 글꼴 가중치: 700; 색상: #212121; 여백: 0 0 8px 0; 줄 높이: 1.4; } .page-subtitle { 글꼴 크기: 14px; 색상: #6E6E6E; 여백: 0; } /* 양식 카드 */ .form-card { 배경색: #FFFFFF; 테두리 반경: 8px; 상자 그림자: 0px 1px 3px rgba(0,0,0,0.08); 패딩: 20px; 최대 너비: 900px; } .form-section { 여백 하단: 24px; } .form-section:last-child { 여백 하단: 0; } .form-section-title { 글꼴 크기: 16px; 글꼴 무게: 600; 색상: #212121; 여백: 0 0 16px 0; 패딩 하단: 8px; 테두리 하단: 1px 단색 #E0E0E0; } .form-grid { 표시: 그리드; 그리드 템플릿 열: 반복(2, 1fr); 간격: 16px; } .form-grid.single-column { grid-template-columns: 1fr; } .form-field { display: flex; flex-direction: column; } .form-field.full-width { grid-column: 1 / -1; } .form-label { font-size: 13px; font-weight: 600; color: #212121; margin-bottom: 4px; } .form-label.required::after { content: " *"; color: #C62828; } .form-input, .form-select, .form-textarea { min-height: 36px; border: 1px solid #BDBDBD; border-radius: 4px; padding: 0 12px; font-size: 14px; font-family: inherit; color: #212121; 전환: 모두 0.2초; } .form-input:focus, .form-select:focus, .form-textarea:focus { 윤곽선: 없음; 테두리 색상: #1A73E8; 상자 그림자: 0 0 0 1px rgba(26,115,232,0.2); } .form-input.error, .form-select.error, .form-textarea.error { 테두리 색상: #C62828; } .form-textarea { 패딩: 8px 12px; 크기 조정: 수직; 최소 높이: 100px; 줄 높이: 1.5; } .form-error { 글꼴 크기: 12px; 색상: #C62828; 위쪽 여백: 4px; } .form-helper { 글꼴 크기: 12px; 색상: #6E6E6E; 위쪽 여백: 4px; } /* 메타데이터 필드 */ .metadata-container { display: flex; flex-direction: column; gap: 8px; } .metadata-row { display: flex; gap: 8px; align-items: flex-start; } .metadata-row input { flex: 1; } .btn-remove { min-height: 36px; width: 36px; background-color: #FFFFFF; color: #C62828; border: 1px solid #C62828; border-radius: 4px; font-size:14px; 글꼴 두께: 600; 커서: 포인터; 전환: 모두 0.2초; 패딩: 0; } .btn-remove:hover { 배경색: #FFEBEE; } .btn-add-metadata { 배경색: #FFFFFF; 색상: #005BAC; 테두리: 1px 단색 #005BAC; 테두리 반경: 6px; 최소 높이: 36px; 패딩: 0 16px; 글꼴 크기: 14px; 글꼴 두께: 600; 커서: 포인터; 전환: 모두 0.2초; 여백 상단: 4px; 디스플레이: 인라인 플렉스; 정렬 항목: 중앙; 간격: 4px; } .btn-add-metadata:hover { 배경색: #E8F1FB; } /* 양식 작업 */ .form-actions { 디스플레이: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E0E0E0; } .btn-primary { 배경색: #005BAC; 색상: #FFFFFF; 테두리: 없음; 테두리 반경: 6px; 최소 높이: 36px; 패딩: 0 16px; 글꼴 크기: 14px; 글꼴 두께: 600; 커서: 포인터; 전환: 배경색 0.2초; } .btn-primary:hover { 배경색: #00437F; } .btn-primary:disabled { 배경색: #BDBDBD; 커서: 허용되지 않음; } .btn-secondary { 배경색: #FFFFFF; 색상: #005BAC; 테두리: 1px solid #005BAC; border-radius: 6px; min-height: 36px; padding: 0 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; } .btn-secondary:hover { background-color: #E8F1FB; } /* 모달 */ .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000; } .modal-overlay.show { display: flex; } .modal-content { background-color: #FFFFFF; border-radius: 8px; box-shadow: 0px 4px 12px rgba(0,0,0,0.15); padding: 24px; max-width: 480px; width: 90%; } .modal-header { font-size: 18px; font-weight: 700; color: #212121; margin: 0 0 16px 0; } .modal-body { font-size: 14px; color: #424242; margin-bottom: 24px; line-height: 1.6; } .modal-actions { display: flex; justify-content: flex-end; gap: 12px; } /* 토스트 */ .toast { position: fixed; top: 80px; right: 24px; background-color: #FFFFFF; border-radius: 6px; box-shadow: 0px 4px 12px rgba(0,0,0,0.15); padding: 12px 16px; display: none; align-items: center; gap: 8px; z-index: 2000; min-width: 280px; border-left: 4px solid; } .toast.show { display: flex; animation: slideIn 0.3s ease-out; } .toast.success { border-left-color:#2E7D32; } .toast.error { border-left-color: #C62828; } .toast-icon { width: 20px; height: 20px; flex-shrink: 0; } .toast-message { flex: 1; font-size: 14px; color: #212121; } @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } } /* 스피너 로딩 */ .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #FFFFFF; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } } </style> <style>@view-transition { navigation: auto; }</style> <script src="/_sdk/data_sdk.js" type="text/javascript"></script> <script src="/_sdk/element_sdk.js" type="text/javascript"></script> <script src="https://cdn.tailwindcss.com" type="text/javascript"></script> </head> <body><!-- 앱 헤더 --> <header class="app-header"> <div class="app-header-left"> <h1>KWH 지식관리시스템</h1> <p>광주은행 헬프데스크 위키</p> </div> <div class="app-header-right"><span>디지털전략부</span> <span class="app-header-divider">·</span> <span>홍길동</span> <span class="app-header-divider">·</span> <span class="role-badge">상담사</span> <button class="btn-logout" onclick="handleLogout()">로그아웃</button> </div> </header><!-- 앱 컨테이너 --> <div class="app-container"><!-- 사이드바 --> <aside class="app-sidebar"> <nav> <div class="menu-section"> <div class="menu-section-title"> 메인 </div><a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect> <rect x="14" y="3" width="7" height="7"></rect> <rect x="14" y="14" width="7" height="7"></rect> <rect x="3" y="14" width="7" height="7"></rect> </svg> 대시보드 </a> </div> <div class="menu-section"> <div class="menu-section-title"> 상담 관리 </div><a href="#" class="menu-item active"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path> <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path> </svg> 상담 등록 </a> <a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle> <path d="m21 21-4.35-4.35"></path> </svg> 상담 검색 </a> </div> <div class="menu-section"> <div class="menu-section-title"> 메뉴얼 관리 </div><a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path> <polyline points="14 2 14 8 20 8"></polyline> </svg> 메뉴얼 검색 </a> <a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle> <polyline points="12 6 12 12 16 14"></polyline> </svg> 메뉴얼 버전 이력 </a> </div> <div class="menu-section"> <div class="menu-section-title"> 검토/승인 </div><a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline> <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path> </svg> 검토 작업 목록 </a> </div> <div class="menu-section"> <div class="menu-section-title"> 관리자 </div><a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path> <circle cx="9" cy="7" r="4"></circle> <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path> <path d="M16 3.13a4 4 0 0 1 0 7.75"></path> </svg> 사용자/권한 관리 </a> <a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" 스트로크="currentColor" 스트로크-폭="2"><circle cx="12" cy="12" r="3"></circle> <path d="M12 1v6m0 6v6m-6-6H0m6 0h6m0-6h6m-6 6h6"></path> </svg> 시스템 설정 </a> </div> </nav> </aside><!-- 주요 내용 --> <main class="main-content"> <div class="page-header"> <h2 class="page-title">상담 등록</h2> <p class="page-subtitle">고객 상담 내용을 입력하고 저장합니다</p> </div> <div class="form-card"> <form id="consultationForm" onsubmit="handleSubmit(event)"><!-- 기본 정보 --> <div class="form-section"> <h3 class="form-section-title">기본 정보</h3> <div class="form-grid"> <div class="form-field"><label class="form-label require">요청영업점</label> <input type="text" class="form-input" id="branch_code" name="branch_code" placeholder="영업점 입력 (예: BR001)" 필수> <span class="form-error" id="branch_code_error"></span> </div> <div class="form-field"><label class="form-label" 필수">요청직원</label> <input type="text" class="form-input" id="employee_id" name="employee_id" placeholder="직원 ID 입력 (예: EMP1234)" 필수> <span class="form-error" id="employee_id_error"></span> </div> <div class="form-field"><label class="form-label 필수">화면번호</label> <input type="text" class="form-input" id="screen_id" name="screen_id" placeholder="화면번호 입력 (예:SCR0001)" 필수> <span class="form-error" id="screen_id_error"></span> </div> <div class="form-field"><label class="form-label 필수">거래명</label> <input type="text" class="form-input" id="transaction_name" name="transaction_name" placeholder="거래명 입력" 필수> <span class="form-error" id="transaction_name_error"></span> </div> <div class="form-field"><label class="form-label 필수">업무구분</label> <select class="form-select" id="business_type" name="business_type" 필수> <option value="">업무구분 선택</option> <option value="DEPOSIT">예금</option> <option value="LOAN">대출</option> <option value="CARD">카드</option> <option value="EXCHANGE">환전</option> <option value="INTERNET">인터넷뱅킹</option> <option value="MOBILE">모바일뱅킹</option> <option value="OTHER">기타</option> </select> <span class="form-error" id="business_type_error"></span> </div> <div class="form-field"><label class="form-label require">에러코드</label> <input type="text" class="form-input" id="error_code" name="error_code" placeholder="에러코드 입력 (예: E001)" 필수> <span class="form-error" id="error_code_error"></span> <span class="form-helper">에러코드를 입력해주세요</span> </div> </div> </div><!-- 상담 내용 --> <div class="form-section"> <h3 class="form-section-title">상담 내용</h3> <div class="form-grid 단일 열"> <div class="form-field"><label class="form-label 필수">문의내용</label> <textarea class="form-textarea" id="inquiry_text" name="inquiry_text" placeholder="고객의 문의 내용을 입력해주세요"row="5" 필수></textarea> <span class="form-error" id="inquiry_text_error"></span> </div> <div class="form-field"><label class="form-label require"> 조치내용</label> <textarea class="form-textarea" id="action_taken" name="action_taken" placeholder="해결을 위해 취한 조치를 입력해주세요"rows="5" 필요></textarea> <span class="form-error" id="action_taken_error"></span> </div> </div> </div><!-- 메타데이터 필드 -->
+      <div class="form-section">
+       <h3 class="form-section-title">추가 정보 (선택)</h3>
+       <div class="form-field"><label class="form-label">메타데이터</label>
+        <div class="metadata-container" id="metadataContainer"><!-- Dynamic metadata rows will be added here -->
+        </div><button type="button" class="btn-add-metadata" onclick="addMetadataRow()">
+         <svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line> <line x1="5" y1="12" x2="19" y2="12"></line>
+         </svg> 필드 추가 </button> <span class="form-helper">추가 정보가 있는 경우 Key/Value 형태로 입력해주세요</span>
+       </div>
+      </div><!-- Form Actions -->
+      <div class="form-actions"><button type="button" class="btn-secondary" onclick="handleCancel()">취소</button> <button type="submit" class="btn-primary" id="submitBtn"> <span id="submitBtnText">저장</span> </button>
+      </div>
+     </form>
+    </div>
+   </main>
+  </div><!-- Modal: Create Manual Confirmation -->
+  <div class="modal-overlay" id="manualModal">
+   <div class="modal-content">
+    <h3 class="modal-header">메뉴얼 생성</h3>
+    <div class="modal-body">
+     상담 내용이 성공적으로 저장되었습니다.<br>
+      이 상담 내용을 바탕으로 메뉴얼을 생성하시겠습니까?
+    </div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeManualModal(false)">아니오</button> <button class="btn-primary" onclick="closeManualModal(true)">예, 생성하기</button>
+    </div>
+   </div>
+  </div><!-- Toast Notification -->
+  <div class="toast" id="toast">
+   <svg class="toast-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="toastIcon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path> <polyline points="22 4 12 14.01 9 11.01"></polyline>
+   </svg><span class="toast-message" id="toastMessage"></span>
+  </div>
+  <script>
+    // State management
+    let metadataRowCount = 0;
+    let savedConsultationId = null;
+
+    // Add metadata row
+    function addMetadataRow() {
+      metadataRowCount++;
+      const container = document.getElementById('metadataContainer'); const row = document.createElement('div'); row.className = 'metadata-row'; row.id = `metadata-row-${metadataRowCount}`; row.innerHTML = ` <input type="text" class="form-input" placeholder="키 (예: 고객번호)" data-metadata-key="${metadataRowCount}" /> <input type="text" class="form-input" placeholder="값 (예: 1234567890)" data-metadata-value="${metadataRowCount}" /> <button type="button" class="btn-remove" onclick="removeMetadataRow(${metadataRowCount})" title="삭제"> ✕ </button> `; container.appendChild(row); } // 메타데이터 행 제거 함수 removeMetadataRow(rowId) { const row = document.getElementById(`metadata-row-${rowId}`); if (row) { row.remove(); } } // 메타데이터 필드 수집 함수 collectMetadata() { const metadata = {}; const container = document.getElementById('metadataContainer'); const rows = container.querySelectorAll('.metadata-row'); rows.forEach(row => { const keyInput = row.querySelector('[data-metadata-key]'); const valueInput = row.querySelector('[data-metadata-value]'); if (keyInput && valueInput && keyInput.value.trim() && valueInput.value.trim()) { metadata[keyInput.value.trim()] = valueInput.value.trim(); } }); return metadata; } // 모든 오류 지우기 함수 clearErrors() { const errorElements = document.querySelectorAll('.form-error'); errorElements.forEach(el => el.textContent = ''); const inputs = document.querySelectorAll('.form-input, .form-select, .form-textarea'); inputs.forEach(input => input.classList.remove('error')); } // 특정 필드에 대한 오류 표시 함수 showFieldError(fieldName, message) { const errorElement = document.getElementById(`${fieldName}_error`); const inputElement = document.getElementById(fieldName); if (errorElement) { errorElement.textContent = message; } if (inputElement) { inputElement.classList.add('error'); } } // 양식 검증 함수 validateForm(formData) { clearErrors(); let isValid = true; // 필수 필드 유효성 검사 const requiredFields = [ { name: 'branch_code', label: '요청영업점' }, { name: 'employee_id', label: '요청직원' }, { name: 'screen_id', label: '화면번호' }, { name: 'transaction_name', label:'거래명' },
+        { name: 'business_type', label: '업무구분' },
+        { name: 'error_code', label: '에러코드' },
+        { name: 'inquiry_text', label: '문의내용' },
+        { name: 'action_taken', label: '조치내용' }
+      ];
+
+      requiredFields.forEach(field => {
+        if (!formData[field.name] || formData[field.name].trim() === '') {
+          showFieldError(field.name, `${field.label}은(는) 필수 입력 항목입니다.`);
+          isValid = false;
+        }
+      });
+
+      // Specific validations
+      if (formData.inquiry_text && formData.inquiry_text.trim().length < 10) {
+        showFieldError('inquiry_text', '문의내용은 최소 10자 이상 입력해주세요.');
+        isValid = false;
+      }
+
+      if (formData.action_taken && formData.action_taken.trim().length < 10) {
+        showFieldError('action_taken', '조치내용은 최소 10자 이상 입력해주세요.');
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+    // Handle form submit
+    async function handleSubmit(event) {
+      event.preventDefault();
+      
+      const form = document.getElementById('consultationForm');
+      const formData = new FormData(form);
+      const submitBtn = document.getElementById('submitBtn');
+      const submitBtnText = document.getElementById('submitBtnText');
+      
+      // Convert form data to object
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+      
+      // Add metadata
+      data.metadata_fields = collectMetadata();
+      
+      // Validate
+      if (!validateForm(data)) {
+        showToast('입력 내용을 확인해주세요.', 'error');
+        return;
+      }
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtnText.innerHTML = '<span class="spinner"></span>';
+      
+      try {
+        // TODO: API Connect - POST /api/consultations
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Mock response
+        const response = {
+          success: true,
+          data: {
+            id: 'CONS-' + Date.now(),
+            ...data,
+            created_at: new Date().toISOString()
+          }
+        };
+        
+        if (response.success) {
+          savedConsultationId = response.data.id;
+          
+          // Show success toast
+          showToast('상담 내용이 성공적으로 저장되었습니다.', 'success');
+          
+          // Show manual creation modal after short delay
+          setTimeout(() => {
+            showManualModal();
+          }, 800);
+        } else {
+          throw new Error('저장 실패');
+        }
+        
+      } catch (error) {
+        console.error('Save error:', error);
+        showToast('저장 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+        
+        // Reset button state
+        submitBtn.disabled = false; submitBtnText.textContent = '저장'; } } // 토스트 알림 기능 표시 showToast(message, type = 'success') { const toast = document.getElementById('toast'); const toastMessage = document.getElementById('toastMessage'); const toastIcon = document.getElementById('toastIcon'); toastMessage.textContent = message; toast.className = `toast ${type} show`; // 유형에 따라 아이콘 업데이트 if (type === 'success') { toastIcon.innerHTML = ` <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path> <polyline points="22 4 12 14.01 9 11.01"></polyline> `; } else { toastIcon.innerHTML = ` <circle cx="12" cy="12" r="10"></circle> <line x1="15" y1="9" x2="9" y2="15"></line> <line x1="9" y1="9" x2="15" y2="15"></line> `; } // 3초 후 자동으로 숨김 setTimeout(() => { toast.classList.remove('show'); }, 3000); } // 수동 생성 모달 함수 표시 showManualModal() { const modal = document.getElementById('manualModal'); modal.classList.add('show'); } // 수동 모달 함수 닫기 closeManualModal(createManual) { const modal = document.getElementById('manualModal'); modal.classList.remove('show'); if (createManual) { // TODO: API Connect - 매뉴얼 생성 페이지로 이동하거나 매뉴얼 생성 트리거 console.log('상담 매뉴얼 생성 중:', savedConsultationId); showToast('메뉴얼 생성 페이지로 이동합니다.', 'success'); // 탐색 시뮬레이션 setTimeout(() => { // window.location.href = `/manual/create?consultation_id=${savedConsultationId}`; }, 1000); } else { // 양식을 재설정하고 목록으로 돌아갑니다 resetForm(); showToast('상담 등록이 완료되었습니다.', 'success'); } } // 양식 재설정 function resetForm() { const form = document.getElementById('consultationForm'); const submitBtn = document.getElementById('submitBtn'); const submitBtnText = document.getElementById('submitBtnText'); form.reset(); clearErrors(); // 메타데이터 행 지우기 const container = document.getElementById('metadataContainer'); container.innerHTML = ''; metadataRowCount = 0; // 버튼 상태 재설정 submitBtn.disabled = false; submitBtnText.textContent = '저장'; savedConsultationId = null; } // 취소 함수 처리 handleCancel() { if (confirm('작성 중인 내용이 있습니다. 취소하시겠습니까?')) { resetForm(); // TODO: 상담 목록으로 돌아가기 // window.location.href = '/consultations'; } } // 로그아웃 함수 처리 handleLogout() { // TODO: API Connect - POST /api/auth/logout console.log('로그아웃 중...'); // window.location.href = '/login'; } // 초기화: 기본적으로 메타데이터 행 하나를 추가합니다(선택 사항) // addMetadataRow(); </script> <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a9145bf55509d6e',t:'MTc2NDkxMzg5NC4wMDAwMDA='};var a=document.createElement('스크립트');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('로딩'!==document.readyState)c();그렇지 않으면 if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'로딩 중'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body> </html>document.addChild(a);if('로딩 중'!==document.readyState)c(); 그렇지 않으면 document.addEventListener('DOMContentLoaded',c); 그렇지 않으면{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'로딩 중'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body> </html>document.addChild(a);if('로딩 중'!==document.readyState)c(); 그렇지 않으면 document.addEventListener('DOMContentLoaded',c); 그렇지 않으면{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'로딩 중'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body> </html>
