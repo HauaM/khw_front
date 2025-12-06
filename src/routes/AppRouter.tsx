@@ -9,6 +9,7 @@ import ManualSearchPage from '@/pages/manuals/ManualSearchPage';
 import ManualHistoryPage from '@/pages/manuals/ManualHistoryPage';
 import ManualDraftResultPage from '@/pages/manuals/ManualDraftResultPage';
 import ReviewTaskListPage from '@/pages/reviews/ReviewTaskListPage';
+import ManualReviewDetailPage from '@/pages/reviews/ManualReviewDetailPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
 import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
 import AuthLayout from '@/components/common/AuthLayout';
@@ -36,6 +37,7 @@ const AppRouter: React.FC = () => {
           </Route>
           <Route path="reviews">
             <Route path="tasks" element={<ReviewTaskListPage />} />
+            <Route path="tasks/:taskId" element={<ManualReviewDetailPage />} />
           </Route>
           <Route path="admin">
             <Route path="users" element={<AdminUsersPage />} />

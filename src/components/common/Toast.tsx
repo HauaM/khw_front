@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { ToastContext, ToastMessage } from '@/contexts/ToastContext';
 
-export type ToastType = 'success' | 'error';
+export type ToastType = 'success' | 'error' | 'info';
 
 export interface ToastState {
   type: ToastType;
@@ -8,15 +9,29 @@ export interface ToastState {
   isOpen: boolean;
 }
 
-interface ToastProps {
-  message: string;
+/**
+ * 개별 Toast 컴포넌트
+ * props로 받는 방식과 Context 방식 모두 지원
+ */
+interface SingleToastProps {
+  toast?: ToastMessage;
+  message?: string;
   type?: ToastType;
   isOpen?: boolean;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ type = 'success', message, isOpen = true, onClose }) => {
+const SingleToast: React.FC<SingleToastProps> = ({
+  toast,
+  message,
+  type = 'success',
+  isOpen = true,
+  onClose,
+}) => {
   const [visible, setVisible] = useState(isOpen);
+
+  const displayMessage = toast?.message || message || '';
+  const displayType = (toast?.type || type) as ToastType;
 
   useEffect(() => {
     setVisible(isOpen);
@@ -26,44 +41,63 @@ const Toast: React.FC<ToastProps> = ({ type = 'success', message, isOpen = true,
     if (!visible) return undefined;
     const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
       setVisible(false);
-      onClose();
+      onClose?.();
+      if (toast) {
+        const context = React.useContext(ToastContext);
+        context?.removeToast(toast.id);
+      }
     }, 3000);
     return () => clearTimeout(timer);
-  }, [onClose, visible]);
+  }, [onClose, visible, toast]);
 
   if (!visible) return null;
 
-  const isSuccess = type === 'success';
+  const typeConfig = {
+    success: { border: 'border-l-green-600', text: 'text-green-600', icon: 'checkmark' },
+    error: { border: 'border-l-red-600', text: 'text-red-600', icon: 'error' },
+    info: { border: 'border-l-blue-600', text: 'text-blue-600', icon: 'info' },
+  };
+
+  const config = typeConfig[displayType];
 
   return (
-    <div className="fixed right-6 top-20 z-50 flex min-w-[280px] items-center gap-3 rounded-md border border-gray-100 bg-white px-4 py-3 shadow-lg transition">
-      <span
-        className={`flex h-6 w-6 items-center justify-center rounded-full ${
-          isSuccess ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-        }`}
-        aria-hidden
-      >
+    <div
+      className={`fixed right-6 top-20 z-50 flex min-w-[320px] items-center gap-3 rounded-md border-l-4 bg-white px-4 py-3 shadow-lg transition ${config.border}`}
+    >
+      <span className={`flex h-6 w-6 items-center justify-center flex-shrink-0 ${config.text}`} aria-hidden>
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          {isSuccess ? (
+          {config.icon === 'checkmark' && (
             <>
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
               <polyline points="22 4 12 14.01 9 11.01" />
             </>
-          ) : (
+          )}
+          {config.icon === 'error' && (
             <>
               <circle cx="12" cy="12" r="10" />
               <line x1="15" y1="9" x2="9" y2="15" />
               <line x1="9" y1="9" x2="15" y2="15" />
             </>
           )}
+          {config.icon === 'info' && (
+            <>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </>
+          )}
         </svg>
       </span>
-      <div className="flex-1 text-[14px] text-gray-900">{message}</div>
+      <div className="flex-1 text-sm text-gray-900">{displayMessage}</div>
       <button
         type="button"
         onClick={() => {
           setVisible(false);
-          onClose();
+          onClose?.();
+          if (toast) {
+            const context = React.useContext(ToastContext);
+            context?.removeToast(toast.id);
+          }
         }}
         className="text-gray-400 transition hover:text-gray-600"
         aria-label="토스트 닫기"
@@ -77,19 +111,53 @@ const Toast: React.FC<ToastProps> = ({ type = 'success', message, isOpen = true,
   );
 };
 
-export default Toast;
+/**
+ * Toast 컨테이너 - Context의 toasts를 렌더링합니다.
+ */
+export const ToastContainer: React.FC = () => {
+  const context = React.useContext(ToastContext);
+  if (!context) return null;
 
-export const useToast = () => {
-  const [toasts, setToasts] = useState<Array<{ id: number; message: string; type: ToastType }>>([]);
-
-  const showToast = (message: string, type: ToastType = 'success') => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
-  };
-
-  const removeToast = (id: number) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
-
-  return { toasts, showToast, removeToast };
+  return (
+    <div className="pointer-events-none fixed inset-0 z-50 flex flex-col items-end justify-start gap-2 p-6">
+      {context.toasts.map((toast) => (
+        <div key={toast.id} className="pointer-events-auto">
+          <SingleToast toast={toast} />
+        </div>
+      ))}
+    </div>
+  );
 };
+
+/**
+ * Context 기반 useToast 훅
+ */
+export const useToast = () => {
+  const context = React.useContext(ToastContext);
+  if (!context) {
+    // Context가 없으면 더미 구현 반환 (로컬 상태)
+    const [toasts, setToasts] = useState<Array<{ id: number; message: string; type: ToastType }>>([]);
+
+    const showToast = (message: string, type: ToastType = 'success') => {
+      const id = Date.now();
+      setToasts((prev) => [...prev, { id, message, type }]);
+      setTimeout(() => {
+        removeToast(id);
+      }, 3000);
+    };
+
+    const removeToast = (id: number) => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    };
+
+    return { toasts, showToast, removeToast };
+  }
+
+  return {
+    toasts: context.toasts,
+    showToast: context.showToast,
+    removeToast: context.removeToast,
+  };
+};
+
+export default SingleToast;

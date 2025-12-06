@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>메뉴얼 검토 - KWH 지식관리시스템</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&amp;family=Roboto+Mono:wght@400;500&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      body {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Noto Sans KR", "Apple SD Gothic Neo", system-ui,
+          -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #212121;
+        background-color: #fafafa;
+        height: 100%;
+        width: 100%;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+
+      html {
+        height: 100%;
+        width: 100%;
+      }
+
+      /* App Header */
+      .app-header {
+        height: 60px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .app-header-left h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #005bac;
+      }
+
+      .app-header-left p {
+        margin: 0;
+        font-size: 12px;
+        color: #6e6e6e;
+      }
+
+      .app-header-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        color: #424242;
+      }
+
+      .app-header-divider {
+        color: #bdbdbd;
+      }
+
+      .role-badge {
+        display: inline-block;
+        background-color: #e8f1fb;
+        color: #1a73e8;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+      }
+
+      .btn-logout {
+        background-color: #ffffff;
+        color: #005bac;
+        border: 1px solid #005bac;
+        border-radius: 4px;
+        padding: 4px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-logout:hover {
+        background-color: #e8f1fb;
+      }
+
+      /* Layout Container */
+      .app-container {
+        display: flex;
+        height: calc(100% - 60px);
+        width: 100%;
+      }
+
+      /* Sidebar */
+      .app-sidebar {
+        width: 240px;
+        background-color: #f5f7fb;
+        border-right: 1px solid #e0e0e0;
+        overflow-y: auto;
+        padding: 16px 0;
+      }
+
+      .menu-section {
+        margin-bottom: 24px;
+      }
+
+      .menu-section-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #6e6e6e;
+        text-transform: uppercase;
+        padding: 8px 16px;
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        color: #424242;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        border-left: 3px solid transparent;
+      }
+
+      .menu-item:hover {
+        background-color: #e8f1fb;
+        color: #005bac;
+      }
+
+      .menu-item.active {
+        background-color: #d2e4fa;
+        color: #005bac;
+        border-left-color: #005bac;
+        font-weight: 600;
+      }
+
+      .menu-icon {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        width: 100%;
+      }
+
+      /* Page Header */
+      .page-header {
+        margin-bottom: 24px;
+      }
+
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #212121;
+        margin: 0 0 8px 0;
+        line-height: 1.4;
+      }
+
+      .page-subtitle {
+        font-size: 14px;
+        color: #6e6e6e;
+        margin: 0;
+      }
+
+      /* Stats Cards */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+        padding: 20px;
+        border-left: 4px solid;
+      }
+
+      .stat-card.todo {
+        border-left-color: #6e6e6e;
+      }
+
+      .stat-card.in-progress {
+        border-left-color: #1a73e8;
+      }
+
+      .stat-card.done {
+        border-left-color: #2e7d32;
+      }
+
+      .stat-card.rejected {
+        border-left-color: #c62828;
+      }
+
+      .stat-label {
+        font-size: 13px;
+        color: #6e6e6e;
+        margin: 0 0 8px 0;
+        font-weight: 600;
+      }
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #212121;
+        margin: 0;
+      }
+
+      /* Filter Card */
+      .filter-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+
+      .filter-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .filter-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #212121;
+        margin: 0;
+      }
+
+      .filter-icon {
+        width: 18px;
+        height: 18px;
+        color: #005bac;
+      }
+
+      .btn-reset {
+        background-color: #ffffff;
+        color: #6e6e6e;
+        border: 1px solid #bdbdbd;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .btn-reset:hover {
+        background-color: #f5f5f5;
+        border-color: #6e6e6e;
+      }
+
+      .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .filter-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #424242;
+      }
+
+      .filter-select,
+      .filter-input {
+        min-height: 36px;
+        border: 1px solid #bdbdbd;
+        border-radius: 4px;
+        padding: 0 12px;
+        font-size: 14px;
+        font-family: inherit;
+        color: #212121;
+        background-color: #ffffff;
+        transition: all 0.2s;
+      }
+
+      .filter-select:focus,
+      .filter-input:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.2);
+      }
+
+      /* Table Card */
+      .table-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+      }
+
+      .table-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .table-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #212121;
+        margin: 0;
+      }
+
+      .table-count {
+        font-size: 13px;
+        color: #6e6e6e;
+        font-weight: 600;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .data-table thead {
+        background-color: #e8f1fb;
+      }
+
+      .data-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        color: #005bac;
+        border-bottom: 1px solid #e0e0e0;
+        white-space: nowrap;
+        user-select: none;
+      }
+
+      .data-table td {
+        padding: 12px 16px;
+        font-size: 13px;
+        color: #424242;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .data-table tbody tr {
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .data-table tbody tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      .manual-id {
+        font-family: "Roboto Mono", "Courier New", monospace;
+        font-size: 13px;
+        color: #005bac;
+        font-weight: 500;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .status-badge.todo {
+        background-color: #f5f5f5;
+        color: #6e6e6e;
+      }
+
+      .status-badge.in-progress {
+        background-color: #e8f1fb;
+        color: #1a73e8;
+      }
+
+      .status-badge.done {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+      }
+
+      .status-badge.rejected {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+
+      .date-text {
+        font-size: 13px;
+        color: #6e6e6e;
+      }
+
+      /* Pagination */
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 20px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .pagination-btn {
+        min-width: 36px;
+        height: 36px;
+        background-color: #ffffff;
+        color: #424242;
+        border: 1px solid #bdbdbd;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .pagination-btn:hover:not(:disabled) {
+        background-color: #e8f1fb;
+        border-color: #005bac;
+        color: #005bac;
+      }
+
+      .pagination-btn.active {
+        background-color: #005bac;
+        color: #ffffff;
+        border-color: #005bac;
+      }
+
+      .pagination-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+      }
+
+      .empty-state-icon {
+        width: 64px;
+        height: 64px;
+        color: #bdbdbd;
+        margin: 0 auto 16px;
+      }
+
+      .empty-state-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #424242;
+        margin: 0 0 8px 0;
+      }
+
+      .empty-state-text {
+        font-size: 14px;
+        color: #6e6e6e;
+        margin: 0;
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        background-color: #ffffff;
+        border-radius: 6px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 12px 16px;
+        display: none;
+        align-items: center;
+        gap: 8px;
+        z-index: 2000;
+        min-width: 280px;
+        border-left: 4px solid;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      .toast.show {
+        display: flex;
+      }
+
+      .toast.info {
+        border-left-color: #1a73e8;
+      }
+
+      .toast-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      .toast-message {
+        flex: 1;
+        font-size: 14px;
+        color: #212121;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 1200px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filter-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .app-sidebar {
+          display: none;
+        }
+
+        .stats-grid,
+        .filter-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .table-container {
+          overflow-x: scroll;
+        }
+
+        .data-table {
+          min-width: 800px;
+        }
+      }
+    </style>
+    <script src="/_sdk/element_sdk.js"></script>
+    <style>
+      @view-transition {
+        navigation: auto;
+      }
+    </style>
+    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-header-left">
+        <h1>KWH 지식관리시스템</h1>
+        <p>Kwangju Bank Help Desk Wiki</p>
+      </div>
+      <div class="app-header-right">
+        <span>디지털전략부</span> <span class="app-header-divider">·</span>
+        <span>홍길동</span> <span class="app-header-divider">·</span>
+        <span class="role-badge">검토자</span>
+        <button class="btn-logout">로그아웃</button>
+      </div>
+    </header>
+    <!-- App Container -->
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="app-sidebar">
+        <nav>
+          <div class="menu-section">
+            <div class="menu-section-title">MAIN</div>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              대시보드
+            </a>
+          </div>
+          <div class="menu-section">
+            <div class="menu-section-title">상담 관리</div>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                ></path>
+              </svg>
+              상담 등록
+            </a>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+              상담 검색
+            </a>
+          </div>
+          <div class="menu-section">
+            <div class="menu-section-title">메뉴얼 관리</div>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                ></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              메뉴얼 검색
+            </a>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              메뉴얼 버전 이력
+            </a>
+          </div>
+          <div class="menu-section">
+            <div class="menu-section-title">검토/승인</div>
+            <a href="#" class="menu-item active">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path
+                  d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+                ></path>
+              </svg>
+              검토 Task 목록
+            </a>
+          </div>
+          <div class="menu-section">
+            <div class="menu-section-title">관리자</div>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              사용자/권한 관리
+            </a>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6"></path>
+                <path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"></path>
+                <path d="M1 12h6m6 0h6"></path>
+                <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"></path>
+              </svg>
+              시스템 설정
+            </a>
+          </div>
+        </nav>
+      </aside>
+      <!-- Main Content -->
+      <main class="main-content">
+        <div id="root"></div>
+      </main>
+    </div>
+    <!-- Toast -->
+    <div class="toast" id="toast">
+      <svg
+        class="toast-icon"
+        viewbox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        id="toastIcon"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line></svg
+      ><span class="toast-message" id="toastMessage"></span>
+    </div>
+    <script type="text/babel">
+      const { useState, useEffect, useMemo } = React;
+
+      // Mock review tasks data
+      const mockReviewTasks = [
+        {
+          task_id: "TASK-2024-001",
+          draft_manual_id: "DRAFT-001",
+          existing_manual_id: "MAN-2023-105",
+          status: "TODO",
+          business_type: "인터넷뱅킹",
+          created_at: "2024-01-15T09:30:00Z",
+        },
+        {
+          task_id: "TASK-2024-002",
+          draft_manual_id: "DRAFT-002",
+          existing_manual_id: "MAN-2023-089",
+          status: "IN_PROGRESS",
+          business_type: "모바일뱅킹",
+          created_at: "2024-01-15T10:15:00Z",
+        },
+        {
+          task_id: "TASK-2024-003",
+          draft_manual_id: "DRAFT-003",
+          existing_manual_id: "MAN-2023-112",
+          status: "TODO",
+          business_type: "대출",
+          created_at: "2024-01-15T11:20:00Z",
+        },
+        {
+          task_id: "TASK-2024-004",
+          draft_manual_id: "DRAFT-004",
+          existing_manual_id: "MAN-2023-098",
+          status: "DONE",
+          business_type: "예금",
+          created_at: "2024-01-14T14:45:00Z",
+        },
+        {
+          task_id: "TASK-2024-005",
+          draft_manual_id: "DRAFT-005",
+          existing_manual_id: "MAN-2023-121",
+          status: "REJECTED",
+          business_type: "카드",
+          created_at: "2024-01-14T16:30:00Z",
+        },
+        {
+          task_id: "TASK-2024-006",
+          draft_manual_id: "DRAFT-006",
+          existing_manual_id: "MAN-2023-134",
+          status: "TODO",
+          business_type: "인터넷뱅킹",
+          created_at: "2024-01-16T08:00:00Z",
+        },
+        {
+          task_id: "TASK-2024-007",
+          draft_manual_id: "DRAFT-007",
+          existing_manual_id: "MAN-2023-145",
+          status: "IN_PROGRESS",
+          business_type: "대출",
+          created_at: "2024-01-16T09:30:00Z",
+        },
+        {
+          task_id: "TASK-2024-008",
+          draft_manual_id: "DRAFT-008",
+          existing_manual_id: "MAN-2023-156",
+          status: "DONE",
+          business_type: "모바일뱅킹",
+          created_at: "2024-01-13T13:20:00Z",
+        },
+        {
+          task_id: "TASK-2024-009",
+          draft_manual_id: "DRAFT-009",
+          existing_manual_id: "MAN-2023-167",
+          status: "TODO",
+          business_type: "예금",
+          created_at: "2024-01-16T10:45:00Z",
+        },
+        {
+          task_id: "TASK-2024-010",
+          draft_manual_id: "DRAFT-010",
+          existing_manual_id: "MAN-2023-178",
+          status: "TODO",
+          business_type: "카드",
+          created_at: "2024-01-16T11:15:00Z",
+        },
+        {
+          task_id: "TASK-2024-011",
+          draft_manual_id: "DRAFT-011",
+          existing_manual_id: "MAN-2023-189",
+          status: "REJECTED",
+          business_type: "인터넷뱅킹",
+          created_at: "2024-01-13T15:00:00Z",
+        },
+        {
+          task_id: "TASK-2024-012",
+          draft_manual_id: "DRAFT-012",
+          existing_manual_id: "MAN-2023-190",
+          status: "DONE",
+          business_type: "모바일뱅킹",
+          created_at: "2024-01-13T16:30:00Z",
+        },
+      ];
+
+      const businessTypes = [
+        "전체",
+        "인터넷뱅킹",
+        "모바일뱅킹",
+        "대출",
+        "예금",
+        "카드",
+      ];
+      const statuses = ["전체", "TODO", "IN_PROGRESS", "DONE", "REJECTED"];
+
+      function ManualReviewScreen() {
+        const [tasks, setTasks] = useState([]);
+        const [filters, setFilters] = useState({
+          status: "전체",
+          businessType: "전체",
+          startDate: "",
+          endDate: "",
+        });
+        const [currentPage, setCurrentPage] = useState(1);
+        const itemsPerPage = 10;
+
+        useEffect(() => {
+          loadTasks();
+        }, []);
+
+        const loadTasks = async () => {
+          // TODO: API Connect - GET /api/manual-review-tasks
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setTasks(mockReviewTasks);
+        };
+
+        const handleFilterChange = (key, value) => {
+          setFilters((prev) => ({ ...prev, [key]: value }));
+          setCurrentPage(1);
+        };
+
+        const handleResetFilters = () => {
+          setFilters({
+            status: "전체",
+            businessType: "전체",
+            startDate: "",
+            endDate: "",
+          });
+          setCurrentPage(1);
+          showToast("필터가 초기화되었습니다.", "info");
+        };
+
+        const handleRowClick = (task) => {
+          console.log("Navigate to task detail:", task.task_id);
+          showToast(`${task.task_id} 상세 화면으로 이동합니다.`, "info");
+          // TODO: Navigate to detail page
+          // window.open(`/manual-review/${task.task_id}`, '_blank', 'noopener,noreferrer');
+        };
+
+        const filteredTasks = useMemo(() => {
+          let filtered = tasks;
+
+          if (filters.status !== "전체") {
+            filtered = filtered.filter(
+              (task) => task.status === filters.status
+            );
+          }
+
+          if (filters.businessType !== "전체") {
+            filtered = filtered.filter(
+              (task) => task.business_type === filters.businessType
+            );
+          }
+
+          if (filters.startDate) {
+            filtered = filtered.filter((task) => {
+              const taskDate = new Date(task.created_at);
+              const startDate = new Date(filters.startDate);
+              return taskDate >= startDate;
+            });
+          }
+
+          if (filters.endDate) {
+            filtered = filtered.filter((task) => {
+              const taskDate = new Date(task.created_at);
+              const endDate = new Date(filters.endDate);
+              endDate.setHours(23, 59, 59, 999);
+              return taskDate <= endDate;
+            });
+          }
+
+          return filtered;
+        }, [tasks, filters]);
+
+        const stats = useMemo(() => {
+          return {
+            todo: tasks.filter((t) => t.status === "TODO").length,
+            inProgress: tasks.filter((t) => t.status === "IN_PROGRESS").length,
+            done: tasks.filter((t) => t.status === "DONE").length,
+            rejected: tasks.filter((t) => t.status === "REJECTED").length,
+          };
+        }, [tasks]);
+
+        const paginatedTasks = useMemo(() => {
+          const startIndex = (currentPage - 1) * itemsPerPage;
+          return filteredTasks.slice(startIndex, startIndex + itemsPerPage);
+        }, [filteredTasks, currentPage]);
+
+        const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
+
+        const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          const hours = String(date.getHours()).padStart(2, "0");
+          const minutes = String(date.getMinutes()).padStart(2, "0");
+          return `${year}-${month}-${day} ${hours}:${minutes}`;
+        };
+
+        const getStatusLabel = (status) => {
+          const labels = {
+            TODO: "대기중",
+            IN_PROGRESS: "검토중",
+            DONE: "완료",
+            REJECTED: "반려",
+          };
+          return labels[status] || status;
+        };
+
+        const getStatusClass = (status) => {
+          return status.toLowerCase().replace("_", "-");
+        };
+
+        return (
+          <>
+            {/* Page Header */}
+            <div className="page-header">
+              <h2 className="page-title">메뉴얼 검토</h2>
+              <p className="page-subtitle">
+                승인·반려를 기다리는 메뉴얼 검토 Task를 조회합니다
+              </p>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="stats-grid">
+              <div className="stat-card todo">
+                <p className="stat-label">대기중</p>
+                <p className="stat-value">{stats.todo}</p>
+              </div>
+              <div className="stat-card in-progress">
+                <p className="stat-label">검토중</p>
+                <p className="stat-value">{stats.inProgress}</p>
+              </div>
+              <div className="stat-card done">
+                <p className="stat-label">완료</p>
+                <p className="stat-value">{stats.done}</p>
+              </div>
+              <div className="stat-card rejected">
+                <p className="stat-label">반려</p>
+                <p className="stat-value">{stats.rejected}</p>
+              </div>
+            </div>
+
+            {/* Filter Card */}
+            <div className="filter-card">
+              <div className="filter-header">
+                <h3 className="filter-title">
+                  <svg
+                    className="filter-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                  </svg>
+                  필터
+                </h3>
+                <button className="btn-reset" onClick={handleResetFilters}>
+                  <svg
+                    style={{ width: "14px", height: "14px" }}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <polyline points="23 20 23 14 17 14"></polyline>
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                  </svg>
+                  초기화
+                </button>
+              </div>
+
+              <div className="filter-grid">
+                <div className="filter-group">
+                  <label className="filter-label" htmlFor="statusFilter">
+                    상태
+                  </label>
+                  <select
+                    id="statusFilter"
+                    className="filter-select"
+                    value={filters.status}
+                    onChange={(e) =>
+                      handleFilterChange("status", e.target.value)
+                    }
+                  >
+                    {statuses.map((status) => (
+                      <option key={status} value={status}>
+                        {status === "전체" ? "전체" : getStatusLabel(status)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label" htmlFor="businessTypeFilter">
+                    업무구분
+                  </label>
+                  <select
+                    id="businessTypeFilter"
+                    className="filter-select"
+                    value={filters.businessType}
+                    onChange={(e) =>
+                      handleFilterChange("businessType", e.target.value)
+                    }
+                  >
+                    {businessTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label" htmlFor="startDate">
+                    시작일
+                  </label>
+                  <input
+                    id="startDate"
+                    type="date"
+                    className="filter-input"
+                    value={filters.startDate}
+                    onChange={(e) =>
+                      handleFilterChange("startDate", e.target.value)
+                    }
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label" htmlFor="endDate">
+                    종료일
+                  </label>
+                  <input
+                    id="endDate"
+                    type="date"
+                    className="filter-input"
+                    value={filters.endDate}
+                    onChange={(e) =>
+                      handleFilterChange("endDate", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Table Card */}
+            <div className="table-card">
+              <div className="table-header">
+                <h3 className="table-title">검토 Task 목록</h3>
+                <span className="table-count">총 {filteredTasks.length}건</span>
+              </div>
+
+              <div className="table-container">
+                {paginatedTasks.length > 0 ? (
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Task ID</th>
+                        <th>신규 초안 Manual ID</th>
+                        <th>기존 Manual ID</th>
+                        <th>업무구분</th>
+                        <th>상태</th>
+                        <th>생성일시</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedTasks.map((task) => (
+                        <tr
+                          key={task.task_id}
+                          onClick={() => handleRowClick(task)}
+                        >
+                          <td>
+                            <span className="manual-id">{task.task_id}</span>
+                          </td>
+                          <td>
+                            <span className="manual-id">
+                              {task.draft_manual_id}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="manual-id">
+                              {task.existing_manual_id}
+                            </span>
+                          </td>
+                          <td>{task.business_type}</td>
+                          <td>
+                            <span
+                              className={`status-badge ${getStatusClass(
+                                task.status
+                              )}`}
+                            >
+                              {getStatusLabel(task.status)}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="date-text">
+                              {formatDate(task.created_at)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="empty-state">
+                    <svg
+                      className="empty-state-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <h4 className="empty-state-title">검색 결과가 없습니다</h4>
+                    <p className="empty-state-text">필터 조건을 변경해보세요</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Pagination */}
+              {paginatedTasks.length > 0 && totalPages > 1 && (
+                <div className="pagination">
+                  <button
+                    className="pagination-btn"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1}
+                  >
+                    <svg
+                      style={{ width: "16px", height: "16px" }}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => {
+                      if (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      ) {
+                        return (
+                          <button
+                            key={page}
+                            className={`pagination-btn ${
+                              currentPage === page ? "active" : ""
+                            }`}
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </button>
+                        );
+                      } else if (
+                        page === currentPage - 2 ||
+                        page === currentPage + 2
+                      ) {
+                        return (
+                          <span key={page} style={{ color: "#9E9E9E" }}>
+                            ...
+                          </span>
+                        );
+                      }
+                      return null;
+                    }
+                  )}
+
+                  <button
+                    className="pagination-btn"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                  >
+                    <svg
+                      style={{ width: "16px", height: "16px" }}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        );
+      }
+
+      // Toast utility
+      function showToast(message, type = "info") {
+        const toast = document.getElementById("toast");
+        const toastMessage = document.getElementById("toastMessage");
+
+        toastMessage.textContent = message;
+        toast.className = `toast ${type} show`;
+
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3000);
+      }
+
+      // Render app
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<ManualReviewScreen />);
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'9a9cd8646779ea26',t:'MTc2NTAzNTI0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

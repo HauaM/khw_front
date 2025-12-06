@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>메뉴얼 검토 상세 - KWH 지식관리시스템</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&amp;family=Roboto+Mono:wght@400;500&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      body {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Noto Sans KR", "Apple SD Gothic Neo", system-ui,
+          -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #212121;
+        background-color: #fafafa;
+        height: 100%;
+        width: 100%;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+
+      html {
+        height: 100%;
+        width: 100%;
+      }
+
+      /* App Header */
+      .app-header {
+        height: 60px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .app-header-left h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #005bac;
+      }
+
+      .app-header-left p {
+        margin: 0;
+        font-size: 12px;
+        color: #6e6e6e;
+      }
+
+      .app-header-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        color: #424242;
+      }
+
+      .app-header-divider {
+        color: #bdbdbd;
+      }
+
+      .role-badge {
+        display: inline-block;
+        background-color: #e8f1fb;
+        color: #1a73e8;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+      }
+
+      .btn-logout {
+        background-color: #ffffff;
+        color: #005bac;
+        border: 1px solid #005bac;
+        border-radius: 4px;
+        padding: 4px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-logout:hover {
+        background-color: #e8f1fb;
+      }
+
+      /* Layout Container */
+      .app-container {
+        display: flex;
+        height: calc(100% - 60px);
+        width: 100%;
+      }
+
+      /* Sidebar */
+      .app-sidebar {
+        width: 240px;
+        background-color: #f5f7fb;
+        border-right: 1px solid #e0e0e0;
+        overflow-y: auto;
+        padding: 16px 0;
+      }
+
+      .menu-section {
+        margin-bottom: 24px;
+      }
+
+      .menu-section-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #6e6e6e;
+        text-transform: uppercase;
+        padding: 8px 16px;
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        color: #424242;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        border-left: 3px solid transparent;
+      }
+
+      .menu-item:hover {
+        background-color: #e8f1fb;
+        color: #005bac;
+      }
+
+      .menu-item.active {
+        background-color: #d2e4fa;
+        color: #005bac;
+        border-left-color: #005bac;
+        font-weight: 600;
+      }
+
+      .menu-icon {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        width: 100%;
+      }
+
+      /* Page Header */
+      .page-header {
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .page-header-left {
+        flex: 1;
+      }
+
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #6e6e6e;
+        margin-bottom: 8px;
+      }
+
+      .breadcrumb a {
+        color: #1a73e8;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .breadcrumb a:hover {
+        color: #005bac;
+        text-decoration: underline;
+      }
+
+      .breadcrumb-separator {
+        color: #bdbdbd;
+      }
+
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #212121;
+        margin: 0 0 4px 0;
+        line-height: 1.4;
+      }
+
+      .task-id {
+        font-family: "Roboto Mono", "Courier New", monospace;
+        font-size: 13px;
+        color: #005bac;
+        font-weight: 500;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .status-badge.in-progress {
+        background-color: #e8f1fb;
+        color: #1a73e8;
+      }
+
+      /* Info Card */
+      .info-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+
+      .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .info-label {
+        font-size: 12px;
+        color: #6e6e6e;
+        font-weight: 600;
+      }
+
+      .info-value {
+        font-size: 14px;
+        color: #212121;
+      }
+
+      /* Diff Summary Card */
+      .diff-summary-card {
+        background-color: #fff9e6;
+        border-left: 4px solid #ffa000;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+      }
+
+      .diff-summary-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .diff-summary-icon {
+        width: 20px;
+        height: 20px;
+        color: #ffa000;
+        flex-shrink: 0;
+      }
+
+      .diff-summary-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #212121;
+        margin: 0;
+      }
+
+      .diff-summary-content {
+        font-size: 14px;
+        line-height: 1.7;
+        color: #424242;
+        white-space: pre-wrap;
+        margin: 0;
+      }
+
+      /* Comparison Container */
+      .comparison-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+
+      /* Panel Card */
+      .panel-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .panel-header {
+        padding: 16px 20px;
+        border-bottom: 2px solid;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .panel-header.old {
+        background-color: #ffebee;
+        border-bottom-color: #c62828;
+      }
+
+      .panel-header.new {
+        background-color: #e8f5e9;
+        border-bottom-color: #2e7d32;
+      }
+
+      .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .panel-title.old {
+        color: #c62828;
+      }
+
+      .panel-title.new {
+        color: #2e7d32;
+      }
+
+      .panel-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      .manual-id-badge {
+        font-family: "Roboto Mono", "Courier New", monospace;
+        font-size: 12px;
+        background-color: #f5f5f5;
+        color: #424242;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+
+      .panel-content {
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .field-section {
+        margin-bottom: 24px;
+      }
+
+      .field-section:last-child {
+        margin-bottom: 0;
+      }
+
+      .field-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #005bac;
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .field-icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      .field-content {
+        font-size: 14px;
+        line-height: 1.7;
+        color: #212121;
+        white-space: pre-wrap;
+        background-color: #fafafa;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 12px;
+        min-height: 60px;
+      }
+
+      .field-content.highlighted {
+        background-color: #fff9e6;
+        border-color: #ffd54f;
+      }
+
+      .highlight {
+        background-color: #ffe082;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-weight: 600;
+      }
+
+      /* Action Bar */
+      .action-bar {
+        background-color: #ffffff;
+        border-top: 1px solid #e0e0e0;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        bottom: 0;
+        width: 100%;
+        box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .action-bar-left {
+        font-size: 13px;
+        color: #6e6e6e;
+      }
+
+      .action-bar-right {
+        display: flex;
+        gap: 12px;
+      }
+
+      .btn {
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-secondary {
+        background-color: #ffffff;
+        color: #424242;
+        border: 1px solid #bdbdbd;
+      }
+
+      .btn-secondary:hover {
+        background-color: #f5f5f5;
+        border-color: #6e6e6e;
+      }
+
+      .btn-reject {
+        background-color: #ffffff;
+        color: #c62828;
+        border: 1px solid #c62828;
+      }
+
+      .btn-reject:hover {
+        background-color: #ffebee;
+      }
+
+      .btn-approve {
+        background-color: #005bac;
+        color: #ffffff;
+        border: 1px solid #005bac;
+      }
+
+      .btn-approve:hover {
+        background-color: #004a8f;
+      }
+
+      .btn-icon {
+        width: 18px;
+        height: 18px;
+      }
+
+      /* Modal Overlay */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+        padding: 20px;
+      }
+
+      .modal-overlay.hidden {
+        display: none;
+      }
+
+      /* Modal */
+      .modal {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 540px;
+        max-height: 90%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212121;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .modal-title-icon {
+        width: 22px;
+        height: 22px;
+        color: #c62828;
+      }
+
+      .modal-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        color: #6e6e6e;
+        transition: color 0.2s;
+      }
+
+      .modal-close:hover {
+        color: #212121;
+      }
+
+      .modal-close-icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .modal-body {
+        padding: 24px;
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .form-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #424242;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .required-mark {
+        color: #c62828;
+      }
+
+      .form-textarea {
+        min-height: 160px;
+        border: 1px solid #bdbdbd;
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 14px;
+        font-family: inherit;
+        color: #212121;
+        background-color: #ffffff;
+        transition: all 0.2s;
+        resize: vertical;
+        line-height: 1.6;
+      }
+
+      .form-textarea:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+      }
+
+      .form-hint {
+        font-size: 12px;
+        color: #6e6e6e;
+        margin: 0;
+      }
+
+      .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        background-color: #ffffff;
+        border-radius: 6px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 12px 16px;
+        display: none;
+        align-items: center;
+        gap: 8px;
+        z-index: 4000;
+        min-width: 320px;
+        border-left: 4px solid;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      .toast.show {
+        display: flex;
+      }
+
+      .toast.success {
+        border-left-color: #2e7d32;
+      }
+
+      .toast.error {
+        border-left-color: #c62828;
+      }
+
+      .toast.info {
+        border-left-color: #1a73e8;
+      }
+
+      .toast-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      .toast-icon.success {
+        color: #2e7d32;
+      }
+
+      .toast-icon.error {
+        color: #c62828;
+      }
+
+      .toast-icon.info {
+        color: #1a73e8;
+      }
+
+      .toast-message {
+        flex: 1;
+        font-size: 14px;
+        color: #212121;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 1200px) {
+        .comparison-container {
+          grid-template-columns: 1fr;
+        }
+
+        .panel-card {
+          max-height: 600px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .app-sidebar {
+          display: none;
+        }
+
+        .page-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .info-card {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .action-bar {
+          flex-direction: column;
+          gap: 12px;
+          align-items: stretch;
+        }
+
+        .action-bar-right {
+          flex-direction: column;
+        }
+
+        .btn {
+          justify-content: center;
+        }
+      }
+    </style>
+    <script src="/_sdk/element_sdk.js"></script>
+    <style>
+      @view-transition {
+        navigation: auto;
+      }
+    </style>
+    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-header-left">
+        <h1>KWH 지식관리시스템</h1>
+        <p>Kwangju Bank Help Desk Wiki</p>
+      </div>
+      <div class="app-header-right">
+        <span>디지털전략부</span> <span class="app-header-divider">·</span>
+        <span>홍길동</span> <span class="app-header-divider">·</span>
+        <span class="role-badge">검토자</span>
+        <button class="btn-logout">로그아웃</button>
+      </div>
+    </header>
+    <!-- App Container -->
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="app-sidebar">
+        <nav>
+          <div class="menu-section">
+            <div class="menu-section-title">MAIN</div>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              대시보드
+            </a>
+          </div>
+          <div class="menu-section">
+            <div class="menu-section-title">상담 관리</div>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                ></path>
+              </svg>
+              상담 등록
+            </a>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+              상담 검색
+            </a>
+          </div>
+          <div class="menu-section">
+            <div class="menu-section-title">메뉴얼 관리</div>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                ></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              메뉴얼 검색
+            </a>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              메뉴얼 버전 이력
+            </a>
+          </div>
+          <div class="menu-section">
+            <div class="menu-section-title">검토/승인</div>
+            <a href="#" class="menu-item active">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path
+                  d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+                ></path>
+              </svg>
+              검토 Task 목록
+            </a>
+          </div>
+          <div class="menu-section">
+            <div class="menu-section-title">관리자</div>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              사용자/권한 관리
+            </a>
+            <a href="#" class="menu-item">
+              <svg
+                class="menu-icon"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6"></path>
+                <path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"></path>
+                <path d="M1 12h6m6 0h6"></path>
+                <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"></path>
+              </svg>
+              시스템 설정
+            </a>
+          </div>
+        </nav>
+      </aside>
+      <!-- Main Content -->
+      <main class="main-content">
+        <div id="root"></div>
+      </main>
+    </div>
+    <!-- Toast -->
+    <div class="toast" id="toast">
+      <svg
+        class="toast-icon"
+        viewbox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        id="toastIcon"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 16v-4"></path>
+        <path d="M12 8h.01"></path></svg
+      ><span class="toast-message" id="toastMessage"></span>
+    </div>
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      // Mock data for manual review
+      const mockReviewData = {
+        task_id: "TASK-2024-002",
+        status: "IN_PROGRESS",
+        business_type: "모바일뱅킹",
+        created_at: "2024-01-15T10:15:00Z",
+        reviewer: "홍길동",
+        old_manual: {
+          manual_id: "MAN-2023-089",
+          topic: "모바일 앱 로그인 오류 해결",
+          background:
+            '고객이 모바일 뱅킹 앱에 로그인 시도 시 "인증 실패" 메시지가 표시되며 로그인이 되지 않는 문제가 발생하고 있습니다.\n\n주로 생체인증(지문/안면인식) 사용 고객에게서 빈번하게 발생합니다.',
+          guideline:
+            "1. 앱 버전 확인\n   - 최신 버전 여부 확인\n   - 구버전 사용 시 업데이트 안내\n\n2. 생체인증 재등록\n   - 설정 > 보안 > 생체인증 초기화\n   - 생체정보 재등록 진행\n\n3. 앱 캐시 삭제\n   - 휴대폰 설정에서 앱 캐시 삭제\n   - 앱 재실행\n\n4. 재설치\n   - 위 방법으로 해결 안 될 경우 앱 삭제 후 재설치",
+        },
+        new_manual: {
+          manual_id: "DRAFT-002",
+          topic: "모바일 앱 로그인 오류 해결 (생체인증 및 인증서 포함)",
+          background:
+            '고객이 모바일 뱅킹 앱에 로그인 시도 시 "인증 실패" 또는 "인증서 오류" 메시지가 표시되며 로그인이 되지 않는 문제가 발생하고 있습니다.\n\n주로 생체인증(지문/안면인식) 및 공동인증서 사용 고객에게서 빈번하게 발생하며, OS 업데이트 이후 증가 추세입니다.',
+          guideline:
+            "1. 앱 버전 확인\n   - 최신 버전(v3.2.5 이상) 여부 확인\n   - 구버전 사용 시 업데이트 필수 안내\n   - Google Play / App Store 링크 제공\n\n2. 생체인증 재등록\n   - 설정 > 보안 > 생체인증 초기화\n   - 생체정보 재등록 진행\n   - iOS 16 이상: Face ID 재설정 필요할 수 있음\n\n3. 공동인증서 확인 (추가됨)\n   - 인증서 유효기간 확인\n   - 만료 시 재발급 안내\n   - 인증서 가져오기 기능 활용\n\n4. 앱 캐시 및 데이터 삭제\n   - Android: 설정 > 앱 > 광주은행 > 저장공간 > 캐시/데이터 삭제\n   - iOS: 설정 > 일반 > iPhone 저장공간 > 광주은행 > 앱 정리\n   - 앱 재실행 후 재로그인\n\n5. 재설치 (최종 수단)\n   - 위 방법으로 해결 안 될 경우에만 진행\n   - 재설치 전 인증서 백업 필수 안내\n   - 앱 삭제 → 재설치 → 인증서 복원",
+        },
+        diff_summary:
+          '주요 변경 사항:\n\n✅ Topic 업데이트: 인증서 관련 내용 추가로 제목 확장\n\n✅ Background 보강: "공동인증서 오류" 케이스 추가, OS 업데이트 후 증가 추세 정보 포함\n\n✅ Guideline 상세화:\n   • 앱 버전 확인 섹션에 구체적 버전(v3.2.5) 및 스토어 링크 제공 가이드 추가\n   • 생체인증 재등록에 iOS 16 특이사항 추가\n   • 공동인증서 확인 단계 신규 추가 (유효기간, 재발급, 가져오기)\n   • 캐시 삭제 방법을 Android/iOS별로 구체적 경로 제시\n   • 재설치 전 인증서 백업 필수 안내 추가\n\n권장: 승인 - 실무 적용 가능한 구체적 개선사항 포함',
+      };
+
+      function ManualReviewDetailScreen() {
+        const [reviewData, setReviewData] = useState(null);
+        const [showRejectModal, setShowRejectModal] = useState(false);
+        const [rejectReason, setRejectReason] = useState("");
+        const [isSubmitting, setIsSubmitting] = useState(false);
+
+        useEffect(() => {
+          loadReviewData();
+        }, []);
+
+        const loadReviewData = async () => {
+          // TODO: API Connect - GET /api/manual-review-tasks/:taskId
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setReviewData(mockReviewData);
+        };
+
+        const handleBackToList = () => {
+          console.log("Navigate back to list");
+          showToast("검토 목록으로 돌아갑니다.", "info");
+          // TODO: Navigate back
+        };
+
+        const handleApprove = async () => {
+          setIsSubmitting(true);
+
+          // TODO: API Connect - POST /api/manual-review-tasks/:taskId/approve
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          setIsSubmitting(false);
+          showToast(
+            "메뉴얼이 승인되었습니다. 신규 메뉴얼이 등록됩니다.",
+            "success"
+          );
+
+          setTimeout(() => {
+            handleBackToList();
+          }, 2000);
+        };
+
+        const handleReject = async () => {
+          if (!rejectReason.trim()) {
+            showToast("반려 사유를 입력해주세요.", "error");
+            return;
+          }
+
+          setIsSubmitting(true);
+
+          // TODO: API Connect - POST /api/manual-review-tasks/:taskId/reject
+          console.log("Reject with reason:", rejectReason);
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          setIsSubmitting(false);
+          setShowRejectModal(false);
+          showToast(
+            "메뉴얼이 반려되었습니다. 작성자에게 알림이 전송됩니다.",
+            "success"
+          );
+
+          setTimeout(() => {
+            handleBackToList();
+          }, 2000);
+        };
+
+        const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          const hours = String(date.getHours()).padStart(2, "0");
+          const minutes = String(date.getMinutes()).padStart(2, "0");
+          return `${year}-${month}-${day} ${hours}:${minutes}`;
+        };
+
+        const highlightChanges = (text, isNew) => {
+          if (!isNew) return text;
+
+          // Simple highlighting for demo - in production, use proper diff algorithm
+          const keywords = [
+            "공동인증서",
+            "v3.2.5",
+            "iOS 16",
+            "Android",
+            "백업",
+            "복원",
+          ];
+          let highlighted = text;
+
+          keywords.forEach((keyword) => {
+            const regex = new RegExp(`(${keyword})`, "g");
+            highlighted = highlighted.replace(
+              regex,
+              '<span class="highlight">$1</span>'
+            );
+          });
+
+          return highlighted;
+        };
+
+        if (!reviewData) {
+          return (
+            <div style={{ textAlign: "center", padding: "60px 20px" }}>
+              <p style={{ fontSize: "14px", color: "#6E6E6E" }}>
+                데이터를 불러오는 중...
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <>
+            {/* Page Header */}
+            <div className="page-header">
+              <div className="page-header-left">
+                <div className="breadcrumb">
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleBackToList();
+                    }}
+                  >
+                    검토 Task 목록
+                  </a>
+                  <span className="breadcrumb-separator">/</span>
+                  <span>상세</span>
+                </div>
+                <h2 className="page-title">메뉴얼 검토 상세</h2>
+                <span className="task-id">{reviewData.task_id}</span>
+              </div>
+              <span className="status-badge in-progress">검토중</span>
+            </div>
+
+            {/* Info Card */}
+            <div className="info-card">
+              <div className="info-item">
+                <span className="info-label">업무구분</span>
+                <span className="info-value">{reviewData.business_type}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">검토자</span>
+                <span className="info-value">{reviewData.reviewer}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">생성일시</span>
+                <span className="info-value">
+                  {formatDate(reviewData.created_at)}
+                </span>
+              </div>
+            </div>
+
+            {/* Diff Summary Card */}
+            <div className="diff-summary-card">
+              <div className="diff-summary-header">
+                <svg
+                  className="diff-summary-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                  <path d="M2 17l10 5 10-5"></path>
+                  <path d="M2 12l10 5 10-5"></path>
+                </svg>
+                <h3 className="diff-summary-title">변경 사항 요약 (AI 생성)</h3>
+              </div>
+              <p className="diff-summary-content">{reviewData.diff_summary}</p>
+            </div>
+
+            {/* Comparison Container */}
+            <div className="comparison-container">
+              {/* Old Manual Panel */}
+              <div className="panel-card">
+                <div className="panel-header old">
+                  <h3 className="panel-title old">
+                    <svg
+                      className="panel-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    기존 메뉴얼
+                  </h3>
+                  <span className="manual-id-badge">
+                    {reviewData.old_manual.manual_id}
+                  </span>
+                </div>
+                <div className="panel-content">
+                  <div className="field-section">
+                    <h4 className="field-label">
+                      <svg
+                        className="field-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                      </svg>
+                      Topic
+                    </h4>
+                    <div className="field-content">
+                      {reviewData.old_manual.topic}
+                    </div>
+                  </div>
+
+                  <div className="field-section">
+                    <h4 className="field-label">
+                      <svg
+                        className="field-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                      </svg>
+                      Background
+                    </h4>
+                    <div className="field-content">
+                      {reviewData.old_manual.background}
+                    </div>
+                  </div>
+
+                  <div className="field-section">
+                    <h4 className="field-label">
+                      <svg
+                        className="field-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                      </svg>
+                      Guideline
+                    </h4>
+                    <div className="field-content">
+                      {reviewData.old_manual.guideline}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* New Manual Panel */}
+              <div className="panel-card">
+                <div className="panel-header new">
+                  <h3 className="panel-title new">
+                    <svg
+                      className="panel-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="12" y1="18" x2="12" y2="12"></line>
+                      <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                    신규 초안
+                  </h3>
+                  <span className="manual-id-badge">
+                    {reviewData.new_manual.manual_id}
+                  </span>
+                </div>
+                <div className="panel-content">
+                  <div className="field-section">
+                    <h4 className="field-label">
+                      <svg
+                        className="field-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                      </svg>
+                      Topic
+                    </h4>
+                    <div
+                      className="field-content highlighted"
+                      dangerouslySetInnerHTML={{
+                        __html: highlightChanges(
+                          reviewData.new_manual.topic,
+                          true
+                        ),
+                      }}
+                    />
+                  </div>
+
+                  <div className="field-section">
+                    <h4 className="field-label">
+                      <svg
+                        className="field-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                      </svg>
+                      Background
+                    </h4>
+                    <div
+                      className="field-content highlighted"
+                      dangerouslySetInnerHTML={{
+                        __html: highlightChanges(
+                          reviewData.new_manual.background,
+                          true
+                        ),
+                      }}
+                    />
+                  </div>
+
+                  <div className="field-section">
+                    <h4 className="field-label">
+                      <svg
+                        className="field-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                      </svg>
+                      Guideline
+                    </h4>
+                    <div
+                      className="field-content highlighted"
+                      dangerouslySetInnerHTML={{
+                        __html: highlightChanges(
+                          reviewData.new_manual.guideline,
+                          true
+                        ),
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Bar */}
+            <div className="action-bar">
+              <div className="action-bar-left">
+                검토를 완료하고 승인 또는 반려를 선택해주세요
+              </div>
+              <div className="action-bar-right">
+                <button
+                  className="btn btn-secondary"
+                  onClick={handleBackToList}
+                  disabled={isSubmitting}
+                >
+                  <svg
+                    className="btn-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                  목록으로
+                </button>
+                <button
+                  className="btn btn-reject"
+                  onClick={() => setShowRejectModal(true)}
+                  disabled={isSubmitting}
+                >
+                  <svg
+                    className="btn-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                  </svg>
+                  반려
+                </button>
+                <button
+                  className="btn btn-approve"
+                  onClick={handleApprove}
+                  disabled={isSubmitting}
+                >
+                  <svg
+                    className="btn-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  {isSubmitting ? "처리중..." : "승인"}
+                </button>
+              </div>
+            </div>
+
+            {/* Reject Modal */}
+            <div
+              className={`modal-overlay ${!showRejectModal ? "hidden" : ""}`}
+            >
+              <div className="modal">
+                <div className="modal-header">
+                  <h3 className="modal-title">
+                    <svg
+                      className="modal-title-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    메뉴얼 반려
+                  </h3>
+                  <button
+                    className="modal-close"
+                    onClick={() => setShowRejectModal(false)}
+                    disabled={isSubmitting}
+                  >
+                    <svg
+                      className="modal-close-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleReject();
+                    }}
+                  >
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="rejectReason">
+                        반려 사유 <span className="required-mark">*</span>
+                      </label>
+                      <textarea
+                        id="rejectReason"
+                        className="form-textarea"
+                        placeholder="반려 사유를 상세히 입력해주세요.&#10;&#10;예시:&#10;- 가이드라인 3번 항목의 절차가 불명확합니다.&#10;- 최신 앱 버전 정보를 확인 후 수정이 필요합니다."
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        disabled={isSubmitting}
+                      />
+                      <p className="form-hint">
+                        작성자에게 반려 사유가 전달되며, 수정 후 재검토를 요청할
+                        수 있습니다.
+                      </p>
+                    </div>
+                  </form>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowRejectModal(false)}
+                    disabled={isSubmitting}
+                  >
+                    취소
+                  </button>
+                  <button
+                    className="btn btn-reject"
+                    onClick={handleReject}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "처리중..." : "반려 확정"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      }
+
+      // Toast utility
+      function showToast(message, type = "info") {
+        const toast = document.getElementById("toast");
+        const toastMessage = document.getElementById("toastMessage");
+        const toastIcon = document.getElementById("toastIcon");
+
+        // Update icon based on type
+        if (type === "success") {
+          toastIcon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        } else if (type === "error") {
+          toastIcon.innerHTML =
+            '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>';
+        } else {
+          toastIcon.innerHTML =
+            '<circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path>';
+        }
+
+        toastMessage.textContent = message;
+        toast.className = `toast ${type} show`;
+        toastIcon.className = `toast-icon ${type}`;
+
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3000);
+      }
+
+      // Render app
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<ManualReviewDetailScreen />);
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'9a9ce7bc1647ea1f',t:'MTc2NTAzNTg3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
