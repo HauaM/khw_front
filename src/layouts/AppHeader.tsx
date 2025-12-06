@@ -1,4 +1,11 @@
 import React from 'react';
+import { UserRole } from '@/types/auth';
+
+const roleLabel: Record<UserRole, string> = {
+  CONSULTANT: '상담사',
+  REVIEWER: '검토자',
+  ADMIN: '관리자',
+};
 
 interface AppHeaderProps {
   systemName?: string;
@@ -6,7 +13,7 @@ interface AppHeaderProps {
   user?: {
     name: string;
     department: string;
-    role: string;
+    role: string | UserRole;
   };
   onLogout?: () => void;
 }
@@ -32,7 +39,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             <span className="font-semibold text-gray-900">{user.name}</span>
             <span className="text-gray-400">·</span>
             <span className="px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold">
-              {user.role}
+              {roleLabel[user.role as UserRole] ?? user.role}
             </span>
             <button
               onClick={onLogout}

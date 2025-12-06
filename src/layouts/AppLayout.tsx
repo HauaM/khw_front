@@ -1,7 +1,9 @@
 import React, { ReactNode } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
+import useAuthUser from '@/hooks/useAuthUser';
+import { clearAuthToken, getRoleLabel } from '@/lib/api/auth';
 
 interface AppLayoutProps {
   children?: ReactNode;
@@ -19,22 +21,28 @@ const defaultUser = {
   role: '관리자',
 };
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children, user = defaultUser, onLogout }) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ children, user: propUser, onLogout }) => {
+  const navigate = useNavigate();
+  const { user } = useAuthUser();
+  const resolvedUser = propUser
+    ? { ...propUser, role: propUser.role }
+    : user
+    ? { ...user, role: getRoleLabel(user.role) }
+    : defaultUser;
+
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
       return;
     }
 
-    console.log('로그아웃');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    window.location.href = '/login';
+    clearAuthToken();
+    navigate('/login', { replace: true });
   };
 
   return (
     <div className="h-screen flex flex-col">
-      <AppHeader user={user} onLogout={handleLogout} />
+      <AppHeader user={resolvedUser} onLogout={handleLogout} />
 
       <div className="flex-1 flex overflow-hidden">
         <AppSidebar />

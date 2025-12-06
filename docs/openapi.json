@@ -1,0 +1,2014 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "KHW",
+    "description": "Customer Support Knowledge Management System",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/consultations": {
+      "post": {
+        "tags": [
+          "consultations"
+        ],
+        "summary": "Create new consultation",
+        "description": "Create new consultation record\n\nRFP Reference: POST /consultations\n- Saves to RDB\n- Indexes in VectorStore\n- Returns created consultation\n\nFR-1: 상담 등록 (RDB 저장 + VectorStore 인덱싱/재시도 큐 연동)\nTODO: current_user = Depends(get_current_user) 추가 후 created_by_user_id 매핑",
+        "operationId": "create_consultation_api_v1_consultations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsultationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/consultations/search": {
+      "get": {
+        "tags": [
+          "consultations"
+        ],
+        "summary": "Search similar consultations",
+        "description": "Search for similar consultations using vector similarity\n\nRFP Reference: GET /consultations/search\n- Vector-based semantic search\n- Metadata filtering (branch, business_type, error_code)\n- Threshold-based result filtering",
+        "operationId": "search_consultations_api_v1_consultations_search_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Query"
+            }
+          },
+          {
+            "name": "branch_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Branch Code"
+            }
+          },
+          {
+            "name": "business_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Business Type"
+            }
+          },
+          {
+            "name": "error_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Error Code"
+            }
+          },
+          {
+            "name": "top_k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Top K"
+            }
+          },
+          {
+            "name": "similarity_threshold",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 1,
+              "minimum": 0,
+              "default": 0.7,
+              "title": "Similarity Threshold"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultationSearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "consultations"
+        ],
+        "summary": "Search consultations (vector)",
+        "description": "FR-3/FR-8: 벡터 기반 상담 검색 (POST).",
+        "operationId": "search_consultations_post_api_v1_consultations_search_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsultationSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConsultationSearchResult"
+                  },
+                  "title": "Response Search Consultations Post Api V1 Consultations Search Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/consultations/{consultation_id}/manual-draft": {
+      "post": {
+        "tags": [
+          "consultations"
+        ],
+        "summary": "Generate manual draft from consultation",
+        "description": "Generate manual draft from consultation using LLM\n\nRFP Reference: POST /consultations/{id}/manual-draft\n- LLM extracts keywords\n- LLM generates manual structure\n- Returns draft for user review\n\nTODO: Implement actual logic",
+        "operationId": "generate_manual_draft_api_v1_consultations__consultation_id__manual_draft_post",
+        "parameters": [
+          {
+            "name": "consultation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Consultation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Generate Manual Draft Api V1 Consultations  Consultation Id  Manual Draft Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals/draft": {
+      "post": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Create manual draft from consultation",
+        "description": "FR-2/FR-9: 상담 기반 메뉴얼 초안 생성 (환각 검증 포함).",
+        "operationId": "create_manual_draft_api_v1_manuals_draft_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualDraftCreateFromConsultationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualDraftResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals/draft/{manual_id}/conflict-check": {
+      "post": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Check conflict and create review task",
+        "description": "FR-6: 신규 초안과 기존 메뉴얼 자동 비교.",
+        "operationId": "check_conflict_api_v1_manuals_draft__manual_id__conflict_check_post",
+        "parameters": [
+          {
+            "name": "manual_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Manual Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ManualReviewTaskResponse"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Check Conflict Api V1 Manuals Draft  Manual Id  Conflict Check Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals/approve/{manual_id}": {
+      "post": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Approve manual and bump version set",
+        "description": "FR-4/FR-5: 메뉴얼 승인 및 전체 버전 세트 관리.",
+        "operationId": "approve_manual_api_v1_manuals_approve__manual_id__post",
+        "parameters": [
+          {
+            "name": "manual_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Manual Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualApproveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualVersionInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals": {
+      "get": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "List manual entries",
+        "description": "List manual entries with optional status filter\n\nRFP Reference: GET /manuals\nTODO: Implement pagination and filtering",
+        "operationId": "list_manuals_api_v1_manuals_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ManualEntryResponse"
+                  },
+                  "title": "Response List Manuals Api V1 Manuals Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals/search": {
+      "get": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Search manuals by similarity",
+        "description": "Search manuals using vector similarity\n\nRFP Reference: GET /manuals/search\n- Vector-based semantic search\n- Filter by status, business_type, error_code",
+        "operationId": "search_manuals_api_v1_manuals_search_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Query"
+            }
+          },
+          {
+            "name": "business_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Business Type"
+            }
+          },
+          {
+            "name": "error_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Error Code"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ManualStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "top_k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Top K"
+            }
+          },
+          {
+            "name": "similarity_threshold",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 1,
+              "minimum": 0,
+              "default": 0.7,
+              "title": "Similarity Threshold"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ManualSearchResult"
+                  },
+                  "title": "Response Search Manuals Api V1 Manuals Search Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals/{manual_id}/review": {
+      "post": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Create review task for manual",
+        "description": "Create review task for manual entry\n\nRFP Reference: POST /manuals/{id}/review\n- Detects conflicts with existing manuals\n- Creates ManualReviewTask if needed",
+        "operationId": "create_manual_review_api_v1_manuals__manual_id__review_post",
+        "parameters": [
+          {
+            "name": "manual_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Manual Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Create Manual Review Api V1 Manuals  Manual Id  Review Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manual-review/tasks": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "List manual review tasks",
+        "description": "List manual review tasks with optional status filter\n\nRFP Reference: GET /tasks/manual-review\n- Returns pending/in-progress/done/rejected tasks\n- For reviewers to see what needs attention\n\nTODO: Implement filtering and pagination",
+        "operationId": "list_review_tasks_api_v1_manual_review_tasks_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ManualReviewTaskResponse"
+                  },
+                  "title": "Response List Review Tasks Api V1 Manual Review Tasks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manual-review/tasks/{task_id}/approve": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Approve manual review task",
+        "description": "Approve manual review task\n\nRFP Reference: POST /tasks/manual-review/{id}/approve\n- Updates task status to DONE\n- Approves new manual entry\n- Deprecates old manual (if exists)\n- Creates new ManualVersion (if requested)\n\nTODO: Implement approval workflow",
+        "operationId": "approve_review_task_api_v1_manual_review_tasks__task_id__approve_post",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualReviewApproval"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualReviewTaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manual-review/tasks/{task_id}/reject": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Reject manual review task",
+        "description": "Reject manual review task\n\nRFP Reference: POST /tasks/manual-review/{id}/reject\n- Updates task status to REJECTED\n- Saves rejection reason\n- Notifies submitter (optional)\n\nTODO: Implement rejection workflow",
+        "operationId": "reject_review_task_api_v1_manual_review_tasks__task_id__reject_post",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualReviewRejection"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualReviewTaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/signup": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "사용자 회원가입",
+        "description": "회원가입 엔드포인트.",
+        "operationId": "signup_api_v1_auth_signup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "사용자 로그인",
+        "description": "로그인 후 액세스 토큰 발급.",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "현재 사용자 조회",
+        "description": "토큰으로 인증된 현재 사용자 정보를 반환.",
+        "operationId": "read_me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health Check",
+        "description": "Health check endpoint\n\nReturns:\n    Status dict",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Check Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConsultationCreate": {
+        "properties": {
+          "summary": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 10,
+            "title": "Summary"
+          },
+          "inquiry_text": {
+            "type": "string",
+            "minLength": 10,
+            "title": "Inquiry Text"
+          },
+          "action_taken": {
+            "type": "string",
+            "minLength": 10,
+            "title": "Action Taken"
+          },
+          "branch_code": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Branch Code"
+          },
+          "employee_id": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Employee Id"
+          },
+          "screen_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screen Id"
+          },
+          "transaction_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transaction Name"
+          },
+          "business_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Type"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "metadata_fields": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "summary",
+          "inquiry_text",
+          "action_taken",
+          "branch_code",
+          "employee_id"
+        ],
+        "title": "ConsultationCreate",
+        "description": "Schema for creating new consultation\n\nRFP Reference: POST /consultations"
+      },
+      "ConsultationResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 10,
+            "title": "Summary"
+          },
+          "inquiry_text": {
+            "type": "string",
+            "minLength": 10,
+            "title": "Inquiry Text"
+          },
+          "action_taken": {
+            "type": "string",
+            "minLength": 10,
+            "title": "Action Taken"
+          },
+          "branch_code": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Branch Code"
+          },
+          "employee_id": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Employee Id"
+          },
+          "screen_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screen Id"
+          },
+          "transaction_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transaction Name"
+          },
+          "business_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Type"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "metadata_fields": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata Fields"
+          },
+          "manual_entry_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manual Entry Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "summary",
+          "inquiry_text",
+          "action_taken",
+          "branch_code",
+          "employee_id"
+        ],
+        "title": "ConsultationResponse",
+        "description": "Schema for consultation response\n\nIncludes all base fields plus ID and timestamps"
+      },
+      "ConsultationSearchFilters": {
+        "properties": {
+          "branch_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Code"
+          },
+          "business_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Type"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          }
+        },
+        "type": "object",
+        "title": "ConsultationSearchFilters",
+        "description": "VectorStore 재조회 시 적용할 메타데이터 필터 (FR-3 대비 사전 정의).\n\n나중 Task에서 사용할 예정이지만, Repository와 Service 계약을 맞추기 위해\n기본 필드를 미리 선언한다."
+      },
+      "ConsultationSearchRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Query",
+            "description": "검색 쿼리"
+          },
+          "top_k": {
+            "type": "integer",
+            "maximum": 50,
+            "minimum": 1,
+            "title": "Top K",
+            "default": 10
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ConsultationSearchFilters",
+            "description": "branch/business/error 등 메타 필터"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "ConsultationSearchRequest",
+        "description": "FR-3: 상담 검색 요청 스키마."
+      },
+      "ConsultationSearchResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ConsultationSearchResult"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "total_found": {
+            "type": "integer",
+            "title": "Total Found"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          }
+        },
+        "type": "object",
+        "required": [
+          "results",
+          "total_found",
+          "query"
+        ],
+        "title": "ConsultationSearchResponse",
+        "description": "Search results response"
+      },
+      "ConsultationSearchResult": {
+        "properties": {
+          "consultation": {
+            "$ref": "#/components/schemas/ConsultationResponse"
+          },
+          "score": {
+            "type": "number",
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Score"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationSearchVectorMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "consultation",
+          "score"
+        ],
+        "title": "ConsultationSearchResult",
+        "description": "검색 결과 단위 (상담 + 점수 + 메타데이터)."
+      },
+      "ConsultationSearchVectorMetadata": {
+        "properties": {
+          "branch_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Code"
+          },
+          "business_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Type"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "title": "ConsultationSearchVectorMetadata",
+        "description": "검색 결과에 포함될 Vector 메타데이터."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ManualApproveRequest": {
+        "properties": {
+          "approver_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Approver Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "승인 메모"
+          }
+        },
+        "type": "object",
+        "required": [
+          "approver_id"
+        ],
+        "title": "ManualApproveRequest",
+        "description": "FR-4: 메뉴얼 승인 요청."
+      },
+      "ManualDraftCreateFromConsultationRequest": {
+        "properties": {
+          "consultation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consultation Id"
+          },
+          "enforce_hallucination_check": {
+            "type": "boolean",
+            "title": "Enforce Hallucination Check",
+            "description": "환각 검증 실패 시 리뷰 태스크 생성 여부",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "consultation_id"
+        ],
+        "title": "ManualDraftCreateFromConsultationRequest",
+        "description": "FR-2: 상담을 기반으로 메뉴얼 초안을 생성하기 위한 요청."
+      },
+      "ManualDraftResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ManualStatus"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keywords"
+          },
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "background": {
+            "type": "string",
+            "title": "Background"
+          },
+          "guideline": {
+            "type": "string",
+            "title": "Guideline"
+          },
+          "source_consultation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Consultation Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "status",
+          "keywords",
+          "topic",
+          "background",
+          "guideline",
+          "source_consultation_id"
+        ],
+        "title": "ManualDraftResponse",
+        "description": "FR-2: 생성된 메뉴얼 초안 반환."
+      },
+      "ManualEntryResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Keywords"
+          },
+          "topic": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 5,
+            "title": "Topic"
+          },
+          "background": {
+            "type": "string",
+            "minLength": 10,
+            "title": "Background"
+          },
+          "guideline": {
+            "type": "string",
+            "minLength": 10,
+            "title": "Guideline"
+          },
+          "business_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Type"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "source_consultation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Consultation Id"
+          },
+          "version_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ManualStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "keywords",
+          "topic",
+          "background",
+          "guideline",
+          "source_consultation_id",
+          "version_id",
+          "status"
+        ],
+        "title": "ManualEntryResponse",
+        "description": "Schema for manual entry response"
+      },
+      "ManualReviewApproval": {
+        "properties": {
+          "reviewer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Reviewer Id"
+          },
+          "review_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Notes"
+          },
+          "create_new_version": {
+            "type": "boolean",
+            "title": "Create New Version",
+            "description": "Create new manual version",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "reviewer_id"
+        ],
+        "title": "ManualReviewApproval",
+        "description": "Schema for approving manual review\n\nRFP Reference: POST /tasks/manual-review/{id}/approve"
+      },
+      "ManualReviewRejection": {
+        "properties": {
+          "review_notes": {
+            "type": "string",
+            "minLength": 10,
+            "title": "Review Notes",
+            "description": "Reason for rejection"
+          }
+        },
+        "type": "object",
+        "required": [
+          "review_notes"
+        ],
+        "title": "ManualReviewRejection",
+        "description": "Schema for rejecting manual review\n\nRFP Reference: POST /tasks/manual-review/{id}/reject"
+      },
+      "ManualReviewTaskResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "old_entry_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old Entry Id"
+          },
+          "new_entry_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "New Entry Id"
+          },
+          "similarity": {
+            "type": "number",
+            "title": "Similarity"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskStatus"
+          },
+          "reviewer_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewer Id"
+          },
+          "review_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Notes"
+          },
+          "old_manual_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old Manual Summary",
+            "description": "기존 메뉴얼 요약"
+          },
+          "new_manual_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Manual Summary",
+            "description": "신규 초안 요약"
+          },
+          "diff_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diff Text",
+            "description": "LLM 비교 결과 요약"
+          },
+          "diff_json": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diff Json",
+            "description": "LLM 비교 결과 JSON"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "old_entry_id",
+          "new_entry_id",
+          "similarity",
+          "status",
+          "reviewer_id",
+          "review_notes"
+        ],
+        "title": "ManualReviewTaskResponse",
+        "description": "Manual review task response\n\nRFP Reference: GET /tasks/manual-review"
+      },
+      "ManualSearchResult": {
+        "properties": {
+          "manual": {
+            "$ref": "#/components/schemas/ManualEntryResponse"
+          },
+          "similarity_score": {
+            "type": "number",
+            "title": "Similarity Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "manual",
+          "similarity_score"
+        ],
+        "title": "ManualSearchResult",
+        "description": "Single manual search result"
+      },
+      "ManualStatus": {
+        "type": "string",
+        "enum": [
+          "DRAFT",
+          "APPROVED",
+          "DEPRECATED"
+        ],
+        "title": "ManualStatus",
+        "description": "메뉴얼 상태 Enum (FR-4 승인/반려 흐름 반영)"
+      },
+      "ManualVersionInfo": {
+        "properties": {
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Approved At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "approved_at"
+        ],
+        "title": "ManualVersionInfo",
+        "description": "FR-5: 전체 문서 세트 버전 정보."
+      },
+      "TaskStatus": {
+        "type": "string",
+        "enum": [
+          "TODO",
+          "IN_PROGRESS",
+          "DONE",
+          "REJECTED"
+        ],
+        "title": "TaskStatus",
+        "description": "검토 태스크 상태 Enum (FR-5/FR-6 워크플로우)"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserCreate": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username"
+          },
+          "employee_id": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Employee Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "department": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Department"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole",
+            "default": "CONSULTANT"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "employee_id",
+          "name",
+          "department",
+          "password"
+        ],
+        "title": "UserCreate"
+      },
+      "UserLogin": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "UserLogin"
+      },
+      "UserResponse": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username"
+          },
+          "employee_id": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Employee Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "department": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Department"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole",
+            "default": "CONSULTANT"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "employee_id",
+          "name",
+          "department",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserResponse"
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "CONSULTANT",
+          "REVIEWER",
+          "ADMIN"
+        ],
+        "title": "UserRole",
+        "description": "시스템 사용자 역할"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {
+
+            },
+            "tokenUrl": "/auth/login"
+          }
+        }
+      }
+    }
+  }
+}

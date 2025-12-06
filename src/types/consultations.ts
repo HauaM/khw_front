@@ -10,10 +10,12 @@ export type BusinessType =
 export interface Consultation {
   id: string;
   branchCode: string;
-  branchName: string;
+  branchName?: string;
   businessType: BusinessType;
   errorCode: string;
   inquiryText: string;
+  summary?: string;
+  actionTaken?: string;
   similarityScore: number;
   createdAt: string; // ISO string
 }
