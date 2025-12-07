@@ -73,8 +73,7 @@ const ManualDetailView: React.FC<ManualDetailViewProps> = ({ detail }) => {
   };
 
   const handleVersionCompare = () => {
-    // TODO: 버전 비교 페이지/모달 구현
-    showToast('버전 비교 화면을 준비중입니다.', 'info');
+    navigate(`/manuals/${detail.id}/versions/compare`);
   };
 
   // 상태 배지 텍스트
