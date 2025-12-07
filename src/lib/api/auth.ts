@@ -92,17 +92,20 @@ export const getUserIdFromToken = (): string | null => {
 };
 
 /**
- * 현재 로그인한 사용자의 검토자 ID (reviewer_id)를 가져옵니다
+ * 현재 로그인한 사용자의 employee_id를 가져옵니다
+ * 메뉴얼 검토 Task 승인/반려 시 사용됩니다.
  * 다음 순서로 시도합니다:
- * 1. localStorage의 user_info에서 employee_id 찾기 (문자열)
+ * 1. localStorage의 user_info에서 employee_id 찾기
  * 2. 저장된 토큰에서 user UUID 추출
  *
- * @returns 사용자 ID (문자열) 또는 null
+ * @returns 사용자의 employee_id (문자열) 또는 null
  */
 export const getCurrentReviewerId = (): string | null => {
   // 방법 1: 저장된 user_info에서 employee_id 가져오기 (UUID 대체로 사용)
   const user = getStoredUser();
+  console.log('getStoredUser():', user);
   if (user && user.employee_id) {
+    console.log('Found employee_id from user_info:', user.employee_id);
     return user.employee_id;
   }
 
@@ -113,7 +116,9 @@ export const getCurrentReviewerId = (): string | null => {
       const parts = token.split('.');
       if (parts.length === 3) {
         const payload = JSON.parse(atob(parts[1]));
+        console.log('Token payload:', payload);
         if (payload.employee_id) {
+          console.log('Found employee_id from token:', payload.employee_id);
           return payload.employee_id;
         }
       }
@@ -122,5 +127,6 @@ export const getCurrentReviewerId = (): string | null => {
     console.error('Failed to extract employee_id from token:', error);
   }
 
+  console.log('No reviewer ID found');
   return null;
 };

@@ -23,7 +23,7 @@ export interface BackendManualReviewTask {
   new_entry_id: string; // uuid
   similarity: number;
   status: ManualReviewStatus;
-  reviewer_id: string | null; // uuid or null
+  reviewer_id: string | null; // employee_id or null
   review_notes: string | null;
   old_manual_summary?: string | null;
   new_manual_summary?: string | null;
@@ -115,7 +115,7 @@ export interface ManualReviewDetail {
   new_entry_id: string; // uuid
   similarity: number;
   // 검토자 정보
-  reviewer_id?: string | null; // uuid or null
+  reviewer_id?: string | null; // employee_id or null
   review_notes?: string | null;
   // AI 생성 요약
   old_manual_summary?: string | null; // 기존 메뉴얼 요약

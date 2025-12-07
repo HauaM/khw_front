@@ -185,24 +185,33 @@ export async function fetchManualReviewDetail(
 /**
  * 메뉴얼 검토 Task 승인
  * @param taskId Task ID
- * @param reviewerId 검토자 ID
+ * @param employeeId 검토자 employee_id (사용자 ID)
  * @param reviewNotes 검토 의견
  * @returns 승인된 Task 정보
  */
 export async function approveManualReviewTask(
   taskId: string,
-  reviewerId: string,
+  employeeId: string,
   reviewNotes?: string
 ): Promise<BackendManualReviewTask> {
   try {
     // OpenAPI: POST /api/v1/manual-review/tasks/{task_id}/approve
+    // ManualReviewApproval 스키마: employee_id (검토자의 employee_id), create_new_version, notes
+    const requestBody: Record<string, any> = {
+      employee_id: employeeId,
+      create_new_version: true,
+    };
+
+    // review_notes가 있을 경우만 포함 (undefined 제외)
+    if (reviewNotes !== undefined) {
+      requestBody.review_notes = reviewNotes;
+    }
+
+    console.log('Approve request body:', requestBody);
+
     const response = await axiosClient.post<BackendManualReviewTask>(
       `/api/v1/manual-review/tasks/${taskId}/approve`,
-      {
-        reviewer_id: reviewerId,
-        review_notes: reviewNotes,
-        create_new_version: true,
-      }
+      requestBody
     );
 
     return response.data;
@@ -216,21 +225,19 @@ export async function approveManualReviewTask(
  * 메뉴얼 검토 Task 반려
  * @param taskId Task ID
  * @param reviewNotes 반려 사유 (최소 10글자)
- * @param reviewerId 검토자 ID (옵션)
  * @returns 반려된 Task 정보
  */
 export async function rejectManualReviewTask(
   taskId: string,
-  reviewNotes: string,
-  reviewerId?: string
+  reviewNotes: string
 ): Promise<BackendManualReviewTask> {
   try {
     // OpenAPI: POST /api/v1/manual-review/tasks/{task_id}/reject
+    // ManualReviewRejection 스키마: review_notes만 필요
     const response = await axiosClient.post<BackendManualReviewTask>(
       `/api/v1/manual-review/tasks/${taskId}/reject`,
       {
         review_notes: reviewNotes,
-        reviewer_id: reviewerId,
       }
     );
 

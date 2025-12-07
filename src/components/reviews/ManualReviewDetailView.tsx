@@ -78,15 +78,7 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
   };
 
   const handleReject = async () => {
-    // 현재 로그인한 사용자의 ID를 JWT 토큰에서 추출
-    const reviewerId = getCurrentReviewerId();
-
-    if (!reviewerId) {
-      showToast('사용자 정보를 가져올 수 없습니다. 다시 로그인해주세요.', 'error');
-      return;
-    }
-
-    await mutateReject(detail.task_id, rejectReason, reviewerId);
+    await mutateReject(detail.task_id, rejectReason);
   };
 
   const formatDate = (dateString?: string): string => {

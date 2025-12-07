@@ -1616,7 +1616,6 @@
         "properties": {
           "approver_id": {
             "type": "string",
-            "format": "uuid",
             "title": "Approver Id"
           },
           "notes": {
@@ -1912,10 +1911,9 @@
       },
       "ManualReviewApproval": {
         "properties": {
-          "reviewer_id": {
+          "employee_id": {
             "type": "string",
-            "format": "uuid",
-            "title": "Reviewer Id"
+            "title": "Employee Id"
           },
           "review_notes": {
             "anyOf": [
@@ -1937,7 +1935,7 @@
         },
         "type": "object",
         "required": [
-          "reviewer_id"
+          "employee_id"
         ],
         "title": "ManualReviewApproval",
         "description": "Schema for approving manual review\n\nRFP Reference: POST /tasks/manual-review/{id}/approve"
@@ -2002,8 +2000,7 @@
           "reviewer_id": {
             "anyOf": [
               {
-                "type": "string",
-                "format": "uuid"
+                "type": "string"
               },
               {
                 "type": "null"

@@ -14,7 +14,7 @@ interface UseApproveManualReviewOptions {
 export interface UseApproveManualReviewResult {
   isLoading: boolean;
   error: Error | null;
-  mutate: (taskId: string, reviewerId: string, reviewNotes?: string) => Promise<void>;
+  mutate: (taskId: string, employeeId: string, reviewNotes?: string) => Promise<void>;
 }
 
 /**
@@ -36,11 +36,11 @@ export function useApproveManualReview(
 
   const mutate = async (
     taskId: string,
-    reviewerId: string,
+    employeeId: string,
     reviewNotes?: string
   ) => {
-    if (!reviewerId || reviewerId.trim() === '') {
-      const error = new Error('Reviewer ID is required');
+    if (!employeeId || employeeId.trim() === '') {
+      const error = new Error('Employee ID is required');
       setError(error);
       options?.onError?.(error);
       return;
@@ -50,7 +50,7 @@ export function useApproveManualReview(
       setIsLoading(true);
       setError(null);
 
-      await approveManualReviewTask(taskId, reviewerId, reviewNotes);
+      await approveManualReviewTask(taskId, employeeId, reviewNotes);
 
       options?.onSuccess?.();
     } catch (err) {

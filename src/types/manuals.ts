@@ -55,3 +55,48 @@ export interface ManualDraftResponse {
   created_at: string;
   updated_at: string;
 }
+
+/**
+ * 메뉴얼 검색 - 업무 구분 타입
+ * OpenAPI: BusinessType enum
+ */
+export type ManualBusinessType = '' | '인터넷뱅킹' | '모바일뱅킹' | '대출' | '예금' | '카드';
+
+/**
+ * 메뉴얼 검색 파라미터
+ * OpenAPI: GET /api/v1/manuals/search query parameters
+ */
+export interface ManualSearchParams {
+  query: string; // 검색 쿼리 (required)
+  business_type?: string | null; // 업무 구분 (optional)
+  error_code?: string | null; // 에러 코드 (optional)
+  status?: ManualDraftStatus | null; // 메뉴얼 상태 (optional)
+  top_k?: number; // 반환할 최대 결과 수 (default 10)
+  similarity_threshold?: number; // 유사도 임계값 (default 0.7)
+}
+
+/**
+ * 메뉴얼 검색 결과 항목
+ * OpenAPI: ManualSearchResult schema
+ * {
+ *   "manual": ManualEntryResponse,
+ *   "similarity_score": number
+ * }
+ */
+export interface ManualSearchResult {
+  manual: {
+    id: string; // uuid
+    keywords: string[];
+    topic: string;
+    background: string;
+    guideline: string;
+    business_type?: string | null;
+    error_code?: string | null;
+    source_consultation_id: string; // uuid
+    version_id?: string | null; // uuid
+    status: ManualDraftStatus;
+    created_at: string; // ISO datetime
+    updated_at: string; // ISO datetime
+  };
+  similarity_score: number; // 0.0 ~ 1.0
+}

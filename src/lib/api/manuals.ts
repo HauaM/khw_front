@@ -3,6 +3,8 @@ import {
   ManualDraft,
   ManualDraftUpdateRequest,
   ManualDraftResponse,
+  ManualSearchParams,
+  ManualSearchResult,
 } from '@/types/manuals';
 
 // Re-export types for convenience
@@ -117,3 +119,56 @@ export const updateManualDraft = (draftId: string, payload: ManualDraftUpdateReq
  */
 export const requestManualReview = (manualId: string) =>
   api.post<ManualReviewTaskResponse>(`/api/v1/manuals/${manualId}/review`, {});
+
+/**
+ * 메뉴얼 벡터 검색
+ * OpenAPI: GET /api/v1/manuals/search
+ *
+ * @param params - 검색 파라미터
+ * @returns 검색 결과 배열
+ *
+ * 요청 예시:
+ * GET /api/v1/manuals/search?query=인터넷뱅킹&business_type=인터넷뱅킹&top_k=10&similarity_threshold=0.7
+ *
+ * 응답 형식:
+ * [
+ *   {
+ *     "manual": {
+ *       "id": "uuid",
+ *       "keywords": ["string"],
+ *       "topic": "string",
+ *       ...
+ *     },
+ *     "similarity_score": 0.95
+ *   }
+ * ]
+ */
+export const searchManuals = (params: ManualSearchParams) => {
+  // Query string으로 변환 (null/undefined 값은 제외)
+  const queryParams = new URLSearchParams();
+
+  // 필수 파라미터
+  if (params.query) {
+    queryParams.append('query', params.query);
+  }
+
+  // 선택 파라미터
+  if (params.business_type) {
+    queryParams.append('business_type', params.business_type);
+  }
+  if (params.error_code) {
+    queryParams.append('error_code', params.error_code);
+  }
+  if (params.status) {
+    queryParams.append('status', params.status);
+  }
+  if (params.top_k) {
+    queryParams.append('top_k', params.top_k.toString());
+  }
+  if (params.similarity_threshold !== undefined) {
+    queryParams.append('similarity_threshold', params.similarity_threshold.toString());
+  }
+
+  const queryString = queryParams.toString();
+  return api.get<ManualSearchResult[]>(`/api/v1/manuals/search${queryString ? `?${queryString}` : ''}`);
+};
