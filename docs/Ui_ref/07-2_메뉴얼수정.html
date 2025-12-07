@@ -1,0 +1,1343 @@
+<!doctype html>
+<html lang="ko">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>메뉴얼 수정 - KWH 지식관리시스템</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Noto Sans KR", "Apple SD Gothic Neo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #212121;
+      background-color: #FAFAFA;
+      height: 100%;
+      width: 100%;
+    }
+
+    *, *::before, *::after {
+      box-sizing: inherit;
+    }
+
+    html {
+      height: 100%;
+      width: 100%;
+    }
+
+    /* App Header */
+    .app-header {
+      height: 60px;
+      background-color: #FFFFFF;
+      border-bottom: 1px solid #E0E0E0;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .app-header-left h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #005BAC;
+    }
+
+    .app-header-left p {
+      margin: 0;
+      font-size: 12px;
+      color: #6E6E6E;
+    }
+
+    .app-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #424242;
+    }
+
+    .app-header-divider {
+      color: #BDBDBD;
+    }
+
+    .role-badge {
+      display: inline-block;
+      background-color: #E8F1FB;
+      color: #1A73E8;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+    }
+
+    .btn-logout {
+      background-color: #FFFFFF;
+      color: #005BAC;
+      border: 1px solid #005BAC;
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-logout:hover {
+      background-color: #E8F1FB;
+    }
+
+    /* Layout Container */
+    .app-container {
+      display: flex;
+      height: calc(100% - 60px);
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .app-sidebar {
+      width: 240px;
+      background-color: #F5F7FB;
+      border-right: 1px solid #E0E0E0;
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+
+    .menu-section {
+      margin-bottom: 24px;
+    }
+
+    .menu-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6E6E6E;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      margin-bottom: 4px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: #424242;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+    }
+
+    .menu-item:hover {
+      background-color: #E8F1FB;
+      color: #005BAC;
+    }
+
+    .menu-item.active {
+      background-color: #D2E4FA;
+      color: #005BAC;
+      border-left-color: #005BAC;
+      font-weight: 600;
+    }
+
+    .menu-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      width: 100%;
+    }
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .page-header-left {
+      flex: 1;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #6E6E6E;
+      margin-bottom: 12px;
+    }
+
+    .breadcrumb-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .breadcrumb-separator {
+      color: #BDBDBD;
+    }
+
+    .breadcrumb-link {
+      color: #005BAC;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .breadcrumb-link:hover {
+      color: #00437F;
+      text-decoration: underline;
+    }
+
+    .page-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #212121;
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .manual-id-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      background-color: #F5F5F5;
+      color: #6E6E6E;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: #6E6E6E;
+      margin: 0;
+    }
+
+    .page-header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-secondary {
+      min-height: 40px;
+      padding: 0 20px;
+      background-color: #FFFFFF;
+      color: #424242;
+      border: 1px solid #BDBDBD;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-secondary:hover {
+      background-color: #F5F5F5;
+      border-color: #757575;
+    }
+
+    .btn-primary {
+      min-height: 40px;
+      padding: 0 20px;
+      background-color: #005BAC;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary:hover {
+      background-color: #00437F;
+    }
+
+    .btn-primary:disabled {
+      background-color: #BDBDBD;
+      cursor: not-allowed;
+    }
+
+    .btn-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Form Card */
+    .form-card {
+      background-color: #FFFFFF;
+      border-radius: 8px;
+      box-shadow: 0px 1px 3px rgba(0,0,0,0.08);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .form-section {
+      margin-bottom: 32px;
+    }
+
+    .form-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #E0E0E0;
+    }
+
+    .section-icon {
+      width: 20px;
+      height: 20px;
+      color: #005BAC;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #212121;
+      margin: 0;
+    }
+
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #424242;
+      margin-bottom: 8px;
+    }
+
+    .form-label .required {
+      color: #C62828;
+      margin-left: 2px;
+    }
+
+    .form-input {
+      width: 100%;
+      min-height: 44px;
+      border: 2px solid #BDBDBD;
+      border-radius: 6px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #212121;
+      background-color: #FFFFFF;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #1A73E8;
+      box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+    }
+
+    .form-input.error {
+      border-color: #C62828;
+    }
+
+    .form-textarea {
+      width: 100%;
+      min-height: 120px;
+      border: 2px solid #BDBDBD;
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #212121;
+      background-color: #FFFFFF;
+      resize: vertical;
+      transition: all 0.2s;
+      line-height: 1.6;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: #1A73E8;
+      box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+    }
+
+    .form-textarea.large {
+      min-height: 180px;
+    }
+
+    .form-select {
+      width: 100%;
+      min-height: 44px;
+      border: 2px solid #BDBDBD;
+      border-radius: 6px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #212121;
+      background-color: #FFFFFF;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: #1A73E8;
+      box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+    }
+
+    .form-help {
+      font-size: 12px;
+      color: #6E6E6E;
+      margin-top: 6px;
+    }
+
+    .form-error {
+      font-size: 12px;
+      color: #C62828;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Keywords Input */
+    .keywords-input-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .keywords-input-container .form-input {
+      flex: 1;
+    }
+
+    .btn-add {
+      min-height: 44px;
+      padding: 0 16px;
+      background-color: #005BAC;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover {
+      background-color: #00437F;
+    }
+
+    .keywords-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .keyword-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background-color: #E8F1FB;
+      color: #005BAC;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .keyword-remove {
+      background: none;
+      border: none;
+      color: #005BAC;
+      cursor: pointer;
+      padding: 0;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+
+    .keyword-remove:hover {
+      color: #C62828;
+    }
+
+    /* Guidelines */
+    .guidelines-edit-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .guideline-edit-item {
+      background-color: #F5F7FB;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .guideline-edit-item:focus-within {
+      border-color: #1A73E8;
+    }
+
+    .guideline-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .guideline-drag-handle {
+      color: #BDBDBD;
+      cursor: move;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .guideline-number-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      background-color: #005BAC;
+      color: #FFFFFF;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .guideline-header .form-input {
+      flex: 1;
+    }
+
+    .btn-remove {
+      background-color: #FFEBEE;
+      color: #C62828;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-remove:hover {
+      background-color: #FFCDD2;
+    }
+
+    .guideline-textarea {
+      width: 100%;
+      min-height: 80px;
+      border: 2px solid #BDBDBD;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #212121;
+      background-color: #FFFFFF;
+      resize: vertical;
+      transition: all 0.2s;
+      line-height: 1.6;
+    }
+
+    .guideline-textarea:focus {
+      outline: none;
+      border-color: #1A73E8;
+      box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+    }
+
+    .btn-add-guideline {
+      width: 100%;
+      min-height: 48px;
+      background-color: #FFFFFF;
+      color: #005BAC;
+      border: 2px dashed #BDBDBD;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-add-guideline:hover {
+      background-color: #E8F1FB;
+      border-color: #005BAC;
+    }
+
+    /* Info Box */
+    .info-box {
+      background-color: #E8F5E9;
+      border-left: 4px solid #2E7D32;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .info-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: #2E7D32;
+    }
+
+    .info-content {
+      flex: 1;
+    }
+
+    .info-text {
+      font-size: 13px;
+      color: #424242;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      background-color: #FFFFFF;
+      border-radius: 6px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+      padding: 12px 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 2000;
+      min-width: 280px;
+      border-left: 4px solid;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    .toast.success {
+      border-left-color: #2E7D32;
+    }
+
+    .toast.error {
+      border-left-color: #C62828;
+    }
+
+    .toast-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toast-message {
+      flex: 1;
+      font-size: 14px;
+      color: #212121;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Loading State */
+    .btn-loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      margin: -8px 0 0 -8px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #FFFFFF;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .page-header-actions {
+        width: 100%;
+        flex-direction: column;
+      }
+
+      .btn-secondary,
+      .btn-primary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .keywords-input-container {
+        flex-direction: column;
+      }
+
+      .guideline-header {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body><!-- App Header -->
+  <header class="app-header">
+   <div class="app-header-left">
+    <h1>KWH 지식관리시스템</h1>
+    <p>Kwangju Bank Help Desk Wiki</p>
+   </div>
+   <div class="app-header-right"><span>디지털전략부</span> <span class="app-header-divider">·</span> <span>홍길동</span> <span class="app-header-divider">·</span> <span class="role-badge">상담사</span> <button class="btn-logout">로그아웃</button>
+   </div>
+  </header><!-- App Container -->
+  <div class="app-container"><!-- Sidebar -->
+   <aside class="app-sidebar">
+    <nav>
+     <div class="menu-section">
+      <div class="menu-section-title">
+       Main
+      </div><a href="#" class="menu-item">
+       <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect> <rect x="14" y="3" width="7" height="7"></rect> <rect x="14" y="14" width="7" height="7"></rect> <rect x="3" y="14" width="7" height="7"></rect>
+       </svg> 대시보드 </a>
+     </div>
+     <div class="menu-section">
+      <div class="menu-section-title">
+       상담 관리
+      </div><a href="#" class="menu-item">
+       <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path> <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+       </svg> 상담 등록 </a> <a href="#" class="menu-item">
+       <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle> <path d="m21 21-4.35-4.35"></path>
+       </svg> 상담 검색 </a>
+     </div>
+     <div class="menu-section">
+      <div class="menu-section-title">
+       메뉴얼 관리
+      </div><a href="#" class="menu-item active">
+       <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path> <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+       </svg> 메뉴얼 수정 </a>
+     </div>
+    </nav>
+   </aside><!-- Main Content -->
+   <main class="main-content">
+    <div id="root"></div>
+   </main>
+  </div><!-- Toast -->
+  <div class="toast" id="toast">
+   <svg class="toast-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="toastIcon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path> <polyline points="22 4 12 14.01 9 11.01"></polyline>
+   </svg><span class="toast-message" id="toastMessage"></span>
+  </div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Mock manual data
+    const mockManualData = {
+      manual_id: 'MAN-2024-001',
+      topic: '인터넷뱅킹 로그인 오류 처리 가이드',
+      keywords: ['인터넷뱅킹', '로그인오류', 'E001', '비밀번호', '계정잠김', '보안'],
+      background: `고객이 인터넷뱅킹 로그인 시 오류가 발생하는 경우는 다양한 원인이 있을 수 있습니다. 
+
+가장 일반적인 경우는 비밀번호 5회 이상 오입력으로 인한 계정 잠김 상태이며, 이 외에도 브라우저 호환성 문제, 보안프로그램 미설치, 인증서 만료 등의 원인이 있을 수 있습니다.
+
+본 가이드는 인터넷뱅킹 로그인 오류 발생 시 상담사가 고객에게 안내해야 할 표준 조치사항을 정리한 문서입니다. 각 단계별로 순차적으로 진행하며, 문제가 해결되지 않을 경우 상위 담당자에게 에스컬레이션하시기 바랍니다.`,
+      guidelines: [
+        {
+          title: '계정 상태 확인',
+          description: '고객의 아이디를 확인하여 계정 잠김 여부를 확인합니다. 비밀번호 5회 이상 오입력 시 자동으로 계정이 잠기며, 본인 확인 후 즉시 해제 가능합니다.'
+        },
+        {
+          title: '브라우저 및 보안프로그램 점검',
+          description: '고객이 사용 중인 브라우저 버전을 확인하고, 보안프로그램(키보드보안, 방화벽)이 정상적으로 설치되어 있는지 확인합니다. 필요 시 재설치를 안내합니다.'
+        },
+        {
+          title: '인증서 유효성 확인',
+          description: '공동인증서 또는 간편인증 수단의 유효기간을 확인합니다. 만료된 경우 재발급 절차를 안내하며, 인증서 위치(하드디스크/이동식디스크)도 함께 확인합니다.'
+        },
+        {
+          title: '캐시 및 쿠키 삭제 안내',
+          description: '브라우저의 캐시와 쿠키를 삭제하도록 안내합니다. 이는 많은 로그인 오류의 원인이 되며, 삭제 후 브라우저를 재시작하여 다시 시도하도록 합니다.'
+        },
+        {
+          title: '임시 비밀번호 발급',
+          description: '위 조치사항으로 해결되지 않을 경우, 본인 확인 후 임시 비밀번호를 발급합니다. 고객에게 SMS 또는 ARS를 통해 전달되며, 최초 로그인 시 비밀번호 변경이 필요함을 안내합니다.'
+        },
+        {
+          title: '에스컬레이션',
+          description: '모든 조치사항을 시도했음에도 문제가 해결되지 않을 경우, 시스템 장애 가능성이 있으므로 2차 지원팀으로 에스컬레이션합니다. 티켓 번호와 함께 상세 내역을 전달합니다.'
+        }
+      ],
+      version: 'v2.1',
+      status: 'Approved'
+    };
+
+    function ManualEditScreen() {
+      const [formData, setFormData] = useState(null);
+      const [keywordInput, setKeywordInput] = useState('');
+      const [errors, setErrors] = useState({});
+      const [isSaving, setIsSaving] = useState(false);
+
+      useEffect(() => {
+        loadManualData();
+      }, []);
+
+      const loadManualData = async () => {
+        // TODO: API Connect - GET /api/manuals/:id
+        // const response = await fetch(`/api/manuals/${manualId}`);
+        // const data = await response.json();
+        
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setFormData(JSON.parse(JSON.stringify(mockManualData)));
+      };
+
+      const handleInputChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        
+        // Clear error when user starts typing
+        if (errors[field]) {
+          setErrors(prev => ({ ...prev, [field]: null }));
+        }
+      };
+
+      const handleAddKeyword = () => {
+        const trimmedKeyword = keywordInput.trim();
+        if (!trimmedKeyword) return;
+        
+        if (formData.keywords.includes(trimmedKeyword)) {
+          showToast('이미 존재하는 키워드입니다.', 'error');
+          return;
+        }
+
+        setFormData(prev => ({
+          ...prev,
+          keywords: [...prev.keywords, trimmedKeyword]
+        }));
+        setKeywordInput('');
+      };
+
+      const handleRemoveKeyword = (keyword) => {
+        setFormData(prev => ({
+          ...prev,
+          keywords: prev.keywords.filter(k => k !== keyword)
+        }));
+      };
+
+      const handleGuidelineChange = (index, field, value) => {
+        setFormData(prev => {
+          const newGuidelines = [...prev.guidelines];
+          newGuidelines[index] = { ...newGuidelines[index], [field]: value };
+          return { ...prev, guidelines: newGuidelines };
+        });
+      };
+
+      const handleAddGuideline = () => {
+        setFormData(prev => ({
+          ...prev,
+          guidelines: [
+            ...prev.guidelines,
+            { title: '', description: '' }
+          ]
+        }));
+      };
+
+      const handleRemoveGuideline = (index) => {
+        setFormData(prev => ({
+          ...prev,
+          guidelines: prev.guidelines.filter((_, i) => i !== index)
+        }));
+      };
+
+      const validateForm = () => {
+        const newErrors = {};
+
+        if (!formData.topic.trim()) {
+          newErrors.topic = '주제는 필수 항목입니다.';
+        }
+
+        if (formData.keywords.length === 0) {
+          newErrors.keywords = '최소 1개의 키워드를 입력해주세요.';
+        }
+
+        if (!formData.background.trim()) {
+          newErrors.background = '배경 정보는 필수 항목입니다.';
+        }
+
+        if (formData.guidelines.length === 0) {
+          newErrors.guidelines = '최소 1개의 조치사항을 입력해주세요.';
+        } else {
+          formData.guidelines.forEach((guideline, index) => {
+            if (!guideline.title.trim()) {
+              newErrors[`guideline_title_${index}`] = '조치사항 제목은 필수입니다.';
+            }
+            if (!guideline.description.trim()) {
+              newErrors[`guideline_desc_${index}`] = '조치사항 설명은 필수입니다.';
+            }
+          });
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+      };
+
+      const handleSave = async (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) {
+          showToast('필수 항목을 모두 입력해주세요.', 'error');
+          return;
+        }
+
+        setIsSaving(true);
+
+        try {
+          // TODO: API Connect - PUT /api/manuals/:id
+          // const response = await fetch(`/api/manuals/${formData.manual_id}`, {
+          //   method: 'PUT',
+          //   headers: { 'Content-Type': 'application/json' },
+          //   body: JSON.stringify(formData)
+          // });
+          
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          console.log('Saving manual data:', formData);
+          showToast('메뉴얼이 성공적으로 저장되었습니다!', 'success');
+          
+          // TODO: Navigate back to detail page after save
+          // setTimeout(() => { window.location.href = `/manuals/${formData.manual_id}`; }, 1000);
+        } catch (error) {
+          console.error('Failed to save manual:', error);
+          showToast('저장에 실패했습니다. 다시 시도해주세요.', 'error');
+        } finally {
+          setIsSaving(false);
+        }
+      };
+
+      const handleCancel = () => {
+        console.log('Cancel editing');
+        showToast('수정이 취소되었습니다.', 'error');
+        // TODO: Navigate back to detail page
+        // window.location.href = `/manuals/${formData.manual_id}`;
+      };
+
+      if (!formData) {
+        return (
+          <div style={{textAlign: 'center', padding: '80px 20px'}}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              border: '4px solid #E0E0E0',
+              borderTopColor: '#005BAC',
+              borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite',
+              margin: '0 auto 16px'
+            }}></div>
+            <p style={{fontSize: '14px', color: '#6E6E6E'}}>메뉴얼을 불러오는 중입니다...</p>
+          </div>
+        );
+      }
+
+      return (
+        <form onSubmit={handleSave}>
+          {/* Page Header */}
+          <div className="page-header">
+            <div className="page-header-left">
+              <nav className="breadcrumb">
+                <div className="breadcrumb-item">
+                  <a className="breadcrumb-link" onClick={handleCancel}>메뉴얼 상세</a>
+                </div>
+                <span className="breadcrumb-separator">›</span>
+                <div className="breadcrumb-item">메뉴얼 수정</div>
+              </nav>
+
+              <div className="page-title-row">
+                <h2 className="page-title">메뉴얼 수정</h2>
+                <span className="manual-id-badge">{formData.manual_id}</span>
+              </div>
+
+              <p className="page-subtitle">메뉴얼 정보를 수정하고 저장하세요</p>
+            </div>
+
+            <div className="page-header-actions">
+              <button type="button" className="btn-secondary" onClick={handleCancel}>
+                <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                취소
+              </button>
+              <button 
+                type="submit" 
+                className={`btn-primary ${isSaving ? 'btn-loading' : ''}`}
+                disabled={isSaving}
+              >
+                {!isSaving && (
+                  <>
+                    <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                      <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                      <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    저장하기
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Info Box */}
+          <div className="info-box">
+            <svg className="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <div className="info-content">
+              <p className="info-text">
+                변경사항을 저장하면 새로운 버전으로 기록됩니다. 이전 버전은 버전 비교 기능을 통해 확인할 수 있습니다.
+              </p>
+            </div>
+          </div>
+
+          {/* Form Card */}
+          <div className="form-card">
+            {/* Basic Information */}
+            <div className="form-section">
+              <div className="section-header">
+                <svg className="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <h3 className="section-title">기본 정보</h3>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="topic" className="form-label">
+                  주제 <span className="required">*</span>
+                </label>
+                <input
+                  id="topic"
+                  type="text"
+                  className={`form-input ${errors.topic ? 'error' : ''}`}
+                  value={formData.topic}
+                  onChange={(e) => handleInputChange('topic', e.target.value)}
+                  placeholder="메뉴얼 주제를 입력하세요"
+                />
+                {errors.topic && (
+                  <div className="form-error">
+                    <svg style={{width: '14px', height: '14px'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    {errors.topic}
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="status" className="form-label">
+                  상태 <span className="required">*</span>
+                </label>
+                <select
+                  id="status"
+                  className="form-select"
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                >
+                  <option value="Approved">승인됨</option>
+                  <option value="Deprecated">사용 중단</option>
+                </select>
+                <div className="form-help">
+                  메뉴얼의 현재 상태를 선택하세요
+                </div>
+              </div>
+            </div>
+
+            {/* Keywords */}
+            <div className="form-section">
+              <div className="section-header">
+                <svg className="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+                <h3 className="section-title">키워드</h3>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="keywordInput" className="form-label">
+                  키워드 추가 <span className="required">*</span>
+                </label>
+                <div className="keywords-input-container">
+                  <input
+                    id="keywordInput"
+                    type="text"
+                    className="form-input"
+                    value={keywordInput}
+                    onChange={(e) => setKeywordInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddKeyword();
+                      }
+                    }}
+                    placeholder="키워드를 입력하고 Enter 또는 추가 버튼을 클릭하세요"
+                  />
+                  <button type="button" className="btn-add" onClick={handleAddKeyword}>
+                    추가
+                  </button>
+                </div>
+                {errors.keywords && (
+                  <div className="form-error">
+                    <svg style={{width: '14px', height: '14px'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    {errors.keywords}
+                  </div>
+                )}
+              </div>
+
+              {formData.keywords.length > 0 && (
+                <div className="keywords-list">
+                  {formData.keywords.map((keyword, index) => (
+                    <div key={index} className="keyword-item">
+                      {keyword}
+                      <button
+                        type="button"
+                        className="keyword-remove"
+                        onClick={() => handleRemoveKeyword(keyword)}
+                        aria-label={`${keyword} 삭제`}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <line x1="18" y1="6" x2="6" y2="18"></line>
+                          <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Background */}
+            <div className="form-section">
+              <div className="section-header">
+                <svg className="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <h3 className="section-title">배경 정보</h3>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="background" className="form-label">
+                  배경 설명 <span className="required">*</span>
+                </label>
+                <textarea
+                  id="background"
+                  className={`form-textarea large ${errors.background ? 'error' : ''}`}
+                  value={formData.background}
+                  onChange={(e) => handleInputChange('background', e.target.value)}
+                  placeholder="메뉴얼의 배경 정보를 상세히 입력하세요"
+                />
+                {errors.background && (
+                  <div className="form-error">
+                    <svg style={{width: '14px', height: '14px'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    {errors.background}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Guidelines */}
+            <div className="form-section">
+              <div className="section-header">
+                <svg className="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 11 12 14 22 4"></polyline>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <h3 className="section-title">조치사항</h3>
+              </div>
+
+              <ul className="guidelines-edit-list">
+                {formData.guidelines.map((guideline, index) => (
+                  <li key={index} className="guideline-edit-item">
+                    <div className="guideline-header">
+                      <svg className="guideline-drag-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="9" y1="5" x2="9" y2="19"></line>
+                        <line x1="15" y1="5" x2="15" y2="19"></line>
+                      </svg>
+                      <div className="guideline-number-display">{index + 1}</div>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={guideline.title}
+                        onChange={(e) => handleGuidelineChange(index, 'title', e.target.value)}
+                        placeholder="조치사항 제목"
+                      />
+                      <button
+                        type="button"
+                        className="btn-remove"
+                        onClick={() => handleRemoveGuideline(index)}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                    {errors[`guideline_title_${index}`] && (
+                      <div className="form-error" style={{marginBottom: '8px'}}>
+                        <svg style={{width: '14px', height: '14px'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="8" x2="12" y2="12"></line>
+                          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        {errors[`guideline_title_${index}`]}
+                      </div>
+                    )}
+                    <textarea
+                      className="guideline-textarea"
+                      value={guideline.description}
+                      onChange={(e) => handleGuidelineChange(index, 'description', e.target.value)}
+                      placeholder="조치사항 설명"
+                    />
+                    {errors[`guideline_desc_${index}`] && (
+                      <div className="form-error" style={{marginTop: '8px'}}>
+                        <svg style={{width: '14px', height: '14px'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="8" x2="12" y2="12"></line>
+                          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        {errors[`guideline_desc_${index}`]}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              <button type="button" className="btn-add-guideline" onClick={handleAddGuideline}>
+                <svg style={{width: '20px', height: '20px'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                조치사항 추가
+              </button>
+
+              {errors.guidelines && (
+                <div className="form-error" style={{marginTop: '12px'}}>
+                  <svg style={{width: '14px', height: '14px'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                  {errors.guidelines}
+                </div>
+              )}
+            </div>
+          </div>
+        </form>
+      );
+    }
+
+    // Toast utility
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      
+      if (type === 'success') {
+        toastIcon.innerHTML = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>';
+      } else {
+        toastIcon.innerHTML = '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>';
+      }
+      
+      toastMessage.textContent = message;
+      toast.className = `toast ${type} show`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Render app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<ManualEditScreen />);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a9cb60664c9d1ed',t:'MTc2NTAzMzgzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

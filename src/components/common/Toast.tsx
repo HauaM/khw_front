@@ -29,6 +29,7 @@ const SingleToast: React.FC<SingleToastProps> = ({
   onClose,
 }) => {
   const [visible, setVisible] = useState(isOpen);
+  const context = React.useContext(ToastContext);
 
   const displayMessage = toast?.message || message || '';
   const displayType = (toast?.type || type) as ToastType;
@@ -43,12 +44,11 @@ const SingleToast: React.FC<SingleToastProps> = ({
       setVisible(false);
       onClose?.();
       if (toast) {
-        const context = React.useContext(ToastContext);
         context?.removeToast(toast.id);
       }
     }, 3000);
     return () => clearTimeout(timer);
-  }, [onClose, visible, toast]);
+  }, [onClose, visible, toast, context]);
 
   if (!visible) return null;
 
@@ -95,7 +95,6 @@ const SingleToast: React.FC<SingleToastProps> = ({
           setVisible(false);
           onClose?.();
           if (toast) {
-            const context = React.useContext(ToastContext);
             context?.removeToast(toast.id);
           }
         }}

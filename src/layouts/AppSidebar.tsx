@@ -90,7 +90,7 @@ const menuSections: MenuSection[] = [
     title: '메뉴얼 관리',
     items: [
       { label: '메뉴얼 검색', path: '/manuals/search', icon: <IconFile /> },
-      { label: '메뉴얼 버전 이력', path: '/manuals/history', icon: <IconClock /> },
+      // { label: '메뉴얼 버전 이력', path: '/manuals/history', icon: <IconClock /> },
     ],
   },
   {

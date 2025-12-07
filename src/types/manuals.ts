@@ -100,3 +100,89 @@ export interface ManualSearchResult {
   };
   similarity_score: number; // 0.0 ~ 1.0
 }
+
+/**
+ * 메뉴얼 상세 조회 응답 타입
+ * OpenAPI: ManualEntryResponse를 기반으로 함
+ *
+ * guideline이 문자열로 전달되므로, 프론트엔드에서는 필요시 배열로 변환합니다.
+ */
+export interface ManualDetail {
+  id: string; // uuid
+  topic: string;
+  keywords: string[];
+  background: string;
+  guideline: string; // API: 줄바꿈으로 구분된 문자열
+  status: ManualDraftStatus;
+  created_at: string; // ISO datetime
+  updated_at: string; // ISO datetime
+  business_type?: string | null;
+  error_code?: string | null;
+  source_consultation_id: string; // uuid
+  version_id?: string | null; // uuid
+}
+
+/**
+ * 메뉴얼 상세 조회 가이드라인 항목 (프론트엔드용)
+ */
+export interface ManualGuideline {
+  title: string;
+  description: string;
+}
+
+/**
+ * 메뉴얼 수정 폼 오류 객체 타입
+ */
+export interface ManualEditErrors {
+  topic?: string;
+  keywords?: string;
+  background?: string;
+  guidelines?: string;
+  [key: string]: string | undefined; // guideline_title_0, guideline_desc_0 등
+}
+
+/**
+ * 메뉴얼 업데이트 요청 페이로드 (기존 메뉴얼 수정용)
+ * guideline을 JSON 배열 문자열로 전송하거나 개별 필드로 전송
+ */
+export interface ManualUpdatePayload {
+  topic: string;
+  keywords: string[];
+  background: string;
+  guidelines: ManualGuideline[];
+  status: ManualDraftStatus;
+}
+
+/**
+ * 메뉴얼 버전 정보
+ * 버전 선택 드롭다운에서 사용
+ */
+export interface ManualVersionInfo {
+  value: string; // "v2.1"
+  label: string; // "v2.1 (현재 버전)"
+  date: string; // "2024-01-15"
+}
+
+/**
+ * 메뉴얼 버전 상세 정보
+ * 버전 비교에서 좌/우 컬럼에 표시되는 데이터
+ *
+ * guideline이 배열로 제공됨을 주의하세요.
+ * API 응답과는 다르게 이미 가이드라인 항목으로 파싱된 형태입니다.
+ */
+export interface ManualVersionDetail {
+  manual_id: string; // UUID
+  version: string; // "v2.1"
+  topic: string;
+  keywords: string[];
+  background: string;
+  guidelines: ManualGuideline[]; // 제목-설명 쌍의 배열
+  status: ManualDraftStatus;
+  updated_at: string; // ISO datetime
+}
+
+/**
+ * 변경 상태 플래그
+ * 키워드와 가이드라인의 추가/삭제/수정 여부를 나타냅니다.
+ */
+export type ChangeFlag = '' | 'ADDED' | 'REMOVED' | 'MODIFIED';

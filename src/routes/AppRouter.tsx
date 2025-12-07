@@ -8,6 +8,9 @@ import ConsultationDetailPage from '@/pages/consultations/ConsultationDetailPage
 import ManualSearchPage from '@/pages/manuals/ManualSearchPage';
 import ManualHistoryPage from '@/pages/manuals/ManualHistoryPage';
 import ManualDraftResultPage from '@/pages/manuals/ManualDraftResultPage';
+import ManualDetailPage from '@/pages/manuals/ManualDetailPage';
+import ManualEditPage from '@/pages/manuals/ManualEditPage';
+import ManualVersionComparePage from '@/pages/manuals/ManualVersionComparePage';
 import ReviewTaskListPage from '@/pages/reviews/ReviewTaskListPage';
 import ManualReviewDetailPage from '@/pages/reviews/ManualReviewDetailPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
@@ -32,6 +35,9 @@ const AppRouter: React.FC = () => {
             <Route path="search" element={<ManualSearchPage />} />
             <Route path="history" element={<ManualHistoryPage />} />
             <Route path="draft/:id" element={<ManualDraftResultPage />} />
+            <Route path=":manualId/versions/compare" element={<ManualVersionComparePage />} />
+            <Route path=":manualId/edit" element={<ManualEditPage />} />
+            <Route path=":manualId" element={<ManualDetailPage />} />
             {/* TODO: 메뉴얼 검토 대기 목록 페이지 추가 예정 */}
             {/* <Route path="drafts" element={<ManualDraftListPage />} /> */}
           </Route>

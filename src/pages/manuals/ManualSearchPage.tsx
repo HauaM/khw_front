@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ManualSearchParams } from '@/types/manuals';
 import { useToast } from '@/contexts/ToastContext';
 import ManualSearchForm from '@/components/manuals/ManualSearchForm';
@@ -16,6 +17,7 @@ import { useManualSearch } from '@/hooks/useManualSearch';
  * - 행 클릭 시 상세 페이지로 이동 (TODO)
  */
 const ManualSearchPage: React.FC = () => {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const { data, isLoading, isSearched, search, reset } = useManualSearch();
 
@@ -55,9 +57,7 @@ const ManualSearchPage: React.FC = () => {
 
   // 테이블 행 클릭
   const handleRowClick = (manualId: string) => {
-    console.log('메뉴얼 상세 이동:', manualId);
-    // TODO: 메뉴얼 상세 페이지 구현 후 활성화
-    // navigate(`/manuals/${manualId}`);
+    navigate(`/manuals/${manualId}`);
   };
 
   return (
