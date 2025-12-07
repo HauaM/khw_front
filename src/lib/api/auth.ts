@@ -57,3 +57,55 @@ export const getRoleLabel = (role?: UserRole) => {
   };
   return map[role] ?? role;
 };
+
+/**
+ * JWT 토큰에서 사용자 UUID를 추출합니다
+ * 토큰 구조: Header.Payload.Signature
+ * Payload에서 'sub' 필드를 추출합니다 (일반적으로 사용자 UUID)
+ *
+ * @returns 사용자 UUID 또는 null
+ */
+export const getUserIdFromToken = (): string | null => {
+  try {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return null;
+
+    // JWT는 3개 부분으로 나뉨: Header.Payload.Signature
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.error('Invalid JWT format');
+      return null;
+    }
+
+    // Payload 부분을 Base64로 디코드
+    const payload = parts[1];
+    const decoded = JSON.parse(atob(payload));
+
+    // 'sub' 필드에서 사용자 ID (UUID) 추출
+    // sub는 JWT의 표준 claim으로 주로 사용자를 나타냄
+    const userId = decoded.sub || decoded.user_id || decoded.id;
+    return userId || null;
+  } catch (error) {
+    console.error('Failed to extract user ID from token:', error);
+    return null;
+  }
+};
+
+/**
+ * 현재 로그인한 사용자의 검토자 ID (reviewer_id)를 가져옵니다
+ * 다음 순서로 시도합니다:
+ * 1. localStorage의 user_info에서 id 찾기
+ * 2. 저장된 토큰에서 user UUID 추출
+ *
+ * @returns 사용자 ID (UUID 형식) 또는 null
+ */
+export const getCurrentReviewerId = (): string | null => {
+  // 방법 1: 저장된 user_info에서 가져오기
+  const user = getStoredUser();
+  if (user && 'id' in user) {
+    return (user as any).id;
+  }
+
+  // 방법 2: 토큰에서 UUID 추출
+  return getUserIdFromToken();
+};

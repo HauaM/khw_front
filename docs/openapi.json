@@ -116,6 +116,40 @@
             }
           },
           {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start Date"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End Date"
+            }
+          },
+          {
             "name": "top_k",
             "in": "query",
             "required": false,
@@ -402,17 +436,73 @@
         }
       }
     },
-    "/api/v1/manuals": {
+    "/api/v1/manuals/{manual_group_id}/versions": {
       "get": {
         "tags": [
           "manuals"
         ],
-        "summary": "List manual entries",
-        "description": "List manual entries with optional status filter\n\nRFP Reference: GET /manuals\nTODO: Implement pagination and filtering",
-        "operationId": "list_manuals_api_v1_manuals_get",
+        "summary": "List manual versions",
+        "description": "FR-14: 버전 목록 조회 (단일 그룹 가정).",
+        "operationId": "list_versions_api_v1_manuals__manual_group_id__versions_get",
         "parameters": [
           {
-            "name": "status",
+            "name": "manual_group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Manual Group Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ManualVersionResponse"
+                  },
+                  "title": "Response List Versions Api V1 Manuals  Manual Group Id  Versions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals/{manual_group_id}/diff": {
+      "get": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Diff manual versions",
+        "description": "FR-14: 최신/임의 버전 간 Diff.",
+        "operationId": "diff_manual_versions_api_v1_manuals__manual_group_id__diff_get",
+        "parameters": [
+          {
+            "name": "manual_group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Manual Group Id"
+            }
+          },
+          {
+            "name": "base_version",
             "in": "query",
             "required": false,
             "schema": {
@@ -424,7 +514,137 @@
                   "type": "null"
                 }
               ],
-              "title": "Status"
+              "title": "Base Version"
+            }
+          },
+          {
+            "name": "compare_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Compare Version"
+            }
+          },
+          {
+            "name": "summarize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Summarize"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualVersionDiffResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals/drafts/{draft_id}/diff-with-active": {
+      "get": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Diff draft set with active version",
+        "description": "FR-14: 운영 버전 vs 특정 DRAFT 세트 Diff.",
+        "operationId": "diff_draft_with_active_api_v1_manuals_drafts__draft_id__diff_with_active_get",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "summarize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Summarize"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualVersionDiffResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals": {
+      "get": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "List manual entries",
+        "description": "List manual entries with optional status filter\n\nRFP Reference: GET /manuals\nTODO: Implement pagination and filtering",
+        "operationId": "list_manuals_api_v1_manuals_get",
+        "parameters": [
+          {
+            "name": "status_filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ManualStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status Filter"
             }
           },
           {
@@ -942,6 +1162,18 @@
   },
   "components": {
     "schemas": {
+      "BusinessType": {
+        "type": "string",
+        "enum": [
+          "인터넷뱅킹",
+          "모바일뱅킹",
+          "대출",
+          "예금",
+          "카드"
+        ],
+        "title": "BusinessType",
+        "description": "메뉴얼 업무구분"
+      },
       "ConsultationCreate": {
         "properties": {
           "summary": {
@@ -1199,6 +1431,32 @@
               }
             ],
             "title": "Error Code"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date",
+            "description": "조회 시작 시각 (created_at 이상)"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date",
+            "description": "조회 종료 시각 (created_at 이하)"
           }
         },
         "type": "object",
@@ -1380,6 +1638,65 @@
         ],
         "title": "ManualApproveRequest",
         "description": "FR-4: 메뉴얼 승인 요청."
+      },
+      "ManualDiffEntrySnapshot": {
+        "properties": {
+          "logical_key": {
+            "type": "string",
+            "title": "Logical Key"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keywords"
+          },
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "background": {
+            "type": "string",
+            "title": "Background"
+          },
+          "guideline": {
+            "type": "string",
+            "title": "Guideline"
+          },
+          "business_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Type"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "logical_key",
+          "keywords",
+          "topic",
+          "background",
+          "guideline"
+        ],
+        "title": "ManualDiffEntrySnapshot",
+        "description": "메뉴얼 항목 스냅샷 (Diff용)."
       },
       "ManualDraftCreateFromConsultationRequest": {
         "properties": {
@@ -1563,6 +1880,36 @@
         "title": "ManualEntryResponse",
         "description": "Schema for manual entry response"
       },
+      "ManualModifiedEntry": {
+        "properties": {
+          "logical_key": {
+            "type": "string",
+            "title": "Logical Key"
+          },
+          "before": {
+            "$ref": "#/components/schemas/ManualDiffEntrySnapshot"
+          },
+          "after": {
+            "$ref": "#/components/schemas/ManualDiffEntrySnapshot"
+          },
+          "changed_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Changed Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "logical_key",
+          "before",
+          "after",
+          "changed_fields"
+        ],
+        "title": "ManualModifiedEntry",
+        "description": "수정된 메뉴얼 항목 정보."
+      },
       "ManualReviewApproval": {
         "properties": {
           "reviewer_id": {
@@ -1723,6 +2070,17 @@
             ],
             "title": "Diff Json",
             "description": "LLM 비교 결과 JSON"
+          },
+          "business_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BusinessType"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "신규 초안(new_entry)의 업무구분 (인터넷뱅킹, 모바일뱅킹, 대출, 예금, 카드)"
           }
         },
         "type": "object",
@@ -1768,6 +2126,67 @@
         "title": "ManualStatus",
         "description": "메뉴얼 상태 Enum (FR-4 승인/반려 흐름 반영)"
       },
+      "ManualVersionDiffResponse": {
+        "properties": {
+          "base_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Version"
+          },
+          "compare_version": {
+            "type": "string",
+            "title": "Compare Version"
+          },
+          "added_entries": {
+            "items": {
+              "$ref": "#/components/schemas/ManualDiffEntrySnapshot"
+            },
+            "type": "array",
+            "title": "Added Entries"
+          },
+          "removed_entries": {
+            "items": {
+              "$ref": "#/components/schemas/ManualDiffEntrySnapshot"
+            },
+            "type": "array",
+            "title": "Removed Entries"
+          },
+          "modified_entries": {
+            "items": {
+              "$ref": "#/components/schemas/ManualModifiedEntry"
+            },
+            "type": "array",
+            "title": "Modified Entries"
+          },
+          "llm_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Llm Summary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base_version",
+          "compare_version",
+          "added_entries",
+          "removed_entries",
+          "modified_entries"
+        ],
+        "title": "ManualVersionDiffResponse",
+        "description": "버전 간 메뉴얼 Diff 결과."
+      },
       "ManualVersionInfo": {
         "properties": {
           "version": {
@@ -1787,6 +2206,63 @@
         ],
         "title": "ManualVersionInfo",
         "description": "FR-5: 전체 문서 세트 버전 정보."
+      },
+      "ManualVersionResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "changelog": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changelog"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "version",
+          "description",
+          "changelog"
+        ],
+        "title": "ManualVersionResponse",
+        "description": "Manual version response"
       },
       "TaskStatus": {
         "type": "string",

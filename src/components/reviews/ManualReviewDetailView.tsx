@@ -5,6 +5,7 @@ import { useToast } from '@/components/common/Toast';
 import Modal from '@/components/common/Modal';
 import { useApproveManualReview } from '@/hooks/useApproveManualReview';
 import { useRejectManualReview } from '@/hooks/useRejectManualReview';
+import { getCurrentReviewerId } from '@/lib/api/auth';
 
 interface ManualReviewDetailViewProps {
   detail: ManualReviewDetail;
@@ -65,7 +66,15 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
   };
 
   const handleApprove = async () => {
-    await mutateApprove(detail.task_id);
+    // 현재 로그인한 사용자의 ID를 JWT 토큰에서 추출
+    const reviewerId = getCurrentReviewerId();
+
+    if (!reviewerId) {
+      showToast('사용자 정보를 가져올 수 없습니다. 다시 로그인해주세요.', 'error');
+      return;
+    }
+
+    await mutateApprove(detail.task_id, reviewerId);
   };
 
   const handleReject = async () => {

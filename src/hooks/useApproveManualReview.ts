@@ -14,7 +14,7 @@ interface UseApproveManualReviewOptions {
 export interface UseApproveManualReviewResult {
   isLoading: boolean;
   error: Error | null;
-  mutate: (taskId: string, reviewerId?: string, reviewNotes?: string) => Promise<void>;
+  mutate: (taskId: string, reviewerId: string, reviewNotes?: string) => Promise<void>;
 }
 
 /**
@@ -36,9 +36,16 @@ export function useApproveManualReview(
 
   const mutate = async (
     taskId: string,
-    reviewerId: string = 'current-user-id', // TODO: 실제 사용자 ID로 교체
+    reviewerId: string,
     reviewNotes?: string
   ) => {
+    if (!reviewerId || reviewerId.trim() === '') {
+      const error = new Error('Reviewer ID is required');
+      setError(error);
+      options?.onError?.(error);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);

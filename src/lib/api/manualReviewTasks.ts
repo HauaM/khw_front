@@ -49,11 +49,12 @@ export async function fetchManualReviewTasks(
 ): Promise<ManualReviewTasksResponse> {
   try {
     // OpenAPI: GET /api/v1/manual-review/tasks
+    // status는 optional(str | None)이므로, undefined일 때는 자동으로 제외됨
     const response = await axiosClient.get<BackendManualReviewTask[]>(
       '/api/v1/manual-review/tasks',
       {
         params: {
-          status: params?.status,
+          status: params?.status || undefined,
           limit: params?.limit || 100,
         },
       }
@@ -81,13 +82,13 @@ export async function fetchManualReviewTasks(
 export async function fetchManualEntry(entryId: string): Promise<ManualEntry | null> {
   try {
     // OpenAPI: GET /api/v1/manuals (목록에서 필터링)
-    // 주의: 단일 엔트리 조회 엔드포인트가 명시되지 않았으므로,
-    // 목록에서 필터링하거나 백엔드에서 /api/v1/manuals/{manual_id} 추가 필요
+    // status_filter는 optional(ManualStatus | None)이므로 undefined일 때 자동으로 제외됨
     const response = await axiosClient.get<any[]>(
       '/api/v1/manuals',
       {
         params: {
           limit: 100,
+          status_filter: undefined, // status_filter는 backend에서 renamed (status -> status_filter)
         },
       }
     );
@@ -135,6 +136,7 @@ export async function fetchManualReviewDetail(
       {
         params: {
           limit: 100,
+          status: undefined, // status는 optional이므로 명시적으로 제외
         },
       }
     );
