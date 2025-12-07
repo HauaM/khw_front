@@ -94,18 +94,33 @@ export const getUserIdFromToken = (): string | null => {
 /**
  * 현재 로그인한 사용자의 검토자 ID (reviewer_id)를 가져옵니다
  * 다음 순서로 시도합니다:
- * 1. localStorage의 user_info에서 id 찾기
+ * 1. localStorage의 user_info에서 employee_id 찾기 (문자열)
  * 2. 저장된 토큰에서 user UUID 추출
  *
- * @returns 사용자 ID (UUID 형식) 또는 null
+ * @returns 사용자 ID (문자열) 또는 null
  */
 export const getCurrentReviewerId = (): string | null => {
-  // 방법 1: 저장된 user_info에서 가져오기
+  // 방법 1: 저장된 user_info에서 employee_id 가져오기 (UUID 대체로 사용)
   const user = getStoredUser();
-  if (user && 'id' in user) {
-    return (user as any).id;
+  if (user && user.employee_id) {
+    return user.employee_id;
   }
 
-  // 방법 2: 토큰에서 UUID 추출
-  return getUserIdFromToken();
+  // 방법 2: 토큰에서 employee_id 추출
+  try {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1]));
+        if (payload.employee_id) {
+          return payload.employee_id;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to extract employee_id from token:', error);
+  }
+
+  return null;
 };

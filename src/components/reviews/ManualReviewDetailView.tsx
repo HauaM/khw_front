@@ -78,11 +78,15 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
   };
 
   const handleReject = async () => {
-    if (!rejectReason.trim()) {
-      showToast('반려 사유를 입력해주세요.', 'error');
+    // 현재 로그인한 사용자의 ID를 JWT 토큰에서 추출
+    const reviewerId = getCurrentReviewerId();
+
+    if (!reviewerId) {
+      showToast('사용자 정보를 가져올 수 없습니다. 다시 로그인해주세요.', 'error');
       return;
     }
-    await mutateReject(detail.task_id, rejectReason);
+
+    await mutateReject(detail.task_id, rejectReason, reviewerId);
   };
 
   const formatDate = (dateString?: string): string => {
@@ -423,7 +427,7 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
         onConfirm={handleReject}
         cancelText="취소"
         confirmText={isRejecting ? '처리중...' : '반려 확정'}
-        disableConfirm={isSubmitting || !rejectReason.trim()}
+        disableConfirm={isSubmitting || rejectReason.trim().length < 10}
         disableCancel={isSubmitting}
       >
         <div className="space-y-3">
@@ -443,9 +447,18 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
 - 최신 앱 버전 정보를 확인 후 수정이 필요합니다."
             className="min-h-[160px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal leading-relaxed text-gray-900 transition placeholder-gray-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-gray-100 disabled:text-gray-500"
           />
-          <p className="m-0 text-xs text-gray-600">
-            작성자에게 반려 사유가 전달되며, 수정 후 재검토를 요청할 수 있습니다.
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="m-0 text-xs text-gray-600">
+              작성자에게 반려 사유가 전달되며, 수정 후 재검토를 요청할 수 있습니다.
+            </p>
+            <span
+              className={`text-xs font-medium ${
+                rejectReason.trim().length >= 10 ? 'text-green-600' : 'text-gray-500'
+              }`}
+            >
+              {rejectReason.trim().length}/10
+            </span>
+          </div>
         </div>
       </Modal>
     </>

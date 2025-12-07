@@ -14,7 +14,7 @@ interface UseRejectManualReviewOptions {
 export interface UseRejectManualReviewResult {
   isLoading: boolean;
   error: Error | null;
-  mutate: (taskId: string, reason: string) => Promise<void>;
+  mutate: (taskId: string, reason: string, reviewerId?: string) => Promise<void>;
 }
 
 /**
@@ -34,12 +34,19 @@ export function useRejectManualReview(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const mutate = async (taskId: string, reason: string) => {
+  const mutate = async (taskId: string, reason: string, reviewerId?: string) => {
+    if (!reason || reason.trim().length < 10) {
+      const error = new Error('반려 사유는 최소 10글자 이상이어야 합니다');
+      setError(error);
+      options?.onError?.(error);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
 
-      await rejectManualReviewTask(taskId, reason);
+      await rejectManualReviewTask(taskId, reason, reviewerId);
 
       options?.onSuccess?.();
     } catch (err) {

@@ -215,12 +215,14 @@ export async function approveManualReviewTask(
 /**
  * 메뉴얼 검토 Task 반려
  * @param taskId Task ID
- * @param reviewNotes 반려 사유
+ * @param reviewNotes 반려 사유 (최소 10글자)
+ * @param reviewerId 검토자 ID (옵션)
  * @returns 반려된 Task 정보
  */
 export async function rejectManualReviewTask(
   taskId: string,
-  reviewNotes: string
+  reviewNotes: string,
+  reviewerId?: string
 ): Promise<BackendManualReviewTask> {
   try {
     // OpenAPI: POST /api/v1/manual-review/tasks/{task_id}/reject
@@ -228,6 +230,7 @@ export async function rejectManualReviewTask(
       `/api/v1/manual-review/tasks/${taskId}/reject`,
       {
         review_notes: reviewNotes,
+        reviewer_id: reviewerId,
       }
     );
 
