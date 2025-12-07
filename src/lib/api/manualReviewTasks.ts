@@ -207,8 +207,6 @@ export async function approveManualReviewTask(
       requestBody.review_notes = reviewNotes;
     }
 
-    console.log('Approve request body:', requestBody);
-
     const response = await axiosClient.post<BackendManualReviewTask>(
       `/api/v1/manual-review/tasks/${taskId}/approve`,
       requestBody

@@ -103,9 +103,7 @@ export const getUserIdFromToken = (): string | null => {
 export const getCurrentReviewerId = (): string | null => {
   // 방법 1: 저장된 user_info에서 employee_id 가져오기 (UUID 대체로 사용)
   const user = getStoredUser();
-  console.log('getStoredUser():', user);
   if (user && user.employee_id) {
-    console.log('Found employee_id from user_info:', user.employee_id);
     return user.employee_id;
   }
 
@@ -116,9 +114,7 @@ export const getCurrentReviewerId = (): string | null => {
       const parts = token.split('.');
       if (parts.length === 3) {
         const payload = JSON.parse(atob(parts[1]));
-        console.log('Token payload:', payload);
         if (payload.employee_id) {
-          console.log('Found employee_id from token:', payload.employee_id);
           return payload.employee_id;
         }
       }
@@ -127,6 +123,5 @@ export const getCurrentReviewerId = (): string | null => {
     console.error('Failed to extract employee_id from token:', error);
   }
 
-  console.log('No reviewer ID found');
   return null;
 };

@@ -1,0 +1,173 @@
+<!doctype html> <html lang="ko"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>메뉴얼 상세 조회 - KWH 지식관리시스템</title> <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet"> <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script> <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script> <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script> <스타일> body { box-sizing: border-box; margin: 0; padding: 0; font-family: "Noto Sans KR", "Apple SD Gothic Neo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; line-height: 1.5; color: #212121; background-color: #FAFAFA; height: 100%; width: 100%; } *, *::before, *::after { box-sizing: inherit; } html { height: 100%; width: 100%; } /* 앱 헤더 */ .app-header { height: 60px; background-color: #FFFFFF; border-bottom: 1px solid #E0E0E0; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; width: 100%; } .app-header-left h1 { margin: 0; font-size: 18px; font-weight: 700; color: #005BAC; } .app-header-left p { margin: 0; font-size: 12px; color: #6E6E6E; } .app-header-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #424242; } .app-header-divider { color: #BDBDBD; } .role-badge { display: inline-block; background-color: #E8F1FB; color: #1A73E8; border-radius: 999px; font-size: 11px; font-weight: 600; 패딩: 2px 8px; } .btn-logout { 배경색: #FFFFFF; 색상: #005BAC; 테두리: 1px 단색 #005BAC; 테두리 반경: 4px; 패딩: 4px 12px; 글꼴 크기: 13px; 글꼴 두께: 600; 커서: 포인터; 전환: 배경색 0.2초; } .btn-logout:hover { 배경색: #E8F1FB; } /* 레이아웃 컨테이너 */ .app-container { 디스플레이: flex; 높이: calc(100% - 60px); 너비: 100%; } /* 사이드바 */ .app-sidebar { 너비: 240px; 배경색: #F5F7FB; 테두리-오른쪽: 1px 단색 #E0E0E0; 오버플로-y: 자동; 패딩: 16px 0; } .menu-section { margin-bottom: 24px; } .menu-section-title { font-size: 11px; font-weight: 600; color: #6E6E6E; text-transform: uppercase; padding:8px 16px; margin-bottom: 4px; } .menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 14px; color: #424242; cursor: pointer; transition: all 0.2s; text-decoration: none; border-left: 3px solid transparent; } .menu-item:hover { background-color: #E8F1FB; color: #005BAC; } .menu-item.active { background-color: #D2E4FA; color: #005BAC; border-left-color: #005BAC; font-weight: 600; } .menu-icon { width: 18px; height: 18px; flex-shrink: 0; } /* 메인 콘텐츠 */ .main-content { flex: 1; overflow-y: auto; padding: 24px; width: 100%; } /* 페이지 헤더 */ .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; } .page-header-left { flex: 1; } .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6E6E6E; margin-bottom: 12px; } .breadcrumb-item { display: flex; align-items: center; gap: 8px; } .breadcrumb-separator { color: #BDBDBD; } .breadcrumb-link { color: #005BAC; 텍스트 장식: 없음; 커서: 포인터; 전환: 색상 0.2초; } .breadcrumb-link:hover { 색상: #00437F; 텍스트 장식: 밑줄; } .page-title-row { 디스플레이: flex; 정렬-항목: 가운데; 간격: 12px; 여백-아래: 8px; } .page-title { 글꼴 크기: 24px; 글꼴-가중치: 700; 색상: #212121; 여백: 0; 줄 높이: 1.4; } .manual-id-badge { 디스플레이: 인라인-플렉스; 정렬-항목: 가운데; 패딩: 4px 10px; 배경색: #F5F5F5; 색상: #6E6E6E; 테두리-반경: 4px; 글꼴 크기: 12px; 글꼴-가중치: 600; 글꼴 패밀리: 'Courier New', 모노스페이스; } .page-meta { display: flex; align-items: center; gap: 16px; font-size: 13px; color: #6E6E6E; } .page-meta-item { display: flex; align-items: center; gap: 6px; } .page-meta-icon { width: 16px; height: 16px; } .page-header-actions { display: flex; gap: 12px; } .btn-secondary { min-height: 40px; padding: 0 20px; background-color: #FFFFFF; color: #424242; border: 1px solid #BDBDBD; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; 간격: 6px; } .btn-secondary:hover { 배경색: #F5F5F5; 테두리색: #757575; } .btn-primary { 최소 높이: 40px; 패딩: 0 20px; 배경색: #005BAC; 색상:#FFFFFF; 테두리: 없음; 테두리 반경: 6px; 글꼴 크기: 14px; 글꼴 가중치: 600; 커서: 포인터; 전환: 배경색 0.2초; 표시: 인라인 플렉스; 정렬 항목: 중앙; 간격: 6px; } .btn-primary:hover { 배경색: #00437F; } .btn-icon { 너비: 16px; 높이: 16px; } /* 상태 배지 */ .status-badges { 표시: flex; 정렬 항목: 중앙; 간격: 8px; } .status-badge { 표시: 인라인 플렉스; 정렬 항목: 중앙; 패딩: 4px 12px; 테두리 반경: 999px; 글꼴 크기: 12px; 글꼴 가중치: 600; } .status-badge.approved { 배경색: #E8F5E9; 색상: #2E7D32; } .status-badge.deprecated { 배경색: #FFEBEE; 색상: #C62828; } .version-badge { 디스플레이: 인라인-플렉스; 정렬-항목: 중앙; 패딩: 4px 12px; 배경색: #E8F1FB; 색상: #005BAC; 테두리-반경: 999px; 글꼴 크기: 12px; 글꼴-두께: 600; } /* 경고 상자 */ .alert-box { 배경색: #FFF3E0; 테두리-왼쪽: 4px 단색 #F57C00; 테두리-반경: 6px; 패딩: 16px 20px; 여백-아래쪽: 24px; 디스플레이: 플렉스; 정렬-항목: flex-start; 간격: 12px; } .alert-box.warning { 배경색: #FFEBEE; 테두리 왼쪽색: #C62828; } .alert-아이콘 { 너비: 24px; 높이: 24px; flex-shrink: 0; 색상: #F57C00; } .alert-box.warning .alert-아이콘 { 색상: #C62828; } .alert-content { flex: 1; } .alert-title { 글꼴 크기: 14px; 글꼴 두께: 700; 색상: #E65100; 여백: 0 0 4px 0; } .alert-box.warning .alert-title { 색상: #B71C1C; } .alert-text { 글꼴 크기: 13px; 색상: #6E6E6E; 여백: 0; line-height: 1.6; } /* 콘텐츠 카드 */ .content-card { background-color: #FFFFFF; border-radius: 8px; box-shadow: 0px 1px 3px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 24px; } .card-section { margin-bottom: 32px; } .card-section:last-child { margin-bottom: 0; } .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #E0E0E0; } .section-icon { width: 20px; height: 20px; color: #005BAC; } .section-title { font-size: 16px; font-weight: 700; color: #212121; margin: 0; } /* 키워드 */ .keywords-container { display: flex; flex-wrap: wrap; gap: 8px; } .keyword-tag { display: inline-flex; align-items: center; padding: 6px 12px; background-color: #E8F1FB; color: #005BAC; border-radius: 6px; font-size:13px; font-weight: 600; } /* 배경 텍스트 */ .background-text { font-size: 14px; line-height: 1.8; color: #424242; margin: 0; white-space: pre-wrap; } /* 가이드라인 목록 */ .guidelines-list { list-style: none; padding: 0; margin: 0; } .guideline-item { display: flex; gap: 12px; padding: 16px; background-color: #F5F7FB; border-radius: 8px; margin-bottom: 12px; transition: background-color 0.2s; } .guideline-item:hover { background-color: #E8F1FB; } .guideline-number { display: flex; align-items: center; justify-content: center; min-width: 28px; 높이: 28px; 배경색: #005BAC; 색상: #FFFFFF; 테두리 반경: 50%; 글꼴 크기: 13px; 글꼴 무게: 700; flex-shrink: 0; } .guideline-content { flex: 1; 패딩 상단: 4px; } .guideline-title { 글꼴 크기: 14px; 글꼴 무게: 600; 색상: #212121; 여백: 0 0 6px 0; } .guideline-description { 글꼴 크기: 13px; 줄 높이: 1.6; 색상: #6E6E6E; 여백: 0; } /* 로딩 상태 */ .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; 패딩: 80px 20px; } .loading-spinner { 너비: 48px; 높이: 48px; 테두리: 4px 단색 #E0E0E0; 테두리-상단-색상: #005BAC; 테두리-반경: 50%; 애니메이션: 회전 0.8초 선형 무한; 여백-하단: 16px; } @keyframes spin { ~로 { 변형: 회전(360도); } } .loading-text { 글꼴-크기: 14px; 색상: #6E6E6E; } /* 토스트 */ .toast { 위치: 고정; 상단: 80px; 오른쪽: 24px; 배경색: #FFFFFF; 테두리-반경: 6px; 상자-그림자: 0px 4px 12px rgba(0,0,0,0.15); 패딩: 12px 16px; 표시: 없음; 정렬-항목: 중앙; 간격: 8px; z-index: 2000; min-width: 280px; border-left: 4px solid; animation: slideIn 0.3s ease-out; } .toast.show { display: flex; } .toast.success { border-left-color: #2E7D32; } .toast.info { border-left-color: #1976D2; } .toast-icon { width: 20px; height: 20px; flex-shrink: 0; } .toast-message { flex: 1; font-size: 14px; color: #212121; } @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } } /* 반응형 */ @media (최대 너비: 768px) { .page-header { flex-direction: column; gap: 16px; } .page-header-actions { 너비: 100%; } .btn-secondary, .btn-primary { flex: 1; } .가이드라인-항목 { flex-direction: column; gap: 8px; } } </style> <style>@view-transition { 탐색: 자동; }</style> <script src="/_sdk/data_sdk.js" type="text/javascript"></script> <script src="/_sdk/element_sdk.js" type="text/javascript"></script> <script src="https://cdn.tailwindcss.com" type="text/javascript"></script> </head> <body><!-- 앱 헤더 --> <header class="app-header"> <div class="app-header-left"> <h1>KWH 지식관리시스템</h1> <p>광주은행 헬프데스크 위키</p> </div> <div class="app-header-right"><span>디지털전략부</span> <span class="app-header-divider">·</span> <span>홍길동</span> <span class="app-header-divider">·</span> <span class="role-badge">상담사</span> <button class="btn-logout">로그아웃</button> </div> </header><!-- 앱 컨테이너 --> <div class="app-container"><!-- 사이드바 --> <aside class="app-sidebar"> <nav> <div class="menu-section"> <div class="menu-section-title"> 메인 </div><a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect> <rect x="14" y="3" width="7" height="7"></rect> <rect x="14" y="14" width="7" height="7"></rect> <rect x="3" y="14" width="7" height="7"></rect> </svg> 대시보드 </a> </div> <div class="menu-section"> <div class="menu-section-title"> 상담 관리 </div><a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path> <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path> </svg> 상담 등록 </a> <a href="#" class="menu-item"> <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle> <path d="m21 21-4.35-4.35"></path>
+       </svg> 상담 검색 </a>
+     </div>
+     <div class="menu-section">
+      <div class="menu-section-title">
+       메뉴얼 관리
+      </div><a href="#" class="menu-item active">
+       <svg class="menu-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path> <polyline points="14 2 14 8 20 8"></polyline>
+       </svg> 메뉴얼 상세 </a>
+     </div>
+    </nav>
+   </aside><!-- Main Content -->
+   <main class="main-content">
+    <div id="root"></div>
+   </main>
+  </div><!-- Toast -->
+  <div class="toast" id="toast">
+   <svg class="toast-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="toastIcon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path> <polyline points="22 4 12 14.01 9 11.01"></polyline>
+   </svg><span class="toast-message" id="toastMessage"></span>
+  </div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Mock manual data
+    const mockManualData = {
+      manual_id: 'MAN-2024-001',
+      topic: '인터넷뱅킹 로그인 오류 처리 가이드',
+      keywords: ['인터넷뱅킹', '로그인오류', 'E001', '비밀번호', '계정잠김', '보안'],
+      background: `고객이 인터넷뱅킹 로그인 시 오류가 발생하는 경우는 다양한 원인이 있을 수 있습니다. 
+
+가장 일반적인 경우는 비밀번호 5회 이상 오입력으로 인한 계정 잠김 상태이며, 이 외에도 브라우저 호환성 문제, 보안프로그램 미설치, 인증서 만료 등의 원인이 있을 수 있습니다.
+
+본 가이드는 인터넷뱅킹 로그인 오류 발생 시 상담사가 고객에게 안내해야 할 표준 조치사항을 정리한 문서입니다. 각 단계별로 순차적으로 진행하며, 문제가 해결되지 않을 경우 상위 담당자에게 에스컬레이션하시기 바랍니다.`,
+      guidelines: [
+        {
+          title: '계정 상태 확인',
+          description: '고객의 아이디를 확인하여 계정 잠김 여부를 확인합니다. 비밀번호 5회 이상 오입력 시 자동으로 계정이 잠기며, 본인 확인 후 즉시 해제 가능합니다.'
+        },
+        {
+          title: '브라우저 및 보안프로그램 점검',
+          description: '고객이 사용 중인 브라우저 버전을 확인하고, 보안프로그램(키보드보안, 방화벽)이 정상적으로 설치되어 있는지 확인합니다. 필요 시 재설치를 안내합니다.'
+        },
+        {
+          title: '인증서 유효성 확인',
+          description: '공동인증서 또는 간편인증 수단의 유효기간을 확인합니다. 만료된 경우 재발급 절차를 안내하며, 인증서 위치(하드디스크/이동식디스크)도 함께 확인합니다.'
+        },
+        {
+          title: '캐시 및 쿠키 삭제 안내',
+          description: '브라우저의 캐시와 쿠키를 삭제하도록 안내합니다. 이는 많은 로그인 오류의 원인이 되며, 삭제 후 브라우저를 재시작하여 다시 시도하도록 합니다.'
+        },
+        {
+          title: '임시 비밀번호 발급',
+          description: '위 조치사항으로 해결되지 않을 경우, 본인 확인 후 임시 비밀번호를 발급합니다. 고객에게 SMS 또는 ARS를 통해 전달되며, 최초 로그인 시 비밀번호 변경이 필요함을 안내합니다.'
+        },
+        {
+          title: '에스컬레이션',
+          description:'모든 조치사항을 시도했음에도 문제가 해결되지 않을 경우, 시스템 장애 가능성이 있으므로 2차 지원팀으로 에스컬레이션합니다. 티켓 번호와 함께 상세 내역을 전달합니다.'
+        }
+      ],
+      version: 'v2.1',
+      status: 'Approved', // 'Approved' or 'Deprecated'
+      created_at: '2024-01-10T09:00:00Z',
+      updated_at: '2024-01-15T14:30:00Z',
+      author: '김상담',
+      department: '디지털전략부'
+    };
+
+    const mockDeprecatedManualData = {
+      ...mockManualData,
+      manual_id: 'MAN-2023-087',
+      topic: '구버전 ActiveX 기반 보안프로그램 설치 가이드',
+      status: 'Deprecated',
+      version: 'v1.2'
+    };
+
+    function ManualDetailScreen() {
+      const [manualData, setManualData] = useState(null);
+      const [isLoading, setIsLoading] = useState(true);
+
+      useEffect(() => {
+        loadManualData();
+      }, []);
+
+      const loadManualData = async () => {
+        setIsLoading(true);
+        
+        try {
+          // TODO: API Connect - GET /api/manuals/:id
+          // const response = await fetch(`/api/manuals/${manualId}`);
+          // const data = await response.json();
+          
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 800));
+          
+          // Use approved manual by default (change to mockDeprecatedManualData to test deprecated state)
+          setManualData(mockManualData);
+        } catch (error) {
+          console.error('Failed to load manual:', error);
+          showToast('메뉴얼을 불러오는데 실패했습니다.', 'error');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      const handleEdit = () => {
+        console.log('Navigate to edit page:', manualData.manual_id);
+        showToast('수정 페이지로 이동합니다.', 'info');
+        // TODO: Navigate to edit page
+        // window.location.href = `/manuals/${manualData.manual_id}/edit`;
+      };
+
+      const handleVersionCompare = () => {
+        console.log('Open version comparison:', manualData.manual_id);
+        showToast('버전 비교 화면을 준비중입니다.', 'info');
+        // TODO: Open version comparison modal or page
+      };
+
+      const handleBackToList = () => {
+        console.log('Navigate back to manual list');
+        // TODO: Navigate back to list
+        // window.location.href = '/manuals';
+      };
+
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${분}`; }; if (isLoading) { return ( <div className="loading-container"> <div className="loading-spinner"></div> <p className="loading-text">메뉴얼을 불러오는 중입니다...</p> </div> ); } if (!manualData) { return ( <div className="loading-container"> <p className="loading-text">메뉴얼을 찾을 수 없습니다.</p> </div> ); } return ( <> {/* 페이지 헤더 */} <div className="page-header"> <div className="page-header-left"> <nav className="breadcrumb"> <div className="breadcrumb-item"> <a className="breadcrumb-link" onClick={handleBackToList}>메뉴얼 관리</a> </div> <span className="breadcrumb-separator">›</span> <div className="breadcrumb-item">메뉴얼 상세</div> </nav> <div className="page-title-row"> <h2 className="page-title">{manualData.topic}</h2> <span className="manual-id-badge">{manualData.manual_id}</span> </div> <div className="page-meta"> <div className="status-badges"> <span className={`status-badge ${manualData.status.toLowerCase()}`}> {manualData.status === '승인됨' ? '승인됨' : '사용 중단'} </span> <span className="version-badge">{manualData.version}</span> </div> <div className="page-meta-item"> <svg className="page-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path> <circle cx="12" cy="7" r="4"></circle> </svg> <span>{manualData.author} · {manualData.부서</span> </div> <div className="page-meta-item"> <svg className="page-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect> <line x1="16" y1="2" x2="16" y2="6"></line> <line x1="8" y1="2" x2="8" y2="6"></line> <line x1="3" y1="10" x2="21" y2="10"></line> </svg> <span>수정일: {formatDate(manualData.updated_at)</span> </div> </div> </div> <div className="page-header-actions"> <button className="btn-secondary" onClick={handleVersionCompare}> <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <polyline points="17 1 21 5 17 9"></polyline> <path d="M3 11V9a4 4 0 0 1 4-4h14"></path> <polyline points="7 23 3 19 7 15"></polyline> <path d="M21 13v2a4 4 0 0 1-4 4H3"></path> </svg> 버전 비교 </button> <button className="btn-primary" onClick={handleEdit}> <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <path d="M12 20h9"></path> <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path> </svg> 수정하기 </button> </div> </div> {/* 더 이상 사용되지 않음 경고 */} {manualData.status === '더 이상 사용되지 않음' && ( <div className="alert-box 경고"> <svg className="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path> <line x1="12" y1="9" x2="12" y2="13"></line> <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <div className="alert-content">
+                <h4 className="alert-title">⚠️ 이 메뉴얼은 사용 중단되었습니다</h4>
+                <p className="alert-text">
+                  이 문서는 더 이상 유효하지 않으며 참고용으로만 보관되고 있습니다. 
+                  최신 메뉴얼을 확인하시거나 담당자에게 문의하시기 바랍니다.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Content Card */}
+          <div className="content-card">
+            {/* Keywords Section */}
+            <div className="card-section">
+              <div className="section-header">
+                <svg className="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+                <h3 className="section-title">키워드</h3>
+              </div>
+              <div className="keywords-container">
+                {manualData.keywords.map((keyword, index) => (
+                  <span key={index} className="keyword-tag">{keyword}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Background Section */}
+            <div className="card-section">
+              <div className="section-header">
+                <svg className="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <h3 className="section-title">배경 정보</h3>
+              </div>
+              <p className="background-text">{manualData.배경</p> </div> {/* 가이드라인 섹션 */} <div className="card-section"> <div className="section-header"> <svg className="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <polyline points="9 11 12 14 22 4"></polyline> <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path> </svg> <h3 className="section-title"> 조치사항</h3> </div> <ul className="guidelines-list"> {manualData.guidelines.map((guideline, index) => ( <li key={index} className="guideline-item"> <div className="guideline-number">{index + 1}</div> <div className="guideline-content"> <h4 className="guideline-title">{guideline.title}</h4> <p className="guideline-description">{guideline.description}</p> </div> </li> ))} </ul> </div> </div> </> ); } // 토스트 유틸리티 함수 showToast(message, type = 'success') { const toast = document.getElementById('toast'); const toastMessage = document.getElementById('toastMessage'); toastMessage.textContent = message; toast.className = `toast ${type} show`; setTimeout(() => { toast.classList.remove('show'); }, 3000); } // 앱 렌더링 const root = ReactDOM.createRoot(document.getElementById('root')); root.render(<ManualDetailScreen />); </script> <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a9aecc7e0b6c6fe',t:'MTc2NTAxNTEwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('로딩 중'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'로딩 중'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body> </html>

@@ -352,64 +352,66 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
         )}
       </div>
 
-      {/* Action Bar */}
-      <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-4 border-t border-gray-200 bg-white px-6 py-4 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
-        <div className="text-sm text-gray-600">
-          검토를 완료하고 승인 또는 반려를 선택해주세요
+      {/* Action Bar - 대기중, 검토중 상태일 때만 표시 */}
+      {(detail.status === 'TODO' || detail.status === 'IN_PROGRESS') && (
+        <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-4 border-t border-gray-200 bg-white px-6 py-4 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+          <div className="text-sm text-gray-600">
+            검토를 완료하고 승인 또는 반려를 선택해주세요
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleBackToList}
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-2 rounded-md border border-gray-400 bg-white px-6 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              목록으로
+            </button>
+            <button
+              onClick={() => setShowRejectModal(true)}
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-2 rounded-md border border-red-700 bg-white px-6 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+              반려
+            </button>
+            <button
+              onClick={handleApprove}
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-2 rounded-md bg-blue-700 px-6 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              {isApproving ? '처리중...' : '승인'}
+            </button>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={handleBackToList}
-            disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-md border border-gray-400 bg-white px-6 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
-          >
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-            목록으로
-          </button>
-          <button
-            onClick={() => setShowRejectModal(true)}
-            disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-md border border-red-700 bg-white px-6 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
-          >
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="15" y1="9" x2="9" y2="15" />
-              <line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-            반려
-          </button>
-          <button
-            onClick={handleApprove}
-            disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-md bg-blue-700 px-6 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-gray-400"
-          >
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            {isApproving ? '처리중...' : '승인'}
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Reject Modal */}
       <Modal
