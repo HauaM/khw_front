@@ -256,35 +256,48 @@ export const updateManual = (manualId: string, payload: any) =>
   api.put<ManualDetail>(`/api/v1/manuals/${manualId}`, payload);
 
 /**
+ * OpenAPI ManualVersionResponse를 프론트엔드 ManualVersionInfo로 변환
+ * @param apiResponse - API 응답 (version, label, date)
+ * @returns ManualVersionInfo (value, label, date)
+ */
+const convertManualVersionResponse = (apiResponse: any): ManualVersionInfo => {
+  return {
+    value: apiResponse.version, // OpenAPI: version → Frontend: value
+    label: apiResponse.label,
+    date: apiResponse.date,
+  };
+};
+
+/**
  * 메뉴얼 버전 목록 조회
  * OpenAPI: GET /api/v1/manuals/{manual_group_id}/versions
  *
- * 응답 예시:
+ * API 응답 형식 (OpenAPI):
+ * [
+ *   {
+ *     "version": "v2.1",
+ *     "label": "v2.1 (현재 버전)",
+ *     "date": "2024-01-15"
+ *   }
+ * ]
+ *
+ * 프론트엔드 변환 후:
  * [
  *   {
  *     "value": "v2.1",
  *     "label": "v2.1 (현재 버전)",
  *     "date": "2024-01-15"
- *   },
- *   {
- *     "value": "v2.0",
- *     "label": "v2.0",
- *     "date": "2024-01-01"
  *   }
  * ]
  *
- * 백엔드 구현 필수 사항:
- * 1. OpenAPI의 ManualVersionResponse를 ManualVersionInfo로 변환
- *    - version → value
- *    - approved_at → date (YYYY-MM-DD 형식)
- *    - label 생성 (버전 + 현재 버전 여부)
- * 2. 버전을 최신순으로 정렬하여 반환
- *
  * @param manualId - 메뉴얼 ID (manual_group_id와 동일)
- * @returns 버전 정보 배열 (최신부터 정렬)
+ * @returns 버전 정보 배열 (version → value 변환됨, 최신부터 정렬)
  */
-export const getManualVersions = (manualId: string) =>
-  api.get<ManualVersionInfo[]>(`/api/v1/manuals/${manualId}/versions`);
+export const getManualVersions = async (manualId: string): Promise<ManualVersionInfo[]> => {
+  const response = await api.get<any[]>(`/api/v1/manuals/${manualId}/versions`);
+  // OpenAPI 응답의 version 필드를 프론트엔드의 value 필드로 변환
+  return response.map(convertManualVersionResponse);
+};
 
 /**
  * 메뉴얼 특정 버전 상세 조회
