@@ -147,7 +147,7 @@ const ManualVersionCompareView: React.FC<ManualVersionCompareViewProps> = ({
               className="min-h-11 border-2 border-orange-500 rounded-md px-3 text-sm font-semibold text-gray-900 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-200"
             >
               {versions.map((v) => (
-                <option key={v.value} value={v.value} disabled={v.value === newVersion}>
+                <option key={`old-${v.value}`} value={v.value} disabled={v.value === newVersion}>
                   {v.label} ({v.date})
                 </option>
               ))}
@@ -175,7 +175,7 @@ const ManualVersionCompareView: React.FC<ManualVersionCompareViewProps> = ({
               className="min-h-11 border-2 border-green-700 rounded-md px-3 text-sm font-semibold text-gray-900 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-200"
             >
               {versions.map((v) => (
-                <option key={v.value} value={v.value} disabled={v.value === oldVersion}>
+                <option key={`new-${v.value}`} value={v.value} disabled={v.value === oldVersion}>
                   {v.label} ({v.date})
                 </option>
               ))}
@@ -234,7 +234,7 @@ const ManualVersionCompareView: React.FC<ManualVersionCompareViewProps> = ({
                 <div className="flex flex-wrap gap-2">
                   {oldData.keywords.map((keyword, idx) => (
                     <span
-                      key={idx}
+                      key={`old-keyword-${keyword}-${idx}`}
                       className={`inline-flex items-center px-3 py-1 rounded text-xs font-semibold ${getKeywordClass(
                         getKeywordStatus(keyword, 'old'),
                       )}`}
@@ -261,7 +261,7 @@ const ManualVersionCompareView: React.FC<ManualVersionCompareViewProps> = ({
                     const status = getGuidelineStatus(guideline, 'old');
                     return (
                       <li
-                        key={idx}
+                        key={`old-guideline-${guideline.title}-${idx}`}
                         className={`flex gap-3 p-3 rounded-md ${getGuidelineClass(status)}`}
                       >
                         <div className="flex items-center justify-center min-w-6 h-6 bg-blue-600 text-white rounded-full text-xs font-bold flex-shrink-0">
@@ -326,7 +326,7 @@ const ManualVersionCompareView: React.FC<ManualVersionCompareViewProps> = ({
                 <div className="flex flex-wrap gap-2">
                   {newData.keywords.map((keyword, idx) => (
                     <span
-                      key={idx}
+                      key={`new-keyword-${keyword}-${idx}`}
                       className={`inline-flex items-center px-3 py-1 rounded text-xs font-semibold ${getKeywordClass(
                         getKeywordStatus(keyword, 'new'),
                       )}`}
@@ -353,7 +353,7 @@ const ManualVersionCompareView: React.FC<ManualVersionCompareViewProps> = ({
                     const status = getGuidelineStatus(guideline, 'new');
                     return (
                       <li
-                        key={idx}
+                        key={`new-guideline-${guideline.title}-${idx}`}
                         className={`flex gap-3 p-3 rounded-md ${getGuidelineClass(status)}`}
                       >
                         <div className="flex items-center justify-center min-w-6 h-6 bg-blue-600 text-white rounded-full text-xs font-bold flex-shrink-0">
