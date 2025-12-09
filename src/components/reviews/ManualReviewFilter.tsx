@@ -41,6 +41,13 @@ const ManualReviewFilter: React.FC<ManualReviewFilterProps> = ({
   const { showToast } = useToast();
   const { options: businessTypeOptions, isLoading: businessTypeLoading } = useCommonCodes('BUSINESS_TYPE');
 
+  // 선택된 label 계산
+  const selectedBusinessTypeLabel = useMemo(() => {
+    if (filters.businessType === '전체' || !filters.businessType) return '';
+    const selected = businessTypeOptions.find(opt => opt.code === filters.businessType);
+    return selected?.label || '';
+  }, [businessTypeOptions, filters.businessType]);
+
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChangeFilters({
       ...filters,
@@ -141,6 +148,7 @@ const ManualReviewFilter: React.FC<ManualReviewFilterProps> = ({
               ...businessTypeOptions,
             ]}
             selectedCode={filters.businessType === '전체' ? '' : filters.businessType}
+            value={selectedBusinessTypeLabel || '전체'}
             onChange={handleBusinessTypeChange}
             placeholder="업무구분 선택"
             allowCreate={false}

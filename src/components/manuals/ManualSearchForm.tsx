@@ -27,6 +27,19 @@ const ManualSearchForm: React.FC<ManualSearchFormProps> = ({
   const { options: businessTypeOptions, isLoading: businessTypeLoading } = useCommonCodes('BUSINESS_TYPE');
   const { options: errorCodeOptions, isLoading: errorCodeLoading } = useCommonCodes('ERROR_CODE');
 
+  // 선택된 label 계산
+  const selectedBusinessTypeLabel = useMemo(() => {
+    if (!value.business_type) return '';
+    const selected = businessTypeOptions.find(opt => opt.code === value.business_type);
+    return selected?.label || '';
+  }, [businessTypeOptions, value.business_type]);
+
+  const selectedErrorCodeLabel = useMemo(() => {
+    if (!value.error_code) return '';
+    const selected = errorCodeOptions.find(opt => opt.code === value.error_code);
+    return selected?.label || '';
+  }, [errorCodeOptions, value.error_code]);
+
   const handleInputChange = (field: keyof ManualSearchParams, val: string | number | null) => {
     onChange({
       ...value,
@@ -93,6 +106,7 @@ const ManualSearchForm: React.FC<ManualSearchFormProps> = ({
           <TypeAheadSelectBox
             options={businessTypeOptions}
             selectedCode={value.business_type || ''}
+            value={selectedBusinessTypeLabel}
             onChange={handleBusinessTypeChange}
             placeholder="업무구분 선택"
             allowCreate={false}
@@ -107,6 +121,7 @@ const ManualSearchForm: React.FC<ManualSearchFormProps> = ({
           <TypeAheadSelectBox
             options={errorCodeOptions}
             selectedCode={value.error_code || ''}
+            value={selectedErrorCodeLabel}
             onChange={handleErrorCodeChange}
             placeholder="에러코드 선택"
             allowCreate={false}
