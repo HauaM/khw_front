@@ -251,24 +251,25 @@ export async function fetchCommonCodeItems(
     return [];
   }
 
-  // API 응답이 간단한 구조(code_key, code_value만)인 경우 처리
-  // 실제 API가 모든 필드를 반환하지 않을 수 있으므로 기본값 사용
-  return rawItems
+  // API 응답을 CommonCodeItem으로 변환
+  const commonCodeItems = rawItems
     .map((item: any, index: number) => {
       const transformed = transformItem({
         id: item.id || `${groupCode}-${index}`,
         group_id: item.group_id || '',
         code_key: item.code_key || '',
         code_value: item.code_value || '',
-        sort_order: item.sort_order ?? index,
+        sort_order: typeof item.sort_order === 'number' ? item.sort_order : index,
         is_active: item.is_active !== false, // 기본값: true (명시적으로 false가 아니면 활성화)
         attributes: item.attributes || undefined,
         created_at: item.created_at || new Date().toISOString(),
         updated_at: item.updated_at || new Date().toISOString(),
       });
       return transformed;
-    })
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+    });
+
+  // API의 sort_order를 기준으로 정렬
+  return commonCodeItems.sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 /**

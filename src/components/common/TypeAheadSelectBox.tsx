@@ -90,7 +90,7 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
         <input
           ref={inputRef}
           type="text"
-          value={value}
+          value={searchTerm || value}
           onChange={(e) => {
             setSearchTerm(e.currentTarget.value);
             setIsOpen(true);
