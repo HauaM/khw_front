@@ -88,9 +88,6 @@ const ManualSearchResults: React.FC<ManualSearchResultsProps> = ({
             <thead>
               <tr className="border-y border-[#E0E0E0] bg-[#F5F7FB]">
                 <th className="whitespace-nowrap px-4 py-3 text-left text-[13px] font-semibold text-gray-700">
-                  ID
-                </th>
-                <th className="whitespace-nowrap px-4 py-3 text-left text-[13px] font-semibold text-gray-700">
                   주제
                 </th>
                 <th className="whitespace-nowrap px-4 py-3 text-left text-[13px] font-semibold text-gray-700">
@@ -98,6 +95,9 @@ const ManualSearchResults: React.FC<ManualSearchResultsProps> = ({
                 </th>
                 <th className="whitespace-nowrap px-4 py-3 text-left text-[13px] font-semibold text-gray-700">
                   업무
+                </th>
+                <th className="whitespace-nowrap px-4 py-3 text-left text-[13px] font-semibold text-gray-700">
+                  에러코드
                 </th>
                 <th className="whitespace-nowrap px-4 py-3 text-left text-[13px] font-semibold text-gray-700">
                   유사도
@@ -114,13 +114,6 @@ const ManualSearchResults: React.FC<ManualSearchResultsProps> = ({
                   onClick={() => onRowClick(result.manual.id)}
                   className="cursor-pointer border-b border-[#E0E0E0] transition-colors hover:bg-[#F5F7FB]"
                 >
-                  {/* Manual ID */}
-                  <td className="px-4 py-4 align-middle text-sm text-gray-900">
-                    <span className="font-mono text-[12px] text-gray-600">
-                      {result.manual.id.substring(0, 8)}...
-                    </span>
-                  </td>
-
                   {/* Topic */}
                   <td className="max-w-[300px] px-4 py-4 align-middle text-sm text-gray-900">
                     <div className="truncate font-semibold">{result.manual.topic}</div>
@@ -149,6 +142,13 @@ const ManualSearchResults: React.FC<ManualSearchResultsProps> = ({
                   <td className="px-4 py-4 align-middle text-sm">
                     <span className="inline-flex whitespace-nowrap items-center rounded bg-[#F5F5F5] px-2.5 py-1 text-[12px] font-semibold text-gray-800">
                       {result.manual.business_type_name || '-'}
+                    </span>
+                  </td>
+
+                  {/* Error Code */}
+                  <td className="px-4 py-4 align-middle text-sm">
+                    <span className="font-mono text-[12px] text-gray-700">
+                      {result.manual.error_code || '-'}
                     </span>
                   </td>
 
