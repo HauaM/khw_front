@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 
 export interface AddCodeModalProps {
@@ -21,6 +21,11 @@ const AddCodeModal: React.FC<AddCodeModalProps> = ({
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // initialLabel prop 변경 시 state 동기화
+  useEffect(() => {
+    setLabel(initialLabel);
+  }, [initialLabel]);
 
   const codeTypeLabel = codeType === 'BUSINESS_TYPE' ? '업무구분' : '에러코드';
 

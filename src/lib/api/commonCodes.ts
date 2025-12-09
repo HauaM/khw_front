@@ -5,6 +5,43 @@
  */
 
 import { api } from '@/lib/api/axiosClient';
+import { AxiosError } from 'axios';
+
+/**
+ * 백엔드 에러 응답에서 메시지 추출
+ */
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof AxiosError) {
+    const errorData = error.response?.data as any;
+
+    // 백엔드 에러 응답 형식: { detail: "에러 메시지" }
+    if (errorData?.detail) {
+      if (typeof errorData.detail === 'string') {
+        return errorData.detail;
+      }
+      // FastAPI 유효성 검사 에러: { detail: [{ msg: "에러 메시지" }] }
+      if (Array.isArray(errorData.detail) && errorData.detail.length > 0) {
+        return errorData.detail
+          .map((err: any) => err.msg || err.message || JSON.stringify(err))
+          .join(', ');
+      }
+    }
+
+    // { message: "에러 메시지" }
+    if (errorData?.message) {
+      return errorData.message;
+    }
+
+    // HTTP 상태 코드별 기본 메시지
+    return error.message || `API 오류 (상태: ${error.response?.status})`;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return '알 수 없는 오류가 발생했습니다.';
+}
 
 /**
  * 공통코드 그룹 타입 (프론트엔드 표현)
@@ -190,10 +227,41 @@ export async function deleteCommonCodeGroup(groupId: string): Promise<void> {
 }
 
 /**
- * 특정 그룹의 공통코드 항목 조회 (페이징)
- * API: GET /api/v1/admin/common-codes/groups/{group_id}/items
+ * 특정 그룹의 공통코드 항목 조회 (일반용 - groupCode 사용)
+ * API: GET /api/v1/common-codes/{group_code}
+ * 사용처: 상담등록, TypeAheadSelectBox 등 일반 사용자 화면
  */
 export async function fetchCommonCodeItems(
+  groupCode: string,
+  page: number = 1,
+  pageSize: number = 100
+): Promise<CommonCodeItem[]> {
+  const response = await api.get<CommonCodeItemListResponse | CommonCodeItemResponse[]>(
+    `/api/v1/common-codes/${groupCode}`,
+    {
+      params: { page, page_size: pageSize },
+    }
+  );
+
+  // 응답이 배열인 경우와 ListResponse 형식인 경우 모두 처리
+  const items = Array.isArray(response) ? response : response.items;
+
+  if (!items || !Array.isArray(items)) {
+    console.error('Invalid API response structure:', response);
+    return [];
+  }
+
+  return items
+    .map(transformItem)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+/**
+ * 특정 그룹의 공통코드 항목 조회 (관리자용 - groupId 사용)
+ * API: GET /api/v1/admin/common-codes/groups/{group_id}/items
+ * 사용처: 관리자 - 공통코드관리 페이지의 코드 항목 조회
+ */
+export async function fetchCommonCodeItemsForAdmin(
   groupId: string,
   page: number = 1,
   pageSize: number = 100
