@@ -3,7 +3,7 @@
  * 상태, 업무구분, 시작일, 종료일 필터링을 제공합니다
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ManualReviewTaskFilters, ManualReviewStatus } from '@/types/reviews';
 import { useToast } from '@/components/common/Toast';
 import { useCommonCodes } from '@/hooks/useCommonCodes';
@@ -40,13 +40,6 @@ const ManualReviewFilter: React.FC<ManualReviewFilterProps> = ({
 }) => {
   const { showToast } = useToast();
   const { options: businessTypeOptions, isLoading: businessTypeLoading } = useCommonCodes('BUSINESS_TYPE');
-
-  // 선택된 label 계산
-  const selectedBusinessTypeLabel = useMemo(() => {
-    if (filters.businessType === '전체' || !filters.businessType) return '';
-    const selected = businessTypeOptions.find(opt => opt.code === filters.businessType);
-    return selected?.label || '';
-  }, [businessTypeOptions, filters.businessType]);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChangeFilters({
@@ -148,7 +141,6 @@ const ManualReviewFilter: React.FC<ManualReviewFilterProps> = ({
               ...businessTypeOptions,
             ]}
             selectedCode={filters.businessType === '전체' ? '' : filters.businessType}
-            value={selectedBusinessTypeLabel || '전체'}
             onChange={handleBusinessTypeChange}
             placeholder="업무구분 선택"
             allowCreate={false}

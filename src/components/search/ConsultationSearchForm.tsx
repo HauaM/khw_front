@@ -32,10 +32,6 @@ const ConsultationSearchForm: React.FC<ConsultationSearchFormProps> = ({
   const { options: businessTypeOptions, isLoading: businessTypeLoading } = useCommonCodes('BUSINESS_TYPE');
   const { options: errorCodeOptions, isLoading: errorCodeLoading } = useCommonCodes('ERROR_CODE');
 
-  // 선택된 label 계산
-  const selectedBusinessTypeLabel = businessTypeOptions.find(opt => opt.code === formState.businessType)?.label || '';
-  const selectedErrorCodeLabel = errorCodeOptions.find(opt => opt.code === formState.errorCode)?.label || '';
-
   useEffect(() => {
     if (defaultValues) {
       setFormState((prev) => ({ ...prev, ...defaultValues }));
@@ -87,7 +83,6 @@ const ConsultationSearchForm: React.FC<ConsultationSearchFormProps> = ({
           <TypeAheadSelectBox
             options={businessTypeOptions}
             selectedCode={formState.businessType}
-            value={selectedBusinessTypeLabel}
             onChange={handleBusinessTypeChange}
             placeholder="업무구분 선택"
             allowCreate={false}
@@ -117,7 +112,6 @@ const ConsultationSearchForm: React.FC<ConsultationSearchFormProps> = ({
           <TypeAheadSelectBox
             options={errorCodeOptions}
             selectedCode={formState.errorCode}
-            value={selectedErrorCodeLabel}
             onChange={handleErrorCodeChange}
             placeholder="에러코드 선택"
             allowCreate={false}

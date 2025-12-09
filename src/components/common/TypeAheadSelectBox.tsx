@@ -9,7 +9,6 @@ export interface TypeAheadOption {
 export interface TypeAheadSelectBoxProps {
   options: TypeAheadOption[];
   selectedCode?: string;
-  value?: string;
   onChange: (code: string, label: string) => void;
   onAddNew?: (searchTerm: string) => void;
   placeholder?: string;
@@ -22,7 +21,6 @@ export interface TypeAheadSelectBoxProps {
 const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
   options,
   selectedCode,
-  value,
   onChange,
   onAddNew,
   placeholder = '검색 또는 선택하세요',
@@ -36,6 +34,9 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
   const [filteredOptions, setFilteredOptions] = useState<TypeAheadOption[]>(options);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // selectedCode에 해당하는 label 찾기
+  const selectedLabel = selectedCode && options.find(opt => opt.code === selectedCode)?.label;
 
   // 필터링 로직
   useEffect(() => {
@@ -90,7 +91,7 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
         <input
           ref={inputRef}
           type="text"
-          value={searchTerm || value}
+          value={searchTerm || selectedLabel || ''}
           onChange={(e) => {
             setSearchTerm(e.currentTarget.value);
             setIsOpen(true);
