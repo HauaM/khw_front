@@ -236,44 +236,38 @@ export async function fetchCommonCodeItems(
   page: number = 1,
   pageSize: number = 100
 ): Promise<CommonCodeItem[]> {
-  const response = await api.get<CommonCodeItemListResponse | CommonCodeItemResponse[]>(
+  const response = await api.get<any>(
     `/api/v1/common-codes/${groupCode}`,
     {
       params: { page, page_size: pageSize },
     }
   );
 
-  console.log(`[fetchCommonCodeItems] API response for ${groupCode}:`, response);
-  console.log(`[fetchCommonCodeItems] response type:`, Array.isArray(response) ? 'array' : typeof response);
+  // response.items에서 항목 추출
+  const rawItems = response?.items || [];
 
-  // 응답이 배열인 경우와 ListResponse 형식인 경우 모두 처리
-  let items: CommonCodeItemResponse[] = [];
-
-  if (Array.isArray(response)) {
-    items = response;
-  } else if (response && typeof response === 'object') {
-    // response.items 확인
-    if ('items' in response && Array.isArray(response.items)) {
-      items = response.items;
-    } else if ('data' in response && Array.isArray((response as any).data)) {
-      items = (response as any).data;
-    } else if ('result' in response && Array.isArray((response as any).result)) {
-      items = (response as any).result;
-    } else {
-      console.error('Cannot find items array in response. Response keys:', Object.keys(response));
-      return [];
-    }
-  }
-
-  if (!Array.isArray(items)) {
+  if (!Array.isArray(rawItems)) {
     console.error('Invalid API response structure:', response);
     return [];
   }
 
-  console.log(`[fetchCommonCodeItems] Found ${items.length} items for ${groupCode}`);
-
-  return items
-    .map(transformItem)
+  // API 응답이 간단한 구조(code_key, code_value만)인 경우 처리
+  // 실제 API가 모든 필드를 반환하지 않을 수 있으므로 기본값 사용
+  return rawItems
+    .map((item: any, index: number) => {
+      const transformed = transformItem({
+        id: item.id || `${groupCode}-${index}`,
+        group_id: item.group_id || '',
+        code_key: item.code_key || '',
+        code_value: item.code_value || '',
+        sort_order: item.sort_order ?? index,
+        is_active: item.is_active !== false, // 기본값: true (명시적으로 false가 아니면 활성화)
+        attributes: item.attributes || undefined,
+        created_at: item.created_at || new Date().toISOString(),
+        updated_at: item.updated_at || new Date().toISOString(),
+      });
+      return transformed;
+    })
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 

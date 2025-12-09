@@ -35,15 +35,6 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
     setError(null);
     try {
       const items = await fetchCommonCodeItems(groupCode);
-      console.log(`[useCommonCodes] ${groupCode} items:`, items);
-
-      if (!Array.isArray(items)) {
-        console.error(`[useCommonCodes] items is not an array:`, typeof items, items);
-        setError('데이터 형식이 올바르지 않습니다.');
-        setOptions([]);
-        return;
-      }
-
       const converted = items
         .filter((item) => item.isActive)
         .map((item) => ({
@@ -53,7 +44,6 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
             ? (item.attributes as Record<string, any>)?.description
             : undefined,
         }));
-      console.log(`[useCommonCodes] ${groupCode} converted:`, converted);
       setOptions(converted);
     } catch (err) {
       const message = err instanceof Error ? err.message : '공통코드 로드 실패';
