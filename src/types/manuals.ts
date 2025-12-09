@@ -90,7 +90,7 @@ export interface ManualSearchResult {
     topic: string;
     background: string;
     guideline: string;
-    business_type?: string | null;
+    business_type_name?: string | null;
     error_code?: string | null;
     source_consultation_id: string; // uuid
     version_id?: string | null; // uuid
@@ -116,7 +116,7 @@ export interface ManualDetail {
   status: ManualDraftStatus;
   created_at: string; // ISO datetime
   updated_at: string; // ISO datetime
-  business_type?: string | null;
+  business_type_name?: string | null;
   error_code?: string | null;
   source_consultation_id: string; // uuid
   version_id?: string | null; // uuid

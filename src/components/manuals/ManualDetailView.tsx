@@ -120,7 +120,7 @@ const ManualDetailView: React.FC<ManualDetailViewProps> = ({ detail }) => {
             </div>
 
             {/* 업무 구분 */}
-            {detail.business_type && (
+            {detail.business_type_name && (
               <div className="flex items-center gap-2">
                 <svg
                   className="w-4 h-4"
@@ -133,7 +133,7 @@ const ManualDetailView: React.FC<ManualDetailViewProps> = ({ detail }) => {
                   <path d="M2 17l10 5 10-5"></path>
                   <path d="M2 12l10 5 10-5"></path>
                 </svg>
-                <span>{detail.business_type}</span>
+                <span>{detail.business_type_name}</span>
               </div>
             )}
 

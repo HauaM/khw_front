@@ -145,10 +145,10 @@ const ManualSearchResults: React.FC<ManualSearchResultsProps> = ({
                     </div>
                   </td>
 
-                  {/* Business Type */}
+                  {/* Business Type Name */}
                   <td className="px-4 py-4 align-middle text-sm">
                     <span className="inline-flex whitespace-nowrap items-center rounded bg-[#F5F5F5] px-2.5 py-1 text-[12px] font-semibold text-gray-800">
-                      {result.manual.business_type || '-'}
+                      {result.manual.business_type_name || '-'}
                     </span>
                   </td>
 
