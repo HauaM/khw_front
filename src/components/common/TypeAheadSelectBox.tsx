@@ -31,12 +31,18 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState<TypeAheadOption[]>(options);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // selectedCode에 해당하는 label 찾기
   const selectedLabel = selectedCode && options.find(opt => opt.code === selectedCode)?.label;
+
+  // 포커스 상태에 따라 표시할 값 결정
+  // - 포커스: 사용자 입력(searchTerm) 표시
+  // - 미포커스: 선택된 값(selectedLabel) 또는 입력값 표시
+  const displayValue = isFocused ? searchTerm : (searchTerm || selectedLabel || '');
 
   // 필터링 로직
   useEffect(() => {
@@ -69,6 +75,7 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
     (code: string, label: string) => {
       onChange(code, label);
       setSearchTerm('');
+      setIsFocused(false);
       setIsOpen(false);
     },
     [onChange]
@@ -78,6 +85,7 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
     if (onAddNew && searchTerm.trim()) {
       onAddNew(searchTerm.trim());
       setSearchTerm('');
+      setIsFocused(false);
       setIsOpen(false);
     }
   }, [onAddNew, searchTerm]);
@@ -91,10 +99,17 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
         <input
           ref={inputRef}
           type="text"
-          value={searchTerm || selectedLabel || ''}
+          value={displayValue}
           onChange={(e) => {
             setSearchTerm(e.currentTarget.value);
             setIsOpen(true);
+          }}
+          onFocus={() => {
+            setIsFocused(true);
+            handleInputClick();
+          }}
+          onBlur={() => {
+            setIsFocused(false);
           }}
           onClick={handleInputClick}
           placeholder={placeholder}
