@@ -3,9 +3,11 @@
  * 상태, 업무구분, 시작일, 종료일 필터링을 제공합니다
  */
 
-import React from 'react';
-import { ManualReviewTaskFilters, ManualReviewStatus, BusinessType } from '@/types/reviews';
+import React, { useMemo } from 'react';
+import { ManualReviewTaskFilters, ManualReviewStatus } from '@/types/reviews';
 import { useToast } from '@/components/common/Toast';
+import { useCommonCodes } from '@/hooks/useCommonCodes';
+import TypeAheadSelectBox from '@/components/common/TypeAheadSelectBox';
 
 interface ManualReviewFilterProps {
   filters: ManualReviewTaskFilters;
@@ -19,15 +21,6 @@ const statusOptions: Array<'전체' | ManualReviewStatus> = [
   'IN_PROGRESS',
   'DONE',
   'REJECTED',
-];
-
-const businessTypeOptions: Array<'전체' | BusinessType> = [
-  '전체',
-  '인터넷뱅킹',
-  '모바일뱅킹',
-  '대출',
-  '예금',
-  '카드',
 ];
 
 const getStatusLabel = (status: string): string => {
@@ -46,6 +39,7 @@ const ManualReviewFilter: React.FC<ManualReviewFilterProps> = ({
   onReset,
 }) => {
   const { showToast } = useToast();
+  const { options: businessTypeOptions, isLoading: businessTypeLoading } = useCommonCodes('BUSINESS_TYPE');
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChangeFilters({
@@ -54,10 +48,10 @@ const ManualReviewFilter: React.FC<ManualReviewFilterProps> = ({
     });
   };
 
-  const handleBusinessTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleBusinessTypeChange = (code: string) => {
     onChangeFilters({
       ...filters,
-      businessType: e.target.value as '전체' | BusinessType,
+      businessType: (code || '전체') as '전체' | string,
     });
   };
 
@@ -141,18 +135,17 @@ const ManualReviewFilter: React.FC<ManualReviewFilterProps> = ({
           <label htmlFor="businessTypeFilter" className="text-sm font-semibold text-gray-700">
             업무구분
           </label>
-          <select
-            id="businessTypeFilter"
-            value={filters.businessType}
+          <TypeAheadSelectBox
+            options={[
+              { code: '', label: '전체' },
+              ...businessTypeOptions,
+            ]}
+            selectedCode={filters.businessType === '전체' ? '' : filters.businessType}
             onChange={handleBusinessTypeChange}
-            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20"
-          >
-            {businessTypeOptions.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
+            placeholder="업무구분 선택"
+            allowCreate={false}
+            isLoading={businessTypeLoading}
+          />
         </div>
 
         {/* 시작일 필터 */}

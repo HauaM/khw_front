@@ -1,21 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { BusinessType, ConsultationSearchParams } from '@/types/consultations';
+import { useCommonCodes } from '@/hooks/useCommonCodes';
+import TypeAheadSelectBox from '@/components/common/TypeAheadSelectBox';
 
 interface ConsultationSearchFormProps {
   defaultValues?: Partial<ConsultationSearchParams>;
   onSearch: (params: ConsultationSearchParams) => void;
   branchOptions?: Array<{ code: string; name: string }>;
 }
-
-const businessTypeOptions: Array<{ value: BusinessType; label: string }> = [
-  { value: 'DEPOSIT', label: '수신' },
-  { value: 'LOAN', label: '여신' },
-  { value: 'CARD', label: '카드' },
-  { value: 'EXCHANGE', label: '환전' },
-  { value: 'INTERNET', label: '인터넷뱅킹' },
-  { value: 'MOBILE', label: '모바일뱅킹' },
-  { value: 'OTHER', label: '기타' },
-];
 
 const defaultFormState: ConsultationSearchParams = {
   query: '',
@@ -36,6 +28,10 @@ const ConsultationSearchForm: React.FC<ConsultationSearchFormProps> = ({
     ...defaultValues,
   });
 
+  // 공통코드 조회
+  const { options: businessTypeOptions, isLoading: businessTypeLoading } = useCommonCodes('BUSINESS_TYPE');
+  const { options: errorCodeOptions, isLoading: errorCodeLoading } = useCommonCodes('ERROR_CODE');
+
   useEffect(() => {
     if (defaultValues) {
       setFormState((prev) => ({ ...prev, ...defaultValues }));
@@ -47,6 +43,14 @@ const ConsultationSearchForm: React.FC<ConsultationSearchFormProps> = ({
   ) => {
     const { name, value } = e.target;
     setFormState((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleBusinessTypeChange = (code: string) => {
+    setFormState((prev) => ({ ...prev, businessType: code }));
+  };
+
+  const handleErrorCodeChange = (code: string) => {
+    setFormState((prev) => ({ ...prev, errorCode: code }));
   };
 
   const handleReset = () => {
@@ -76,19 +80,14 @@ const ConsultationSearchForm: React.FC<ConsultationSearchFormProps> = ({
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-semibold text-gray-700">업무구분</label>
-          <select
-            name="businessType"
-            value={formState.businessType}
-            onChange={handleChange}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="">전체</option>
-            {businessTypeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <TypeAheadSelectBox
+            options={businessTypeOptions}
+            selectedCode={formState.businessType}
+            onChange={handleBusinessTypeChange}
+            placeholder="업무구분 선택"
+            allowCreate={false}
+            isLoading={businessTypeLoading}
+          />
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -110,13 +109,13 @@ const ConsultationSearchForm: React.FC<ConsultationSearchFormProps> = ({
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-semibold text-gray-700">에러코드</label>
-          <input
-            type="text"
-            name="errorCode"
-            value={formState.errorCode}
-            onChange={handleChange}
-            placeholder="예: ERR-001"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          <TypeAheadSelectBox
+            options={errorCodeOptions}
+            selectedCode={formState.errorCode}
+            onChange={handleErrorCodeChange}
+            placeholder="에러코드 선택"
+            allowCreate={false}
+            isLoading={errorCodeLoading}
           />
         </div>
 

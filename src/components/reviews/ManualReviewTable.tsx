@@ -62,16 +62,13 @@ const ManualReviewTable: React.FC<ManualReviewTableProps> = ({
             <thead>
               <tr className="bg-blue-50">
                 <th className="border-b border-gray-200 px-4 py-3 text-left text-xs font-semibold text-blue-600">
-                  Task ID
-                </th>
-                <th className="border-b border-gray-200 px-4 py-3 text-left text-xs font-semibold text-blue-600">
-                  신규 초안 Manual ID
-                </th>
-                <th className="border-b border-gray-200 px-4 py-3 text-left text-xs font-semibold text-blue-600">
-                  기존 Manual ID
+                  주제
                 </th>
                 <th className="border-b border-gray-200 px-4 py-3 text-left text-xs font-semibold text-blue-600">
                   업무구분
+                </th>
+                <th className="border-b border-gray-200 px-4 py-3 text-left text-xs font-semibold text-blue-600">
+                  에러코드
                 </th>
                 <th className="border-b border-gray-200 px-4 py-3 text-left text-xs font-semibold text-blue-600">
                   상태
@@ -88,14 +85,9 @@ const ManualReviewTable: React.FC<ManualReviewTableProps> = ({
                   onClick={() => onRowClick(task)}
                   className="border-b border-gray-200 transition-colors hover:bg-gray-50 cursor-pointer"
                 >
-                  <td className="px-4 py-3 text-sm font-mono text-blue-600">{task.task_id}</td>
-                  <td className="px-4 py-3 text-sm font-mono text-blue-600">
-                    {task.draft_manual_id}
-                  </td>
-                  <td className="px-4 py-3 text-sm font-mono text-blue-600">
-                    {task.existing_manual_id}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{task.business_type}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{task.new_manual_topic || '-'}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{task.business_type_name || '-'}</td>
+                  <td className="px-4 py-3 text-sm font-mono text-blue-600">{task.new_error_code || '-'}</td>
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`inline-block rounded-full px-2 py-1 text-xs font-semibold whitespace-nowrap ${getStatusBadgeClasses(

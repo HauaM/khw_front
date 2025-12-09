@@ -147,7 +147,7 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
                   ].join(' ')}
                 >
                   <div className="font-semibold text-[14px]">{option.label}</div>
-                  <div className="text-[12px] text-gray-600">{option.code}</div>
+                  {/* <div className="text-[12px] text-gray-600">{option.code}</div> */}
                 </div>
               ))}
 

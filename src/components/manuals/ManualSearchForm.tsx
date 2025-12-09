@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ManualSearchParams, ManualBusinessType } from '@/types/manuals';
 import Spinner from '@/components/common/Spinner';
+import { useCommonCodes } from '@/hooks/useCommonCodes';
+import TypeAheadSelectBox from '@/components/common/TypeAheadSelectBox';
 
 interface ManualSearchFormProps {
   value: ManualSearchParams;
@@ -9,12 +11,6 @@ interface ManualSearchFormProps {
   onReset: () => void;
   isLoading: boolean;
 }
-
-/**
- * OpenAPI BusinessType enum
- * "인터넷뱅킹", "모바일뱅킹", "대출", "예금", "카드"
- */
-const BUSINESS_TYPES: ManualBusinessType[] = ['', '인터넷뱅킹', '모바일뱅킹', '대출', '예금', '카드'];
 
 /**
  * 메뉴얼 검색 폼 컴포넌트
@@ -27,10 +23,28 @@ const ManualSearchForm: React.FC<ManualSearchFormProps> = ({
   onReset,
   isLoading,
 }) => {
+  // 공통코드 조회
+  const { options: businessTypeOptions, isLoading: businessTypeLoading } = useCommonCodes('BUSINESS_TYPE');
+  const { options: errorCodeOptions, isLoading: errorCodeLoading } = useCommonCodes('ERROR_CODE');
+
   const handleInputChange = (field: keyof ManualSearchParams, val: string | number | null) => {
     onChange({
       ...value,
       [field]: val,
+    });
+  };
+
+  const handleBusinessTypeChange = (code: string) => {
+    onChange({
+      ...value,
+      business_type: code || null,
+    });
+  };
+
+  const handleErrorCodeChange = (code: string) => {
+    onChange({
+      ...value,
+      error_code: code || null,
     });
   };
 
@@ -76,32 +90,27 @@ const ManualSearchForm: React.FC<ManualSearchFormProps> = ({
           <label htmlFor="business_type" className="text-[13px] font-semibold text-gray-700">
             업무구분
           </label>
-          <select
-            id="business_type"
-            className="min-h-[40px] rounded-md border border-gray-400 px-3 text-sm bg-white focus:border-[#1A73E8] focus:outline-none focus:ring-2 focus:ring-[#1A73E8]/20"
-            value={value.business_type || ''}
-            onChange={(e) => handleInputChange('business_type', e.target.value || null)}
-          >
-            {BUSINESS_TYPES.map((type) => (
-              <option key={type || 'empty'} value={type}>
-                {type || '전체'}
-              </option>
-            ))}
-          </select>
+          <TypeAheadSelectBox
+            options={businessTypeOptions}
+            selectedCode={value.business_type || ''}
+            onChange={handleBusinessTypeChange}
+            placeholder="업무구분 선택"
+            allowCreate={false}
+            isLoading={businessTypeLoading}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="error_code" className="text-[13px] font-semibold text-gray-700">
             에러코드
           </label>
-          <input
-            id="error_code"
-            type="text"
-            className="min-h-[40px] rounded-md border border-gray-400 px-3 text-sm focus:border-[#1A73E8] focus:outline-none focus:ring-2 focus:ring-[#1A73E8]/20"
-            placeholder="예: E001, E102"
-            value={value.error_code || ''}
-            onChange={(e) => handleInputChange('error_code', e.target.value || null)}
-            onKeyPress={handleKeyPress}
+          <TypeAheadSelectBox
+            options={errorCodeOptions}
+            selectedCode={value.error_code || ''}
+            onChange={handleErrorCodeChange}
+            placeholder="에러코드 선택"
+            allowCreate={false}
+            isLoading={errorCodeLoading}
           />
         </div>
       </div>

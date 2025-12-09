@@ -21,14 +21,20 @@ import {
  * 백엔드 응답을 프론트엔드 형식으로 변환
  * BackendManualReviewTask -> ManualReviewTask
  */
-export function transformBackendTask(task: BackendManualReviewTask): ManualReviewTask {
+export function transformBackendTask(task: BackendManualReviewTask & Record<string, any>): ManualReviewTask {
   return {
     task_id: task.id,
     draft_manual_id: task.new_entry_id,
     existing_manual_id: task.old_entry_id || 'N/A',
     status: task.status,
-    business_type: '인터넷뱅킹' as BusinessType,
     created_at: task.created_at,
+    // 테이블 표시용 필드 (API에서 제공 시)
+    new_manual_topic: task.new_manual_topic,
+    business_type_name: task.business_type_name,
+    new_error_code: task.new_error_code,
+    // 기존 필드 (하위호환성)
+    business_type: (task.business_type || '인터넷뱅킹') as BusinessType,
+    // 추가 필드
     similarity: task.similarity,
     reviewer_id: task.reviewer_id,
     review_notes: task.review_notes,
