@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ManualDetail, ManualGuideline } from '@/types/manuals';
-import { useToast } from '@/contexts/ToastContext';
 
 interface ManualDetailViewProps {
   detail: ManualDetail;
@@ -57,7 +56,6 @@ const parseGuidelines = (guidelineStr: string): ManualGuideline[] => {
  */
 const ManualDetailView: React.FC<ManualDetailViewProps> = ({ detail }) => {
   const navigate = useNavigate();
-  const { showToast } = useToast();
 
   // 가이드라인 파싱 (메모이제이션)
   const guidelines = useMemo(() => parseGuidelines(detail.guideline), [detail.guideline]);

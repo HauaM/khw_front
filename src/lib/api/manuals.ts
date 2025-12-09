@@ -8,7 +8,6 @@ import {
   ManualDetail,
   ManualVersionInfo,
   ManualVersionDetail,
-  ManualGuideline,
 } from '@/types/manuals';
 
 // Re-export types for convenience

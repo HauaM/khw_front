@@ -15,6 +15,7 @@ import ReviewTaskListPage from '@/pages/reviews/ReviewTaskListPage';
 import ManualReviewDetailPage from '@/pages/reviews/ManualReviewDetailPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
 import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
+import CommonCodeManagementPage from '@/pages/admin/CommonCodeManagementPage';
 import AuthLayout from '@/components/common/AuthLayout';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
@@ -48,6 +49,7 @@ const AppRouter: React.FC = () => {
           <Route path="admin">
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />
+            <Route path="common-codes" element={<CommonCodeManagementPage />} />
           </Route>
         </Route>
 

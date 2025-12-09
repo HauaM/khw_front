@@ -436,22 +436,23 @@
         }
       }
     },
-    "/api/v1/manuals/{manual_group_id}/versions": {
+    "/api/v1/manuals/{manual_id}/versions": {
       "get": {
         "tags": [
           "manuals"
         ],
         "summary": "List manual versions",
-        "description": "FR-14: 버전 목록 조회 (단일 그룹 가정).\n\n메뉴얼의 모든 버전을 최신순으로 반환합니다.",
-        "operationId": "list_versions_api_v1_manuals__manual_group_id__versions_get",
+        "description": "FR-14: 메뉴얼 그룹의 버전 목록 조회.\n\n특정 메뉴얼(manual_id)과 같은 business_type/error_code를 가진 메뉴얼 그룹의\n모든 버전을 최신순으로 반환합니다.",
+        "operationId": "list_versions_api_v1_manuals__manual_id__versions_get",
         "parameters": [
           {
-            "name": "manual_group_id",
+            "name": "manual_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Manual Group Id"
+              "format": "uuid",
+              "title": "Manual Id"
             }
           }
         ],
@@ -465,7 +466,7 @@
                   "items": {
                     "$ref": "#/components/schemas/ManualVersionResponse"
                   },
-                  "title": "Response List Versions Api V1 Manuals  Manual Group Id  Versions Get"
+                  "title": "Response List Versions Api V1 Manuals  Manual Id  Versions Get"
                 }
               }
             }
@@ -1286,6 +1287,739 @@
         ]
       }
     },
+    "/api/v1/api/v1/admin/common-codes/groups": {
+      "post": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Groups"
+        ],
+        "summary": "공통코드 그룹 생성",
+        "description": "새로운 공통코드 그룹 생성\n\n- **group_code**: 그룹 고유 코드 (예: BUSINESS_TYPE, ERROR_CODE)\n- **group_name**: 그룹 이름 (예: 업무 구분, 에러코드)\n- **description**: 그룹 설명 (선택사항)\n- **is_active**: 활성화 여부 (기본값: true)\n\n에러:\n- 400: group_code 중복\n- 422: 입력 데이터 검증 실패",
+        "operationId": "create_group_api_v1_api_v1_admin_common_codes_groups_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommonCodeGroupCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonCodeGroupResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Groups"
+        ],
+        "summary": "공통코드 그룹 목록 조회",
+        "description": "공통코드 그룹 목록 조회 (페이징)",
+        "operationId": "list_groups_api_v1_api_v1_admin_common_codes_groups_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "페이지 번호",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "페이지 번호"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "페이지 크기",
+              "default": 20,
+              "title": "Page Size"
+            },
+            "description": "페이지 크기"
+          },
+          {
+            "name": "is_active",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "활성화 필터",
+              "title": "Is Active"
+            },
+            "description": "활성화 필터"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonCodeGroupListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/api/v1/admin/common-codes/groups/search": {
+      "get": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Groups"
+        ],
+        "summary": "공통코드 그룹 검색",
+        "description": "그룹 코드 또는 그룹 이름으로 검색",
+        "operationId": "search_groups_api_v1_api_v1_admin_common_codes_groups_search_get",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "검색 키워드",
+              "title": "Keyword"
+            },
+            "description": "검색 키워드"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "페이지 번호",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "페이지 번호"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "페이지 크기",
+              "default": 20,
+              "title": "Page Size"
+            },
+            "description": "페이지 크기"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonCodeGroupListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/api/v1/admin/common-codes/groups/{group_id}": {
+      "get": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Groups"
+        ],
+        "summary": "공통코드 그룹 조회 (항목 포함)",
+        "description": "ID로 그룹과 하위 항목을 함께 조회",
+        "operationId": "get_group_api_v1_api_v1_admin_common_codes_groups__group_id__get",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "그룹 ID",
+              "title": "Group Id"
+            },
+            "description": "그룹 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonCodeGroupDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Groups"
+        ],
+        "summary": "공통코드 그룹 수정",
+        "description": "공통코드 그룹 수정 (부분 업데이트 지원)",
+        "operationId": "update_group_api_v1_api_v1_admin_common_codes_groups__group_id__put",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "그룹 ID",
+              "title": "Group Id"
+            },
+            "description": "그룹 ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommonCodeGroupUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonCodeGroupResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Groups"
+        ],
+        "summary": "공통코드 그룹 삭제",
+        "description": "공통코드 그룹 삭제 (하위 항목도 함께 삭제)",
+        "operationId": "delete_group_api_v1_api_v1_admin_common_codes_groups__group_id__delete",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "그룹 ID",
+              "title": "Group Id"
+            },
+            "description": "그룹 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "그룹 삭제 완료"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/api/v1/admin/common-codes/groups/{group_id}/items": {
+      "post": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Items"
+        ],
+        "summary": "공통코드 항목 생성",
+        "description": "공통코드 항목 생성",
+        "operationId": "create_item_api_v1_api_v1_admin_common_codes_groups__group_id__items_post",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "그룹 ID",
+              "title": "Group Id"
+            },
+            "description": "그룹 ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommonCodeItemCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonCodeItemResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Items"
+        ],
+        "summary": "공통코드 항목 목록 조회",
+        "description": "그룹의 공통코드 항목 목록 조회",
+        "operationId": "list_items_api_v1_api_v1_admin_common_codes_groups__group_id__items_get",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "그룹 ID",
+              "title": "Group Id"
+            },
+            "description": "그룹 ID"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "페이지 번호",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "페이지 번호"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "description": "페이지 크기",
+              "default": 100,
+              "title": "Page Size"
+            },
+            "description": "페이지 크기"
+          },
+          {
+            "name": "is_active_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "활성 항목만 조회",
+              "default": false,
+              "title": "Is Active Only"
+            },
+            "description": "활성 항목만 조회"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonCodeItemListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/api/v1/admin/common-codes/items/{item_id}": {
+      "get": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Items"
+        ],
+        "summary": "공통코드 항목 조회",
+        "description": "ID로 공통코드 항목 조회",
+        "operationId": "get_item_api_v1_api_v1_admin_common_codes_items__item_id__get",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "항목 ID",
+              "title": "Item Id"
+            },
+            "description": "항목 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonCodeItemResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Items"
+        ],
+        "summary": "공통코드 항목 수정",
+        "description": "공통코드 항목 수정 (부분 업데이트 지원)",
+        "operationId": "update_item_api_v1_api_v1_admin_common_codes_items__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "항목 ID",
+              "title": "Item Id"
+            },
+            "description": "항목 ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommonCodeItemUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonCodeItemResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "common-codes",
+          "Admin - Common Code Items"
+        ],
+        "summary": "공통코드 항목 삭제",
+        "description": "공통코드 항목 삭제",
+        "operationId": "delete_item_api_v1_api_v1_admin_common_codes_items__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "항목 ID",
+              "title": "Item Id"
+            },
+            "description": "항목 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "항목 삭제 완료"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/api/v1/common-codes/{group_code}": {
+      "get": {
+        "tags": [
+          "common-codes",
+          "Public - Common Codes"
+        ],
+        "summary": "공통코드 조회 (그룹 코드)",
+        "description": "그룹 코드로 공통코드 항목 조회 (프론트엔드용)\n\n응답 예시:\n```json\n{\n  \"group_code\": \"BUSINESS_TYPE\",\n  \"items\": [\n    {\"code_key\": \"RETAIL\", \"code_value\": \"리테일\"},\n    {\"code_key\": \"LOAN\", \"code_value\": \"대출\"}\n  ]\n}\n```",
+        "operationId": "get_codes_by_group_api_v1_api_v1_common_codes__group_code__get",
+        "parameters": [
+          {
+            "name": "group_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "그룹 코드 (예: BUSINESS_TYPE)",
+              "title": "Group Code"
+            },
+            "description": "그룹 코드 (예: BUSINESS_TYPE)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Codes By Group Api V1 Api V1 Common Codes  Group Code  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/api/v1/common-codes/bulk": {
+      "post": {
+        "tags": [
+          "common-codes",
+          "Public - Common Codes"
+        ],
+        "summary": "공통코드 일괄 조회",
+        "description": "여러 그룹의 공통코드 일괄 조회 (프론트엔드용)\n\n요청 본문:\n```json\n[\"BUSINESS_TYPE\", \"ERROR_CODE\"]\n```\n\n응답 예시:\n```json\n{\n  \"data\": {\n    \"BUSINESS_TYPE\": {\n      \"group_code\": \"BUSINESS_TYPE\",\n      \"items\": [...]\n    },\n    \"ERROR_CODE\": {\n      \"group_code\": \"ERROR_CODE\",\n      \"items\": [...]\n    }\n  }\n}\n```",
+        "operationId": "get_multiple_codes_api_v1_api_v1_common_codes_bulk_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "title": "Group Codes"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Multiple Codes Api V1 Api V1 Common Codes Bulk Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -1324,6 +2058,508 @@
         ],
         "title": "BusinessType",
         "description": "메뉴얼 업무구분"
+      },
+      "CommonCodeGroupCreate": {
+        "properties": {
+          "group_code": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Group Code",
+            "description": "그룹 고유 코드 (예: BUSINESS_TYPE, ERROR_CODE)"
+          },
+          "group_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Group Name",
+            "description": "그룹 이름 (예: 업무 구분, 에러코드)"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "그룹 설명 (선택사항)"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "활성화 여부",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_code",
+          "group_name"
+        ],
+        "title": "CommonCodeGroupCreate",
+        "description": "공통코드 그룹 생성 요청"
+      },
+      "CommonCodeGroupDetailResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "group_code": {
+            "type": "string",
+            "title": "Group Code",
+            "description": "그룹 고유 코드"
+          },
+          "group_name": {
+            "type": "string",
+            "title": "Group Name",
+            "description": "그룹 이름"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "그룹 설명"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "활성화 여부"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CommonCodeItemResponse"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "하위 코드 항목 목록",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "group_code",
+          "group_name",
+          "description",
+          "is_active"
+        ],
+        "title": "CommonCodeGroupDetailResponse",
+        "description": "공통코드 그룹 상세 응답 (항목 포함)"
+      },
+      "CommonCodeGroupListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CommonCodeGroupResponse"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "그룹 목록"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "총 개수"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "현재 페이지"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "description": "페이지 크기"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
+            "description": "총 페이지 수"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size",
+          "total_pages"
+        ],
+        "title": "CommonCodeGroupListResponse",
+        "description": "공통코드 그룹 목록 응답"
+      },
+      "CommonCodeGroupResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "group_code": {
+            "type": "string",
+            "title": "Group Code",
+            "description": "그룹 고유 코드"
+          },
+          "group_name": {
+            "type": "string",
+            "title": "Group Name",
+            "description": "그룹 이름"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "그룹 설명"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "활성화 여부"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "group_code",
+          "group_name",
+          "description",
+          "is_active"
+        ],
+        "title": "CommonCodeGroupResponse",
+        "description": "공통코드 그룹 응답 (항목 미포함)"
+      },
+      "CommonCodeGroupUpdate": {
+        "properties": {
+          "group_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Code",
+            "description": "그룹 고유 코드 (선택사항)"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name",
+            "description": "그룹 이름 (선택사항)"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "그룹 설명 (선택사항)"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active",
+            "description": "활성화 여부 (선택사항)"
+          }
+        },
+        "type": "object",
+        "title": "CommonCodeGroupUpdate",
+        "description": "공통코드 그룹 수정 요청"
+      },
+      "CommonCodeItemCreate": {
+        "properties": {
+          "code_key": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Code Key",
+            "description": "코드 키 (예: RETAIL, LOAN)"
+          },
+          "code_value": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Code Value",
+            "description": "코드 값/표시명 (예: 리테일, 대출)"
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Sort Order",
+            "description": "정렬 순서",
+            "default": 0
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "활성화 여부",
+            "default": true
+          },
+          "attributes": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attributes",
+            "description": "추가 속성/메타데이터 (선택사항)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code_key",
+          "code_value"
+        ],
+        "title": "CommonCodeItemCreate",
+        "description": "공통코드 항목 생성 요청"
+      },
+      "CommonCodeItemListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CommonCodeItemResponse"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "항목 목록"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "총 개수"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "현재 페이지"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "description": "페이지 크기"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
+            "description": "총 페이지 수"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size",
+          "total_pages"
+        ],
+        "title": "CommonCodeItemListResponse",
+        "description": "공통코드 항목 목록 응답"
+      },
+      "CommonCodeItemResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "group_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Group Id",
+            "description": "상위 그룹 ID"
+          },
+          "code_key": {
+            "type": "string",
+            "title": "Code Key",
+            "description": "코드 키"
+          },
+          "code_value": {
+            "type": "string",
+            "title": "Code Value",
+            "description": "코드 값/표시명"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "description": "정렬 순서"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "활성화 여부"
+          },
+          "attributes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Attributes",
+            "description": "추가 속성/메타데이터"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "group_id",
+          "code_key",
+          "code_value",
+          "sort_order",
+          "is_active",
+          "attributes"
+        ],
+        "title": "CommonCodeItemResponse",
+        "description": "공통코드 항목 응답"
+      },
+      "CommonCodeItemUpdate": {
+        "properties": {
+          "code_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code Key",
+            "description": "코드 키 (선택사항)"
+          },
+          "code_value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code Value",
+            "description": "코드 값/표시명 (선택사항)"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order",
+            "description": "정렬 순서 (선택사항)"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active",
+            "description": "활성화 여부 (선택사항)"
+          },
+          "attributes": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attributes",
+            "description": "추가 속성/메타데이터 (선택사항)"
+          }
+        },
+        "type": "object",
+        "title": "CommonCodeItemUpdate",
+        "description": "공통코드 항목 수정 요청"
       },
       "ConsultationCreate": {
         "properties": {

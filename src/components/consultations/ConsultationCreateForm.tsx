@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../common/Modal';
 import Spinner from '../common/Spinner';
 import Toast, { ToastState, ToastType } from '../common/Toast';
+import TypeAheadSelectBox from '../common/TypeAheadSelectBox';
+import AddCodeModal from '../common/AddCodeModal';
 import MetadataFields from './MetadataFields';
+import { useCommonCodes } from '@/hooks/useCommonCodes';
 import {
   BusinessType as ApiBusinessType,
   ConsultationResponse as ApiConsultationResponse,
@@ -53,6 +56,24 @@ const ConsultationCreateForm: React.FC = () => {
     message: '',
     isOpen: false,
   });
+
+  // 공통코드 훅
+  const {
+    options: businessTypeOptions,
+    isLoading: businessTypeLoading,
+    addNewCode: addNewBusinessType,
+  } = useCommonCodes('BUSINESS_TYPE');
+
+  const {
+    options: errorCodeOptions,
+    isLoading: errorCodeLoading,
+    addNewCode: addNewErrorCode,
+  } = useCommonCodes('ERROR_CODE');
+
+  // AddCodeModal 상태
+  const [addCodeModalOpen, setAddCodeModalOpen] = useState(false);
+  const [addCodeType, setAddCodeType] = useState<'BUSINESS_TYPE' | 'ERROR_CODE'>('BUSINESS_TYPE');
+  const [addCodeLabel, setAddCodeLabel] = useState('');
 
   useEffect(() => {
     if (!isCreatingManualDraft) {
@@ -239,6 +260,24 @@ const ConsultationCreateForm: React.FC = () => {
     navigate('/consultations/search');
   };
 
+  const handleAddCodeConfirm = async (label: string, code: string, description: string) => {
+    try {
+      if (addCodeType === 'BUSINESS_TYPE') {
+        await addNewBusinessType(label, code, description);
+        setValues((prev) => ({ ...prev, business_type: code as BusinessType }));
+        showToast('새 업무구분이 추가되었습니다.', 'success');
+      } else {
+        await addNewErrorCode(label, code, description);
+        setValues((prev) => ({ ...prev, error_code: code }));
+        showToast('새 에러코드가 추가되었습니다.', 'success');
+      }
+      setAddCodeModalOpen(false);
+    } catch (error) {
+      console.error('Add code error:', error);
+      showToast('코드 추가에 실패했습니다. 다시 시도해주세요.', 'error');
+    }
+  };
+
   const inputClasses = (hasError: boolean) =>
     [
       'min-h-[36px] w-full rounded border px-3 text-[14px] text-gray-900 outline-none transition',
@@ -328,42 +367,57 @@ const ConsultationCreateForm: React.FC = () => {
                 <label className="mb-1 text-[13px] font-semibold text-gray-900">
                   업무구분<span className="text-red-600">*</span>
                 </label>
-                <select
-                  name="business_type"
-                  value={values.business_type}
-                  onChange={handleInputChange}
-                  className={inputClasses(Boolean(errors.business_type))}
-                >
-                  <option value="">업무구분 선택</option>
-                  <option value="DEPOSIT">예금</option>
-                  <option value="LOAN">대출</option>
-                  <option value="CARD">카드</option>
-                  <option value="EXCHANGE">환전</option>
-                  <option value="INTERNET">인터넷뱅킹</option>
-                  <option value="MOBILE">모바일뱅킹</option>
-                  <option value="OTHER">기타</option>
-                </select>
-                {errors.business_type && (
-                  <span className="mt-1 text-[12px] text-red-600">{errors.business_type}</span>
-                )}
+                <TypeAheadSelectBox
+                  options={businessTypeOptions}
+                  selectedCode={values.business_type}
+                  value={
+                    businessTypeOptions.find((opt) => opt.code === values.business_type)
+                      ?.label || ''
+                  }
+                  onChange={(code) => {
+                    setValues((prev) => ({ ...prev, business_type: code as BusinessType }));
+                    if (errors.business_type) {
+                      setErrors((prev) => ({ ...prev, business_type: '' }));
+                    }
+                  }}
+                  onAddNew={(searchTerm) => {
+                    setAddCodeType('BUSINESS_TYPE');
+                    setAddCodeLabel(searchTerm);
+                    setAddCodeModalOpen(true);
+                  }}
+                  placeholder="업무구분을 검색하거나 선택하세요"
+                  error={errors.business_type}
+                  isLoading={businessTypeLoading}
+                  allowCreate={true}
+                />
               </div>
 
               <div className="flex flex-col">
                 <label className="mb-1 text-[13px] font-semibold text-gray-900">
                   에러코드<span className="text-red-600">*</span>
                 </label>
-                <input
-                  type="text"
-                  name="error_code"
-                  value={values.error_code}
-                  onChange={handleInputChange}
-                  placeholder="에러코드 입력 (예: E001)"
-                  className={inputClasses(Boolean(errors.error_code))}
+                <TypeAheadSelectBox
+                  options={errorCodeOptions}
+                  selectedCode={values.error_code}
+                  value={
+                    errorCodeOptions.find((opt) => opt.code === values.error_code)?.label || ''
+                  }
+                  onChange={(code) => {
+                    setValues((prev) => ({ ...prev, error_code: code }));
+                    if (errors.error_code) {
+                      setErrors((prev) => ({ ...prev, error_code: '' }));
+                    }
+                  }}
+                  onAddNew={(searchTerm) => {
+                    setAddCodeType('ERROR_CODE');
+                    setAddCodeLabel(searchTerm);
+                    setAddCodeModalOpen(true);
+                  }}
+                  placeholder="에러코드를 검색하거나 선택하세요"
+                  error={errors.error_code}
+                  isLoading={errorCodeLoading}
+                  allowCreate={true}
                 />
-                {errors.error_code && (
-                  <span className="mt-1 text-[12px] text-red-600">{errors.error_code}</span>
-                )}
-                <span className="mt-1 text-[12px] text-gray-600">에러코드를 입력해주세요</span>
               </div>
             </div>
           </section>
@@ -469,6 +523,14 @@ const ConsultationCreateForm: React.FC = () => {
           onClose={() => setToast((prev) => ({ ...prev, isOpen: false }))}
         />
       )}
+
+      <AddCodeModal
+        isOpen={addCodeModalOpen}
+        codeType={addCodeType}
+        initialLabel={addCodeLabel}
+        onConfirm={handleAddCodeConfirm}
+        onCancel={() => setAddCodeModalOpen(false)}
+      />
     </>
   );
 };

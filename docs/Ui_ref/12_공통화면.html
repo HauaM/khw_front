@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>공통코드 관리 - KWH 지식관리시스템</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="/_sdk/element_sdk.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Noto Sans KR", "Apple SD Gothic Neo", system-ui,
+          -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #212121;
+        background-color: #fafafa;
+        box-sizing: border-box;
+        height: 100%;
+        width: 100%;
+      }
+
+      html {
+        height: 100%;
+        width: 100%;
+      }
+
+      /* App Header */
+      .app-header {
+        height: 60px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+      }
+
+      .app-header-left {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #005bac;
+        line-height: 1.2;
+      }
+
+      .app-subtitle {
+        font-size: 12px;
+        color: #6e6e6e;
+        margin-top: 2px;
+      }
+
+      .app-header-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        color: #424242;
+      }
+
+      .header-divider {
+        color: #bdbdbd;
+      }
+
+      .user-role-badge {
+        background-color: #e8f1fb;
+        color: #1a73e8;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+      }
+
+      .logout-btn {
+        color: #005bac;
+        background: none;
+        border: 1px solid #005bac;
+        border-radius: 4px;
+        padding: 4px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .logout-btn:hover {
+        background-color: #e8f1fb;
+      }
+
+      /* App Container */
+      .app-container {
+        display: flex;
+        height: 100%;
+        width: 100%;
+        padding-top: 60px;
+      }
+
+      /* Sidebar */
+      .app-sidebar {
+        width: 240px;
+        background-color: #ffffff;
+        border-right: 1px solid #e0e0e0;
+        overflow-y: auto;
+        height: calc(100vh - 60px);
+      }
+
+      .sidebar-menu {
+        padding: 16px 0;
+      }
+
+      .menu-group {
+        margin-bottom: 24px;
+      }
+
+      .menu-group-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #6e6e6e;
+        text-transform: uppercase;
+        padding: 8px 16px;
+        letter-spacing: 0.5px;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #424242;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-left: 3px solid transparent;
+      }
+
+      .menu-item:hover {
+        background-color: #e8f1fb;
+        color: #005bac;
+      }
+
+      .menu-item.active {
+        background-color: #d2e4fa;
+        color: #005bac;
+        border-left-color: #005bac;
+        font-weight: 600;
+      }
+
+      .menu-icon {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+        height: calc(100vh - 60px);
+      }
+
+      .content-wrapper {
+        padding: 24px;
+        max-width: 1600px;
+      }
+
+      .page-header {
+        margin-bottom: 24px;
+      }
+
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #212121;
+        line-height: 1.4;
+        margin-bottom: 8px;
+      }
+
+      .page-description {
+        font-size: 14px;
+        color: #6e6e6e;
+      }
+
+      /* Split Layout */
+      .split-layout {
+        display: flex;
+        gap: 24px;
+        height: calc(100vh - 200px);
+      }
+
+      /* Left Panel - Group List */
+      .group-panel {
+        width: 380px;
+        display: flex;
+        flex-direction: column;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+      }
+
+      .group-panel-header {
+        padding: 16px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .group-panel-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #212121;
+        margin-bottom: 12px;
+      }
+
+      .search-box {
+        position: relative;
+      }
+
+      .search-input {
+        width: 100%;
+        height: 36px;
+        border: 1px solid #bdbdbd;
+        border-radius: 4px;
+        padding: 0 12px 0 36px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.2);
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        color: #6e6e6e;
+      }
+
+      .group-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px;
+      }
+
+      .group-item {
+        padding: 12px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+
+      .group-item:hover {
+        background-color: #f5f5f5;
+        border-color: #1a73e8;
+      }
+
+      .group-item.selected {
+        background-color: #e8f1fb;
+        border-color: #005bac;
+      }
+
+      .group-item-actions {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: none;
+        gap: 4px;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 4px;
+        padding: 2px;
+      }
+
+      .group-item:hover .group-item-actions,
+      .group-item.selected .group-item-actions {
+        display: flex;
+      }
+
+      .group-action-btn {
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        background-color: transparent;
+      }
+
+      .group-action-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .group-action-btn.edit {
+        color: #005bac;
+      }
+
+      .group-action-btn.edit:hover {
+        background-color: #e8f1fb;
+      }
+
+      .group-action-btn.delete {
+        color: #c62828;
+      }
+
+      .group-action-btn.delete:hover {
+        background-color: #ffebee;
+      }
+
+      .group-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+
+      .group-code {
+        font-size: 13px;
+        font-weight: 600;
+        color: #005bac;
+        font-family: "Roboto Mono", monospace;
+      }
+
+      .group-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #212121;
+        margin-bottom: 4px;
+      }
+
+      .group-description {
+        font-size: 12px;
+        color: #6e6e6e;
+        line-height: 1.4;
+      }
+
+      .status-badge {
+        display: inline-block;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+      }
+
+      .status-badge.active {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+      }
+
+      .status-badge.inactive {
+        background-color: #f5f5f5;
+        color: #6e6e6e;
+      }
+
+      .group-panel-footer {
+        padding: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .add-group-btn {
+        width: 100%;
+        height: 40px;
+        background-color: #005bac;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: background-color 0.2s;
+      }
+
+      .add-group-btn:hover {
+        background-color: #00437f;
+      }
+
+      /* Right Panel - Code Items */
+      .code-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+      }
+
+      .code-panel-header {
+        padding: 20px;
+        border-bottom: 1px solid #e0e0e0;
+        background-color: #f5f7fb;
+      }
+
+      .code-panel-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+
+      .code-panel-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #005bac;
+        margin-bottom: 4px;
+      }
+
+      .code-panel-subtitle {
+        font-size: 13px;
+        color: #6e6e6e;
+      }
+
+      .add-code-btn {
+        height: 36px;
+        background-color: #005bac;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        padding: 0 16px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: background-color 0.2s;
+      }
+
+      .add-code-btn:hover {
+        background-color: #00437f;
+      }
+
+      .empty-state {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+      }
+
+      .empty-icon {
+        width: 64px;
+        height: 64px;
+        color: #bdbdbd;
+        margin-bottom: 16px;
+      }
+
+      .empty-text {
+        font-size: 16px;
+        color: #6e6e6e;
+        margin-bottom: 8px;
+      }
+
+      .empty-subtext {
+        font-size: 13px;
+        color: #9e9e9e;
+      }
+
+      .code-table-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+      }
+
+      .code-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .code-table th {
+        background-color: #e8f1fb;
+        color: #005bac;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #bdbdbd;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .code-table td {
+        font-size: 13px;
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .code-table tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      .code-table tr.inactive {
+        opacity: 0.5;
+      }
+
+      .code-key {
+        font-family: "Roboto Mono", monospace;
+        font-weight: 600;
+        color: #1a73e8;
+      }
+
+      .sort-order {
+        text-align: center;
+        font-family: "Roboto Mono", monospace;
+        color: #6e6e6e;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+      }
+
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        background-color: transparent;
+      }
+
+      .btn-icon:hover {
+        transform: scale(1.1);
+      }
+
+      .btn-icon.edit {
+        color: #005bac;
+      }
+
+      .btn-icon.edit:hover {
+        background-color: #e8f1fb;
+      }
+
+      .btn-icon.delete {
+        color: #c62828;
+      }
+
+      .btn-icon.delete:hover {
+        background-color: #ffebee;
+      }
+
+      .btn-icon svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      /* Toggle Switch */
+      .toggle-switch {
+        position: relative;
+        width: 40px;
+        height: 20px;
+        background-color: #bdbdbd;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .toggle-switch.active {
+        background-color: #2e7d32;
+      }
+
+      .toggle-switch::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.2s;
+      }
+
+      .toggle-switch.active::after {
+        transform: translateX(20px);
+      }
+
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+      }
+
+      .modal {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .modal-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #212121;
+      }
+
+      .modal-body {
+        padding: 24px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #212121;
+        margin-bottom: 6px;
+      }
+
+      .form-label.required::after {
+        content: " *";
+        color: #c62828;
+      }
+
+      .form-input,
+      .form-textarea {
+        width: 100%;
+        min-height: 36px;
+        border: 1px solid #bdbdbd;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+
+      .form-textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      .form-input:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.2);
+      }
+
+      .form-helper {
+        font-size: 12px;
+        color: #6e6e6e;
+        margin-top: 4px;
+      }
+
+      .form-error {
+        font-size: 12px;
+        color: #c62828;
+        margin-top: 4px;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 16px;
+      }
+
+      .form-col {
+        flex: 1;
+      }
+
+      .toggle-field {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+      }
+
+      .btn-cancel,
+      .btn-save {
+        height: 40px;
+        padding: 0 20px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-cancel {
+        background-color: #ffffff;
+        color: #424242;
+        border: 1px solid #bdbdbd;
+      }
+
+      .btn-cancel:hover {
+        background-color: #f5f5f5;
+      }
+
+      .btn-save {
+        background-color: #005bac;
+        color: #ffffff;
+        border: none;
+      }
+
+      .btn-save:hover {
+        background-color: #00437f;
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        background-color: #ffffff;
+        border-radius: 6px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 2000;
+        animation: slideIn 0.3s ease-out;
+        border-left: 4px solid #005bac;
+        min-width: 300px;
+      }
+
+      .toast.success {
+        border-left-color: #2e7d32;
+      }
+
+      .toast.error {
+        border-left-color: #c62828;
+      }
+
+      .toast-icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .toast-message {
+        font-size: 14px;
+        color: #212121;
+        flex: 1;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Delete Confirmation */
+      .confirm-dialog {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 24px;
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .confirm-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212121;
+        margin-bottom: 12px;
+      }
+
+      .confirm-message {
+        font-size: 14px;
+        color: #424242;
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+
+      .confirm-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      .btn-confirm-cancel,
+      .btn-confirm-delete {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .btn-confirm-cancel {
+        background-color: #ffffff;
+        color: #424242;
+        border: 1px solid #bdbdbd;
+      }
+
+      .btn-confirm-delete {
+        background-color: #c62828;
+        color: #ffffff;
+        border: none;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
+    <style>
+      @view-transition {
+        navigation: auto;
+      }
+    </style>
+    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-header-left">
+        <div class="app-title" id="headerTitle">KWH 지식관리시스템</div>
+        <div class="app-subtitle">Kwangju Bank Help Desk Wiki</div>
+      </div>
+      <div class="app-header-right">
+        <span id="headerDepartment">디지털전략부</span>
+        <span class="header-divider">·</span>
+        <span id="headerUserName">홍길동</span>
+        <span class="header-divider">·</span>
+        <span class="user-role-badge" id="headerUserRole">관리자</span>
+        <button class="logout-btn">로그아웃</button>
+      </div>
+    </header>
+    <!-- App Container -->
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="app-sidebar">
+        <nav class="sidebar-menu">
+          <div class="menu-group">
+            <div class="menu-group-title">메인</div>
+            <div class="menu-item">
+              <svg
+                class="menu-icon"
+                fill="none"
+                stroke="currentColor"
+                viewbox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              대시보드
+            </div>
+          </div>
+          <div class="menu-group">
+            <div class="menu-group-title">상담 관리</div>
+            <div class="menu-item">
+              <svg
+                class="menu-icon"
+                fill="none"
+                stroke="currentColor"
+                viewbox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              상담 등록
+            </div>
+            <div class="menu-item">
+              <svg
+                class="menu-icon"
+                fill="none"
+                stroke="currentColor"
+                viewbox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              상담 검색
+            </div>
+          </div>
+          <div class="menu-group">
+            <div class="menu-group-title">메뉴얼 관리</div>
+            <div class="menu-item">
+              <svg
+                class="menu-icon"
+                fill="none"
+                stroke="currentColor"
+                viewbox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              메뉴얼 검색
+            </div>
+          </div>
+          <div class="menu-group">
+            <div class="menu-group-title">관리자</div>
+            <div class="menu-item active">
+              <svg
+                class="menu-icon"
+                fill="none"
+                stroke="currentColor"
+                viewbox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              공통코드 관리
+            </div>
+            <div class="menu-item">
+              <svg
+                class="menu-icon"
+                fill="none"
+                stroke="currentColor"
+                viewbox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+              사용자 관리
+            </div>
+          </div>
+        </nav>
+      </aside>
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h1 class="page-title">공통코드 관리</h1>
+            <p class="page-description">
+              시스템에서 사용하는 공통코드 그룹 및 코드 항목을 관리합니다.
+            </p>
+          </div>
+          <div class="split-layout">
+            <!-- Left Panel: Group List -->
+            <div class="group-panel">
+              <div class="group-panel-header">
+                <h2 class="group-panel-title">코드 그룹 목록</h2>
+                <div class="search-box">
+                  <svg
+                    class="search-icon"
+                    fill="none"
+                    stroke="currentColor"
+                    viewbox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    /></svg
+                  ><input
+                    type="text"
+                    class="search-input"
+                    placeholder="그룹코드 또는 그룹명 검색"
+                    id="groupSearchInput"
+                  />
+                </div>
+              </div>
+              <div class="group-list" id="groupList">
+                <!-- Group items will be rendered here -->
+              </div>
+              <div class="group-panel-footer">
+                <button class="add-group-btn" id="addGroupBtn">
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    viewbox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  그룹 추가
+                </button>
+              </div>
+            </div>
+            <!-- Right Panel: Code Items -->
+            <div class="code-panel">
+              <div id="emptyState" class="empty-state">
+                <svg
+                  class="empty-icon"
+                  fill="none"
+                  stroke="currentColor"
+                  viewbox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <div class="empty-text">그룹을 선택해주세요</div>
+                <div class="empty-subtext">
+                  좌측에서 코드 그룹을 선택하면 상세 정보가 표시됩니다.
+                </div>
+              </div>
+              <div
+                id="codeContent"
+                class="hidden"
+                style="display: flex; flex-direction: column; height: 100%"
+              >
+                <div class="code-panel-header">
+                  <div class="code-panel-title-row">
+                    <div>
+                      <h2 class="code-panel-title" id="selectedGroupName">-</h2>
+                      <p
+                        class="code-panel-subtitle"
+                        id="selectedGroupDescription"
+                      >
+                        -
+                      </p>
+                    </div>
+                    <button class="add-code-btn" id="addCodeBtn">
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        viewbox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      코드 항목 추가
+                    </button>
+                  </div>
+                </div>
+                <div class="code-table-container">
+                  <table class="code-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 15%">코드 키</th>
+                        <th style="width: 20%">코드 값</th>
+                        <th style="width: 30%">설명</th>
+                        <th style="width: 10%; text-align: center">정렬순서</th>
+                        <th style="width: 10%; text-align: center">활성</th>
+                        <th style="width: 15%; text-align: center">관리</th>
+                      </tr>
+                    </thead>
+                    <tbody id="codeTableBody">
+                      <!-- Code items will be rendered here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- Group Modal -->
+    <div id="groupModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title" id="groupModalTitle">그룹 추가</h3>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label required">그룹 코드</label>
+            <input
+              type="text"
+              class="form-input"
+              id="groupCodeInput"
+              placeholder="예: BUSINESS_TYPE"
+            />
+            <div class="form-helper">
+              영문 대문자와 언더스코어(_)만 사용 가능합니다.
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">그룹명</label>
+            <input
+              type="text"
+              class="form-input"
+              id="groupNameInput"
+              placeholder="예: 업무구분"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">설명</label>
+            <textarea
+              class="form-textarea"
+              id="groupDescInput"
+              placeholder="그룹에 대한 설명을 입력하세요."
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <div class="toggle-field">
+              <label class="form-label">활성 여부</label>
+              <div class="toggle-switch active" id="groupActiveToggle"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" id="groupModalCancel">취소</button>
+          <button
+            class="btn-delete"
+            id="groupModalDelete"
+            style="
+              margin-right: auto;
+              display: none;
+              background-color: #c62828;
+              color: #ffffff;
+              height: 40px;
+              padding: 0 20px;
+              border-radius: 6px;
+              font-size: 14px;
+              font-weight: 600;
+              cursor: pointer;
+              border: none;
+              transition: background-color 0.2s;
+            "
+          >
+            삭제
+          </button>
+          <button class="btn-save" id="groupModalSave">저장</button>
+        </div>
+      </div>
+    </div>
+    <!-- Code Item Modal -->
+    <div id="codeModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title" id="codeModalTitle">코드 항목 추가</h3>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-col">
+              <div class="form-group">
+                <label class="form-label required">코드 키</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  id="codeKeyInput"
+                  placeholder="예: DEPOSIT"
+                />
+                <div class="form-helper">
+                  영문 대문자와 언더스코어(_)만 사용
+                </div>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-group">
+                <label class="form-label required">코드 값</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  id="codeValueInput"
+                  placeholder="예: 예금"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">설명</label>
+            <textarea
+              class="form-textarea"
+              id="codeDescInput"
+              placeholder="코드에 대한 설명을 입력하세요."
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-col">
+              <div class="form-group">
+                <label class="form-label">��렬 순서</label>
+                <input
+                  type="number"
+                  class="form-input"
+                  id="codeSortInput"
+                  placeholder="1"
+                  value="1"
+                />
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-group">
+                <div class="toggle-field">
+                  <label class="form-label">활성 여부</label>
+                  <div class="toggle-switch active" id="codeActiveToggle"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">메타데이터 (JSON)</label>
+            <textarea
+              class="form-textarea"
+              id="codeMetadataInput"
+              placeholder='{"key": "value"}'
+            ></textarea>
+            <div class="form-helper">선택사항: JSON 형식으로 입력하세요.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" id="codeModalCancel">취소</button>
+          <button class="btn-save" id="codeModalSave">저장</button>
+        </div>
+      </div>
+    </div>
+    <!-- Delete Confirmation Dialog -->
+    <div id="deleteDialog" class="modal-overlay hidden">
+      <div class="confirm-dialog">
+        <h3 class="confirm-title">코드 비활성화</h3>
+        <p class="confirm-message">
+          해당 코드 항목을 비활성화하시겠습니까?<br />
+          비활성화된 항목은 시스템에서 사용되지 않습니다.
+        </p>
+        <div class="confirm-buttons">
+          <button class="btn-confirm-cancel" id="deleteDialogCancel">
+            취소
+          </button>
+          <button class="btn-confirm-delete" id="deleteDialogConfirm">
+            비활성화
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Delete Group Confirmation Dialog -->
+    <div id="deleteGroupDialog" class="modal-overlay hidden">
+      <div class="confirm-dialog">
+        <h3 class="confirm-title">그룹 삭제</h3>
+        <p class="confirm-message">
+          해당 그룹을 삭제하시겠습니까?<br />
+          그룹에 속한 모든 코드 항목도 함께 삭제됩니다.
+        </p>
+        <div class="confirm-buttons">
+          <button class="btn-confirm-cancel" id="deleteGroupDialogCancel">
+            취소
+          </button>
+          <button class="btn-confirm-delete" id="deleteGroupDialogConfirm">
+            삭제
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Sample Data
+      let groups = [
+        {
+          id: 1,
+          group_code: "BUSINESS_TYPE",
+          group_name: "업무구분",
+          description: "상담 업무의 종류를 구분하는 코드",
+          is_active: true,
+        },
+        {
+          id: 2,
+          group_code: "ERROR_CODE",
+          group_name: "에러코드",
+          description: "시스템 에러 및 예외 상황 코드",
+          is_active: true,
+        },
+        {
+          id: 3,
+          group_code: "SCREEN_CODE",
+          group_name: "화면코드",
+          description: "시스템 화면 식별 코드",
+          is_active: true,
+        },
+        {
+          id: 4,
+          group_code: "CUSTOMER_TYPE",
+          group_name: "고객유형",
+          description: "고객 분류 코드",
+          is_active: false,
+        },
+      ];
+
+      let codeItems = [
+        {
+          id: 1,
+          group_id: 1,
+          code_key: "DEPOSIT",
+          code_value: "예금",
+          description: "예금 관련 업무",
+          sort_order: 1,
+          is_active: true,
+          metadata: null,
+        },
+        {
+          id: 2,
+          group_id: 1,
+          code_key: "LOAN",
+          code_value: "대출",
+          description: "대출 관련 업무",
+          sort_order: 2,
+          is_active: true,
+          metadata: null,
+        },
+        {
+          id: 3,
+          group_id: 1,
+          code_key: "CARD",
+          code_value: "카드",
+          description: "카드 관련 업무",
+          sort_order: 3,
+          is_active: true,
+          metadata: null,
+        },
+        {
+          id: 4,
+          group_id: 2,
+          code_key: "ERR_001",
+          code_value: "네트워크 오류",
+          description: "서버 연결 실패",
+          sort_order: 1,
+          is_active: true,
+          metadata: '{"severity": "high"}',
+        },
+        {
+          id: 5,
+          group_id: 2,
+          code_key: "ERR_002",
+          code_value: "권한 오���",
+          description: "접근 권한 없음",
+          sort_order: 2,
+          is_active: true,
+          metadata: '{"severity": "medium"}',
+        },
+      ];
+
+      let selectedGroupId = null;
+      let editingGroupId = null;
+      let editingCodeId = null;
+      let deleteTargetId = null;
+
+      // Default Config
+      const defaultConfig = {
+        system_title: "KWH 지식관리시스템",
+        user_name: "홍길동",
+        department: "디지털전략부",
+        user_role: "관리자",
+      };
+
+      // Config object (managed by SDK)
+      let config = { ...defaultConfig };
+
+      // Render functions
+      function renderGroupList(searchTerm = "") {
+        const groupList = document.getElementById("groupList");
+        const filtered = groups.filter(
+          (g) =>
+            g.group_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            g.group_name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        groupList.innerHTML = filtered
+          .map(
+            (group) => `
+        <div class="group-item ${
+          selectedGroupId === group.id ? "selected" : ""
+        }" data-id="${group.id}">
+          <div class="group-item-actions">
+            <button class="group-action-btn edit" data-id="${
+              group.id
+            }" title="그룹 수정">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+            </button>
+            <button class="group-action-btn delete" data-id="${
+              group.id
+            }" title="그룹 삭제">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+          <div class="group-item-header">
+            <span class="group-code">${group.group_code}</span>
+            <span class="status-badge ${
+              group.is_active ? "active" : "inactive"
+            }">
+              ${group.is_active ? "활성" : "비활성"}
+            </span>
+          </div>
+          <div class="group-name">${group.group_name}</div>
+          <div class="group-description">${group.description}</div>
+        </div>
+      `
+          )
+          .join("");
+
+        // Add click handlers
+        document.querySelectorAll(".group-item").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            // Ignore clicks on action buttons
+            if (e.target.closest(".group-item-actions")) {
+              return;
+            }
+            const groupId = parseInt(item.dataset.id);
+            selectGroup(groupId);
+          });
+
+          // Double click to edit
+          item.addEventListener("dblclick", (e) => {
+            if (e.target.closest(".group-item-actions")) {
+              return;
+            }
+            const groupId = parseInt(item.dataset.id);
+            openGroupModal(groupId);
+          });
+        });
+
+        // Add action button handlers
+        document.querySelectorAll(".group-action-btn.edit").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const groupId = parseInt(btn.dataset.id);
+            openGroupModal(groupId);
+          });
+        });
+
+        document.querySelectorAll(".group-action-btn.delete").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const groupId = parseInt(btn.dataset.id);
+            openDeleteGroupDialog(groupId);
+          });
+        });
+      }
+
+      function selectGroup(groupId) {
+        selectedGroupId = groupId;
+        const group = groups.find((g) => g.id === groupId);
+
+        if (group) {
+          document.getElementById("emptyState").classList.add("hidden");
+          document.getElementById("codeContent").classList.remove("hidden");
+          document.getElementById("codeContent").style.display = "flex";
+
+          document.getElementById("selectedGroupName").textContent =
+            group.group_name;
+          document.getElementById(
+            "selectedGroupDescription"
+          ).textContent = `${group.group_code} - ${group.description}`;
+
+          renderCodeItems();
+          renderGroupList(document.getElementById("groupSearchInput").value);
+        }
+      }
+
+      function renderCodeItems() {
+        const tbody = document.getElementById("codeTableBody");
+        const items = codeItems
+          .filter((item) => item.group_id === selectedGroupId)
+          .sort((a, b) => a.sort_order - b.sort_order);
+
+        if (items.length === 0) {
+          tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px; color: #6E6E6E;">
+              등록된 코드 항목이 없습니다.
+            </td>
+          </tr>
+        `;
+          return;
+        }
+
+        tbody.innerHTML = items
+          .map(
+            (item) => `
+        <tr class="${!item.is_active ? "inactive" : ""}" data-id="${item.id}">
+          <td><span class="code-key">${item.code_key}</span></td>
+          <td>${item.code_value}</td>
+          <td>${item.description || "-"}</td>
+          <td class="sort-order">${item.sort_order}</td>
+          <td style="text-align: center;">
+            <span class="status-badge ${
+              item.is_active ? "active" : "inactive"
+            }">
+              ${item.is_active ? "활성" : "비활성"}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon edit" data-id="${
+                item.id
+              }" title="코드 수정">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button class="btn-icon delete" data-id="${
+                item.id
+              }" title="코드 삭제">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `
+          )
+          .join("");
+
+        // Add event handlers
+        document.querySelectorAll(".btn-icon.edit").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const itemId = parseInt(btn.dataset.id);
+            openCodeModal(itemId);
+          });
+        });
+
+        document.querySelectorAll(".btn-icon.delete").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const itemId = parseInt(btn.dataset.id);
+            openDeleteDialog(itemId);
+          });
+        });
+      }
+
+      // Modal functions
+      function openGroupModal(groupId = null) {
+        editingGroupId = groupId;
+        const modal = document.getElementById("groupModal");
+        const title = document.getElementById("groupModalTitle");
+        const deleteBtn = document.getElementById("groupModalDelete");
+
+        if (groupId) {
+          const group = groups.find((g) => g.id === groupId);
+          title.textContent = "그룹 수정";
+          document.getElementById("groupCodeInput").value = group.group_code;
+          document.getElementById("groupNameInput").value = group.group_name;
+          document.getElementById("groupDescInput").value =
+            group.description || "";
+
+          const toggle = document.getElementById("groupActiveToggle");
+          if (group.is_active) {
+            toggle.classList.add("active");
+          } else {
+            toggle.classList.remove("active");
+          }
+
+          // Show delete button when editing
+          deleteBtn.style.display = "block";
+        } else {
+          title.textContent = "그룹 추가";
+          document.getElementById("groupCodeInput").value = "";
+          document.getElementById("groupNameInput").value = "";
+          document.getElementById("groupDescInput").value = "";
+          document.getElementById("groupActiveToggle").classList.add("active");
+
+          // Hide delete button when adding
+          deleteBtn.style.display = "none";
+        }
+
+        modal.classList.remove("hidden");
+      }
+
+      function closeGroupModal() {
+        document.getElementById("groupModal").classList.add("hidden");
+        editingGroupId = null;
+      }
+
+      function saveGroup() {
+        const code = document.getElementById("groupCodeInput").value.trim();
+        const name = document.getElementById("groupNameInput").value.trim();
+        const desc = document.getElementById("groupDescInput").value.trim();
+        const isActive = document
+          .getElementById("groupActiveToggle")
+          .classList.contains("active");
+
+        if (!code || !name) {
+          showToast("그룹 코드와 그룹명은 필수입니다.", "error");
+          return;
+        }
+
+        // TODO: API Connect - POST /admin/common-codes/groups or PUT /admin/common-codes/groups/{id}
+
+        if (editingGroupId) {
+          const group = groups.find((g) => g.id === editingGroupId);
+          group.group_code = code;
+          group.group_name = name;
+          group.description = desc;
+          group.is_active = isActive;
+          showToast("그룹이 수정되었습니다.", "success");
+        } else {
+          const newGroup = {
+            id: Math.max(...groups.map((g) => g.id)) + 1,
+            group_code: code,
+            group_name: name,
+            description: desc,
+            is_active: isActive,
+          };
+          groups.push(newGroup);
+          showToast("그룹이 추가되었습니다.", "success");
+        }
+
+        renderGroupList();
+        closeGroupModal();
+      }
+
+      function openCodeModal(itemId = null) {
+        editingCodeId = itemId;
+        const modal = document.getElementById("codeModal");
+        const title = document.getElementById("codeModalTitle");
+
+        if (itemId) {
+          const item = codeItems.find((c) => c.id === itemId);
+          title.textContent = "코드 항목 수정";
+          document.getElementById("codeKeyInput").value = item.code_key;
+          document.getElementById("codeValueInput").value = item.code_value;
+          document.getElementById("codeDescInput").value =
+            item.description || "";
+          document.getElementById("codeSortInput").value = item.sort_order;
+          document.getElementById("codeMetadataInput").value =
+            item.metadata || "";
+
+          const toggle = document.getElementById("codeActiveToggle");
+          if (item.is_active) {
+            toggle.classList.add("active");
+          } else {
+            toggle.classList.remove("active");
+          }
+        } else {
+          title.textContent = "코드 항목 추가";
+          document.getElementById("codeKeyInput").value = "";
+          document.getElementById("codeValueInput").value = "";
+          document.getElementById("codeDescInput").value = "";
+          document.getElementById("codeSortInput").value = "1";
+          document.getElementById("codeMetadataInput").value = "";
+          document.getElementById("codeActiveToggle").classList.add("active");
+        }
+
+        modal.classList.remove("hidden");
+      }
+
+      function closeCodeModal() {
+        document.getElementById("codeModal").classList.add("hidden");
+        editingCodeId = null;
+      }
+
+      function saveCodeItem() {
+        const key = document.getElementById("codeKeyInput").value.trim();
+        const value = document.getElementById("codeValueInput").value.trim();
+        const desc = document.getElementById("codeDescInput").value.trim();
+        const sortOrder =
+          parseInt(document.getElementById("codeSortInput").value) || 1;
+        const metadata = document
+          .getElementById("codeMetadataInput")
+          .value.trim();
+        const isActive = document
+          .getElementById("codeActiveToggle")
+          .classList.contains("active");
+
+        if (!key || !value) {
+          showToast("코��� 키와 코드 값은 필수입니다.", "error");
+          return;
+        }
+
+        // Check for duplicate key
+        const duplicate = codeItems.find(
+          (item) =>
+            item.code_key === key &&
+            item.group_id === selectedGroupId &&
+            item.id !== editingCodeId
+        );
+
+        if (duplicate) {
+          showToast("동일한 코드 키가 이미 존재합니다.", "error");
+          return;
+        }
+
+        // TODO: API Connect - POST or PUT /admin/common-codes/items
+
+        if (editingCodeId) {
+          const item = codeItems.find((c) => c.id === editingCodeId);
+          item.code_key = key;
+          item.code_value = value;
+          item.description = desc;
+          item.sort_order = sortOrder;
+          item.metadata = metadata || null;
+          item.is_active = isActive;
+          showToast("코드가 수정되었습니다.", "success");
+        } else {
+          const newItem = {
+            id: Math.max(...codeItems.map((c) => c.id)) + 1,
+            group_id: selectedGroupId,
+            code_key: key,
+            code_value: value,
+            description: desc,
+            sort_order: sortOrder,
+            metadata: metadata || null,
+            is_active: isActive,
+          };
+          codeItems.push(newItem);
+          showToast("코드가 추가되었습니다.", "success");
+        }
+
+        renderCodeItems();
+        closeCodeModal();
+      }
+
+      function openDeleteDialog(itemId) {
+        deleteTargetId = itemId;
+        document.getElementById("deleteDialog").classList.remove("hidden");
+      }
+
+      function closeDeleteDialog() {
+        document.getElementById("deleteDialog").classList.add("hidden");
+        deleteTargetId = null;
+      }
+
+      function confirmDelete() {
+        if (deleteTargetId) {
+          // TODO: API Connect - DELETE /admin/common-codes/items/{id}
+
+          const item = codeItems.find((c) => c.id === deleteTargetId);
+          if (item) {
+            item.is_active = false;
+            showToast("코드가 비활성화되었습니다.", "success");
+            renderCodeItems();
+          }
+        }
+        closeDeleteDialog();
+      }
+
+      let deleteGroupTargetId = null;
+
+      function openDeleteGroupDialog(groupId) {
+        deleteGroupTargetId = groupId;
+        document.getElementById("deleteGroupDialog").classList.remove("hidden");
+      }
+
+      function closeDeleteGroupDialog() {
+        document.getElementById("deleteGroupDialog").classList.add("hidden");
+        deleteGroupTargetId = null;
+      }
+
+      function confirmDeleteGroup() {
+        if (deleteGroupTargetId) {
+          // TODO: API Connect - DELETE /admin/common-codes/groups/{id}
+
+          // Remove group
+          groups = groups.filter((g) => g.id !== deleteGroupTargetId);
+
+          // Remove all code items in this group
+          codeItems = codeItems.filter(
+            (item) => item.group_id !== deleteGroupTargetId
+          );
+
+          // Reset selected group if deleted
+          if (selectedGroupId === deleteGroupTargetId) {
+            selectedGroupId = null;
+            document.getElementById("emptyState").classList.remove("hidden");
+            document.getElementById("codeContent").classList.add("hidden");
+          }
+
+          showToast("그룹이 삭제되었습니다.", "success");
+          renderGroupList(document.getElementById("groupSearchInput").value);
+        }
+        closeDeleteGroupDialog();
+      }
+
+      function showToast(message, type = "success") {
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+
+        const icon =
+          type === "success"
+            ? '<svg class="toast-icon" fill="none" stroke="#2E7D32" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+            : '<svg class="toast-icon" fill="none" stroke="#C62828" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+
+        toast.innerHTML = `
+        ${icon}
+        <div class="toast-message">${message}</div>
+      `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+          toast.remove();
+        }, 3000);
+      }
+
+      // Event Listeners
+      document
+        .getElementById("groupSearchInput")
+        .addEventListener("input", (e) => {
+          renderGroupList(e.target.value);
+        });
+
+      document.getElementById("addGroupBtn").addEventListener("click", () => {
+        openGroupModal();
+      });
+
+      document.getElementById("addCodeBtn").addEventListener("click", () => {
+        openCodeModal();
+      });
+
+      document
+        .getElementById("groupModalCancel")
+        .addEventListener("click", closeGroupModal);
+      document
+        .getElementById("groupModalSave")
+        .addEventListener("click", saveGroup);
+      document
+        .getElementById("groupModalDelete")
+        .addEventListener("click", () => {
+          if (editingGroupId) {
+            closeGroupModal();
+            openDeleteGroupDialog(editingGroupId);
+          }
+        });
+
+      document
+        .getElementById("codeModalCancel")
+        .addEventListener("click", closeCodeModal);
+      document
+        .getElementById("codeModalSave")
+        .addEventListener("click", saveCodeItem);
+
+      document
+        .getElementById("deleteDialogCancel")
+        .addEventListener("click", closeDeleteDialog);
+      document
+        .getElementById("deleteDialogConfirm")
+        .addEventListener("click", confirmDelete);
+
+      document
+        .getElementById("deleteGroupDialogCancel")
+        .addEventListener("click", closeDeleteGroupDialog);
+      document
+        .getElementById("deleteGroupDialogConfirm")
+        .addEventListener("click", confirmDeleteGroup);
+
+      // Toggle switches
+      document
+        .getElementById("groupActiveToggle")
+        .addEventListener("click", function () {
+          this.classList.toggle("active");
+        });
+
+      document
+        .getElementById("codeActiveToggle")
+        .addEventListener("click", function () {
+          this.classList.toggle("active");
+        });
+
+      // Close modals on overlay click
+      document.getElementById("groupModal").addEventListener("click", (e) => {
+        if (e.target.id === "groupModal") closeGroupModal();
+      });
+
+      document.getElementById("codeModal").addEventListener("click", (e) => {
+        if (e.target.id === "codeModal") closeCodeModal();
+      });
+
+      document.getElementById("deleteDialog").addEventListener("click", (e) => {
+        if (e.target.id === "deleteDialog") closeDeleteDialog();
+      });
+
+      document
+        .getElementById("deleteGroupDialog")
+        .addEventListener("click", (e) => {
+          if (e.target.id === "deleteGroupDialog") closeDeleteGroupDialog();
+        });
+
+      // Element SDK Integration
+      async function onConfigChange(newConfig) {
+        document.getElementById("headerTitle").textContent =
+          newConfig.system_title || defaultConfig.system_title;
+        document.getElementById("headerUserName").textContent =
+          newConfig.user_name || defaultConfig.user_name;
+        document.getElementById("headerDepartment").textContent =
+          newConfig.department || defaultConfig.department;
+        document.getElementById("headerUserRole").textContent =
+          newConfig.user_role || defaultConfig.user_role;
+      }
+
+      function mapToCapabilities(config) {
+        return {
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined,
+        };
+      }
+
+      function mapToEditPanelValues(config) {
+        return new Map([
+          ["system_title", config.system_title || defaultConfig.system_title],
+          ["user_name", config.user_name || defaultConfig.user_name],
+          ["department", config.department || defaultConfig.department],
+          ["user_role", config.user_role || defaultConfig.user_role],
+        ]);
+      }
+
+      // Initialize SDK
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig: defaultConfig,
+          onConfigChange: onConfigChange,
+          mapToCapabilities: mapToCapabilities,
+          mapToEditPanelValues: mapToEditPanelValues,
+        });
+
+        config = window.elementSdk.config;
+        onConfigChange(config);
+      }
+
+      // Initial render
+      renderGroupList();
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'9ab0415a97ca9d6e',t:'MTc2NTIzODc3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

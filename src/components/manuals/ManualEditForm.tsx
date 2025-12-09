@@ -8,11 +8,9 @@ import {
   ManualUpdatePayload,
 } from '@/types/manuals';
 import {
-  ChevronRightIcon,
   EditIcon,
   XIcon,
   PlusIcon,
-  TrashIcon,
   CheckIcon,
   AlertCircleIcon,
   InfoIcon,
