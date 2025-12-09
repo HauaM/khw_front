@@ -12,10 +12,11 @@ import {
   createCommonCodeGroup,
   updateCommonCodeGroup,
   deleteCommonCodeGroup,
-  fetchCommonCodeItems,
+  fetchCommonCodeItemsForAdmin,
   createCommonCodeItem,
   updateCommonCodeItem,
   deactivateCommonCodeItem,
+  getErrorMessage,
 } from '@/lib/api/commonCodes';
 
 export interface UseCommonCodeManagementResult {
@@ -144,9 +145,20 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
   // 선택 그룹 변경 시 코드 항목 조회
   useEffect(() => {
     if (selectedGroupId) {
-      loadCodeItems(selectedGroupId);
+      (async () => {
+        try {
+          setIsLoadingItems(true);
+          const items = await fetchCommonCodeItemsForAdmin(selectedGroupId);
+          setCodeItems(items);
+        } catch (error) {
+          console.error('Failed to load code items:', error);
+          showToast('코드 항목 조회에 실패했습니다.', 'error');
+        } finally {
+          setIsLoadingItems(false);
+        }
+      })();
     }
-  }, [selectedGroupId]);
+  }, [selectedGroupId, showToast]);
 
   const loadGroups = useCallback(async () => {
     try {
@@ -155,7 +167,8 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
       setGroups(fetchedGroups);
     } catch (error) {
       console.error('Failed to load groups:', error);
-      showToast('그룹 목록 조회에 실패했습니다.', 'error');
+      const errorMessage = getErrorMessage(error);
+      showToast(`그룹 목록 조회 실패: ${errorMessage}`, 'error');
     } finally {
       setIsLoadingGroups(false);
     }
@@ -165,11 +178,12 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
     async (groupId: string) => {
       try {
         setIsLoadingItems(true);
-        const items = await fetchCommonCodeItems(groupId);
+        const items = await fetchCommonCodeItemsForAdmin(groupId);
         setCodeItems(items);
       } catch (error) {
         console.error('Failed to load code items:', error);
-        showToast('코드 항목 조회에 실패했습니다.', 'error');
+        const errorMessage = getErrorMessage(error);
+        showToast(`코드 항목 조회 실패: ${errorMessage}`, 'error');
       } finally {
         setIsLoadingItems(false);
       }
@@ -288,7 +302,8 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
         closeGroupModal();
       } catch (error) {
         console.error('Failed to save group:', error);
-        showToast('그룹 저장에 실패했습니다.', 'error');
+        const errorMessage = getErrorMessage(error);
+        showToast(`그룹 저장 실패: ${errorMessage}`, 'error');
       } finally {
         setIsSaving(false);
       }
@@ -311,7 +326,8 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
         closeDeleteGroupDialog();
       } catch (error) {
         console.error('Failed to delete group:', error);
-        showToast('그룹 삭제에 실패했습니다.', 'error');
+        const errorMessage = getErrorMessage(error);
+        showToast(`그룹 삭제 실패: ${errorMessage}`, 'error');
       } finally {
         setIsSaving(false);
       }
@@ -343,7 +359,8 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
         closeItemModal();
       } catch (error) {
         console.error('Failed to save item:', error);
-        showToast('코드 저장에 실패했습니다.', 'error');
+        const errorMessage = getErrorMessage(error);
+        showToast(`코드 저장 실패: ${errorMessage}`, 'error');
       } finally {
         setIsSaving(false);
       }
@@ -364,7 +381,8 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
         closeDeleteDialog();
       } catch (error) {
         console.error('Failed to deactivate item:', error);
-        showToast('코드 비활성화에 실패했습니다.', 'error');
+        const errorMessage = getErrorMessage(error);
+        showToast(`코드 비활성화 실패: ${errorMessage}`, 'error');
       } finally {
         setIsSaving(false);
       }

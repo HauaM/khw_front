@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchCommonCodeItems, createCommonCodeItem } from '@/lib/api/commonCodes';
+import { fetchCommonCodeGroups, fetchCommonCodeItems, createCommonCodeItem } from '@/lib/api/commonCodes';
 import type { CommonCodeItemPayload } from '@/lib/api/commonCodes';
 
 export interface CommonCodeOption {
@@ -8,22 +8,42 @@ export interface CommonCodeOption {
   description?: string;
 }
 
-const BUSINESS_TYPE_GROUP_ID = 'BUSINESS_TYPE_GROUP_ID';
-const ERROR_CODE_GROUP_ID = 'ERROR_CODE_GROUP_ID';
-
 export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
   const [options, setOptions] = useState<CommonCodeOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [groupId, setGroupId] = useState<string | null>(null);
 
-  const groupId = groupCode === 'BUSINESS_TYPE' ? BUSINESS_TYPE_GROUP_ID : ERROR_CODE_GROUP_ID;
+  // 그룹 ID 초기화: groupCode로 해당 그룹의 ID 찾기
+  useEffect(() => {
+    (async () => {
+      try {
+        const groups = await fetchCommonCodeGroups();
+        const group = groups.find((g) => g.groupCode === groupCode);
+        if (group) {
+          setGroupId(group.id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch groups:', err);
+      }
+    })();
+  }, [groupCode]);
 
   // 공통코드 조회
   const fetchCodes = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const items = await fetchCommonCodeItems(groupId);
+      const items = await fetchCommonCodeItems(groupCode);
+      console.log(`[useCommonCodes] ${groupCode} items:`, items);
+
+      if (!Array.isArray(items)) {
+        console.error(`[useCommonCodes] items is not an array:`, typeof items, items);
+        setError('데이터 형식이 올바르지 않습니다.');
+        setOptions([]);
+        return;
+      }
+
       const converted = items
         .filter((item) => item.isActive)
         .map((item) => ({
@@ -33,6 +53,7 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
             ? (item.attributes as Record<string, any>)?.description
             : undefined,
         }));
+      console.log(`[useCommonCodes] ${groupCode} converted:`, converted);
       setOptions(converted);
     } catch (err) {
       const message = err instanceof Error ? err.message : '공통코드 로드 실패';
@@ -41,7 +62,7 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
     } finally {
       setIsLoading(false);
     }
-  }, [groupId]);
+  }, [groupCode]);
 
   // 초기 로드
   useEffect(() => {
@@ -51,6 +72,10 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
   // 새 코드 추가
   const addNewCode = useCallback(
     async (label: string, code: string, description: string) => {
+      if (!groupId) {
+        throw new Error('그룹 ID가 로드되지 않았습니다.');
+      }
+
       try {
         const payload: CommonCodeItemPayload = {
           codeKey: code,

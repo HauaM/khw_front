@@ -243,13 +243,34 @@ export async function fetchCommonCodeItems(
     }
   );
 
-  // 응답이 배열인 경우와 ListResponse 형식인 경우 모두 처리
-  const items = Array.isArray(response) ? response : response.items;
+  console.log(`[fetchCommonCodeItems] API response for ${groupCode}:`, response);
+  console.log(`[fetchCommonCodeItems] response type:`, Array.isArray(response) ? 'array' : typeof response);
 
-  if (!items || !Array.isArray(items)) {
+  // 응답이 배열인 경우와 ListResponse 형식인 경우 모두 처리
+  let items: CommonCodeItemResponse[] = [];
+
+  if (Array.isArray(response)) {
+    items = response;
+  } else if (response && typeof response === 'object') {
+    // response.items 확인
+    if ('items' in response && Array.isArray(response.items)) {
+      items = response.items;
+    } else if ('data' in response && Array.isArray((response as any).data)) {
+      items = (response as any).data;
+    } else if ('result' in response && Array.isArray((response as any).result)) {
+      items = (response as any).result;
+    } else {
+      console.error('Cannot find items array in response. Response keys:', Object.keys(response));
+      return [];
+    }
+  }
+
+  if (!Array.isArray(items)) {
     console.error('Invalid API response structure:', response);
     return [];
   }
+
+  console.log(`[fetchCommonCodeItems] Found ${items.length} items for ${groupCode}`);
 
   return items
     .map(transformItem)
