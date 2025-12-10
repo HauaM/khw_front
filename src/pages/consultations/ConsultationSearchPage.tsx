@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ConsultationSearchForm from '@/components/search/ConsultationSearchForm';
 import ConsultationResultTable from '@/components/table/ConsultationResultTable';
 import Spinner from '@/components/common/Spinner';
@@ -24,6 +24,7 @@ const DEFAULT_TOP_K = 20;
 
 const ConsultationSearchPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toasts, showToast, removeToast } = useToast();
   const [status, setStatus] = useState<PageStatus>('idle');
   const [results, setResults] = useState<Consultation[]>([]);
@@ -34,6 +35,7 @@ const ConsultationSearchPage: React.FC = () => {
     totalItems: 0,
     itemsPerPage: DEFAULT_TOP_K,
   });
+  const [searchSessionId, setSearchSessionId] = useState<string | null>(null);
 
   const branchOptions = useMemo(
     () => Object.entries(BRANCH_MAP).map(([code, name]) => ({ code, name })),
@@ -41,6 +43,28 @@ const ConsultationSearchPage: React.FC = () => {
   );
 
   const resolveBranchName = (code: string, fallback?: string) => BRANCH_MAP[code] ?? fallback ?? code;
+
+  /**
+   * 상담 상세조회에서 돌아올 때 검색 상태 복원
+   */
+  useEffect(() => {
+    const restoreSessionId = (location.state as any)?.restoreSessionId;
+    if (restoreSessionId) {
+      const saved = sessionStorage.getItem(restoreSessionId);
+      if (saved) {
+        try {
+          const { results: savedResults, searchParams: savedParams, pagination: savedPagination } = JSON.parse(saved);
+          setResults(savedResults);
+          setSearchParams(savedParams);
+          setPagination(savedPagination);
+          setSearchSessionId(restoreSessionId);
+          setStatus('success');
+        } catch (err) {
+          console.error('검색 상태 복원 실패:', err);
+        }
+      }
+    }
+  }, [location.state]);
 
   const handleSearch = (params: ConsultationSearchParams) => {
     if (params.startDate && params.endDate && params.startDate > params.endDate) {
@@ -121,6 +145,19 @@ const ConsultationSearchPage: React.FC = () => {
           createdAt: item.consultation.created_at,
         }));
 
+        const newSessionId = `search_${Date.now()}`;
+        const sessionData = {
+          results: mapped,
+          searchParams: normalizedParams,
+          pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: data.total_found ?? mapped.length,
+            itemsPerPage: mapped.length,
+          },
+        };
+        sessionStorage.setItem(newSessionId, JSON.stringify(sessionData));
+
         setResults(mapped);
         setPagination({
           currentPage: 1,
@@ -128,6 +165,7 @@ const ConsultationSearchPage: React.FC = () => {
           totalItems: data.total_found ?? mapped.length,
           itemsPerPage: mapped.length,
         });
+        setSearchSessionId(newSessionId);
         setStatus(mapped.length ? 'success' : 'empty');
       } catch (error) {
         console.error(error);
@@ -152,8 +190,13 @@ const ConsultationSearchPage: React.FC = () => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
 
-  const handleRowClick = (consultationId: string) => {
-    navigate(`/consultations/${consultationId}`);
+  const handleRowClick = (consultation: Consultation) => {
+    navigate(`/consultations/${consultation.id}`, {
+      state: {
+        consultation,
+        searchSessionId,
+      },
+    });
   };
 
   return (

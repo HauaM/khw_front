@@ -6,7 +6,7 @@ interface ConsultationResultTableProps {
   data: Consultation[];
   pagination: PaginationInfo;
   onPageChange: (page: number) => void;
-  onRowClick: (consultationId: string) => void;
+  onRowClick: (consultation: Consultation) => void;
   resolveBranchName: (code: string, fallback?: string) => string;
 }
 
@@ -64,7 +64,7 @@ const ConsultationResultTable: React.FC<ConsultationResultTableProps> = ({
               return (
                 <tr
                   key={item.id}
-                  onClick={() => onRowClick(item.id)}
+                  onClick={() => onRowClick(item)}
                   className="hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <td className="px-6 py-4 font-semibold text-primary-700">{item.id}</td>

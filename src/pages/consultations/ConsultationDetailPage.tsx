@@ -1,5 +1,7 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import type { Consultation as SearchConsultation } from '@/types/consultations';
+import type { Consultation as ApiConsultation } from '@/lib/api/consultations';
 import ConsultationDetailBasicInfo from '@/components/consultations/ConsultationDetailBasicInfo';
 import ConsultationDetailContent from '@/components/consultations/ConsultationDetailContent';
 import ConsultationMetadataTable from '@/components/consultations/ConsultationMetadataTable';
@@ -9,10 +11,45 @@ import useConsultationDetail from '@/hooks/useConsultationDetail';
 import useCreateManualDraft from '@/hooks/useCreateManualDraft';
 import { convertApiResponseToManualDraft } from '@/lib/api/manuals';
 
+interface LocationState {
+  consultation?: SearchConsultation;
+  searchSessionId?: string;
+}
+
+/**
+ * camelCase 검색 결과를 snake_case API 포맷으로 변환
+ */
+const convertSearchResultToApiFormat = (consultation: SearchConsultation | undefined): ApiConsultation | null => {
+  if (!consultation) return null;
+
+  return {
+    id: consultation.id,
+    branch_code: consultation.branchCode,
+    branch_name: consultation.branchName || '',
+    employee_id: '',
+    employee_name: '',
+    screen_id: '',
+    transaction_name: '',
+    business_type: consultation.businessType,
+    error_code: consultation.errorCode,
+    inquiry_text: consultation.inquiryText,
+    action_taken: consultation.actionTaken || '',
+    created_at: consultation.createdAt,
+    metadata_fields: {},
+  };
+};
+
 const ConsultationDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data, isLoading, isError, error } = useConsultationDetail(id);
+  const location = useLocation();
+  const { consultation: stateConsultation, searchSessionId: stateSearchSessionId } = (location.state || {}) as LocationState;
+
+  // state에서 받은 데이터가 있으면 변환해서 사용, 없으면 API 호출
+  const convertedStateData = convertSearchResultToApiFormat(stateConsultation);
+  const { data: apiData, isLoading, isError, error } = useConsultationDetail(convertedStateData ? undefined : id);
+  const data = convertedStateData || apiData;
+
   const { toasts, showToast, removeToast } = useToast();
 
   const { mutate: createDraft, isLoading: isCreating } = useCreateManualDraft({
@@ -33,7 +70,12 @@ const ConsultationDetailPage: React.FC = () => {
   });
 
   const handleBack = () => {
-    if (window.history.length > 1) {
+    if (stateSearchSessionId) {
+      // 검색 상태가 있으면 복원하면서 돌아가기
+      navigate('/consultations/search', {
+        state: { restoreSessionId: stateSearchSessionId },
+      });
+    } else if (window.history.length > 1) {
       navigate(-1);
     } else {
       navigate('/consultations/search');
