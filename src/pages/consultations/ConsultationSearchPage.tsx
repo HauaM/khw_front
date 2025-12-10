@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ConsultationSearchForm from '@/components/search/ConsultationSearchForm';
 import ConsultationResultTable from '@/components/table/ConsultationResultTable';
 import Spinner from '@/components/common/Spinner';
@@ -22,6 +23,7 @@ type PageStatus = 'idle' | 'loading' | 'success' | 'empty';
 const DEFAULT_TOP_K = 20;
 
 const ConsultationSearchPage: React.FC = () => {
+  const navigate = useNavigate();
   const { toasts, showToast, removeToast } = useToast();
   const [status, setStatus] = useState<PageStatus>('idle');
   const [results, setResults] = useState<Consultation[]>([]);
@@ -150,6 +152,10 @@ const ConsultationSearchPage: React.FC = () => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
 
+  const handleRowClick = (consultationId: string) => {
+    navigate(`/consultations/${consultationId}`);
+  };
+
   return (
     <div className="space-y-6">
       <header className="space-y-1">
@@ -194,6 +200,7 @@ const ConsultationSearchPage: React.FC = () => {
             data={results}
             pagination={pagination}
             onPageChange={handlePageChange}
+            onRowClick={handleRowClick}
             resolveBranchName={resolveBranchName}
           />
         )}
