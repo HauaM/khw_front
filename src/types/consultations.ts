@@ -11,6 +11,10 @@ export interface Consultation {
   id: string;
   branchCode: string;
   branchName?: string;
+  employeeId?: string;
+  employeeName?: string;
+  screenId?: string;
+  transactionName?: string;
   businessType: BusinessType;
   errorCode: string;
   inquiryText: string;

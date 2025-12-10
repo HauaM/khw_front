@@ -37,7 +37,6 @@ const ConsultationSearchPage: React.FC = () => {
     totalItems: 0,
     itemsPerPage: DEFAULT_TOP_K,
   });
-  const [searchSessionId, setSearchSessionId] = useState<string | null>(null);
   const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
 
   // 쿼리 파라미터에서 detail ID 읽기
@@ -75,7 +74,6 @@ const ConsultationSearchPage: React.FC = () => {
           setResults(savedResults);
           setSearchParams(savedParams);
           setPagination(savedPagination);
-          setSearchSessionId(restoreSessionId);
           setStatus('success');
         } catch (err) {
           console.error('검색 상태 복원 실패:', err);
@@ -131,6 +129,10 @@ const ConsultationSearchPage: React.FC = () => {
             consultation: {
               id: string;
               branch_code: string;
+              employee_id?: string;
+              employee_name?: string;
+              screen_id?: string;
+              transaction_name?: string;
               business_type: string | null;
               error_code: string | null;
               inquiry_text: string;
@@ -154,6 +156,10 @@ const ConsultationSearchPage: React.FC = () => {
           id: item.consultation.id,
           branchCode: item.consultation.branch_code,
           branchName: resolveBranchName(item.consultation.branch_code),
+          employeeId: item.consultation.employee_id,
+          employeeName: item.consultation.employee_name,
+          screenId: item.consultation.screen_id,
+          transactionName: item.consultation.transaction_name,
           businessType: (item.consultation.business_type || 'OTHER') as Consultation['businessType'],
           errorCode: item.consultation.error_code || '',
           inquiryText: item.consultation.inquiry_text,
@@ -183,7 +189,6 @@ const ConsultationSearchPage: React.FC = () => {
           totalItems: data.total_found ?? mapped.length,
           itemsPerPage: mapped.length,
         });
-        setSearchSessionId(newSessionId);
         setStatus(mapped.length ? 'success' : 'empty');
       } catch (error) {
         console.error(error);

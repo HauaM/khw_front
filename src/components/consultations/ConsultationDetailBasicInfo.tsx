@@ -106,13 +106,13 @@ const ConsultationDetailBasicInfo: React.FC<ConsultationDetailBasicInfoProps> = 
         <DetailField label="ID" value={consultation.id} />
         <DetailField label="등록일시" value={formatDateTime(consultation.created_at)} />
         <DetailField label="요청영업점" value={`${consultation.branch_code} (${consultation.branch_name})`} />
-        <DetailField label="요청직원" value={`${consultation.employee_id} (${consultation.employee_name})`} />
-        <DetailField label="화면번호" value={consultation.screen_id} />
-        <DetailField label="거래명" value={consultation.transaction_name} />
         <DetailField
-          label="업무구분"
-          value={<span className={`inline-flex items-center rounded px-3 py-1 text-sm font-semibold ${businessType.className}`}>{businessType.label}</span>}
+          label="요청직원"
+          value={consultation.employee_name && consultation.employee_id ? `${consultation.employee_name}(${consultation.employee_id})` : '-'}
         />
+        <DetailField label="화면번호" value={consultation.screen_id || '-'} />
+        <DetailField label="거래명" value={consultation.transaction_name || '-'} />
+        <DetailField label="업무구분" value={businessType.label} />
         <DetailField label="에러코드" value={consultation.error_code} />
       </div>
     </section>

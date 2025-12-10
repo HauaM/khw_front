@@ -6,9 +6,7 @@ import ConsultationDetailContent from '@/components/consultations/ConsultationDe
 import ConsultationMetadataTable from '@/components/consultations/ConsultationMetadataTable';
 import Spinner from '@/components/common/Spinner';
 import Toast, { useToast } from '@/components/common/Toast';
-import useConsultationDetail from '@/hooks/useConsultationDetail';
 import useCreateManualDraft from '@/hooks/useCreateManualDraft';
-import { convertApiResponseToManualDraft } from '@/lib/api/manuals';
 
 interface ConsultationDetailModalProps {
   consultation: SearchConsultation;
@@ -25,10 +23,10 @@ const convertSearchResultToApiFormat = (consultation: SearchConsultation): ApiCo
     id: consultation.id,
     branch_code: consultation.branchCode,
     branch_name: consultation.branchName || '',
-    employee_id: '',
-    employee_name: '',
-    screen_id: '',
-    transaction_name: '',
+    employee_id: consultation.employeeId || '',
+    employee_name: consultation.employeeName || '',
+    screen_id: consultation.screenId || '',
+    transaction_name: consultation.transactionName || '',
     business_type: consultation.businessType,
     error_code: consultation.errorCode,
     inquiry_text: consultation.inquiryText,
@@ -50,7 +48,6 @@ const ConsultationDetailModal: React.FC<ConsultationDetailModalProps> = ({
   const { mutate: createDraft, isLoading: isCreating } = useCreateManualDraft({
     onSuccess: (draftResponse) => {
       showToast('메뉴얼 초안이 생성되었습니다. 검토 페이지로 이동합니다.', 'success');
-      const convertedDraft = convertApiResponseToManualDraft(draftResponse);
       setTimeout(() => {
         onManualDraftCreated?.(draftResponse.id);
       }, 1500);
