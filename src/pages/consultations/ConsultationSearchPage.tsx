@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ConsultationSearchForm from '@/components/search/ConsultationSearchForm';
 import ConsultationResultTable from '@/components/table/ConsultationResultTable';
+import ConsultationDetailModal from '@/components/modals/ConsultationDetailModal';
 import Spinner from '@/components/common/Spinner';
 import Toast, { useToast } from '@/components/common/Toast';
 import {
@@ -25,6 +26,7 @@ const DEFAULT_TOP_K = 20;
 const ConsultationSearchPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [queryParams, setQueryParams] = useSearchParams();
   const { toasts, showToast, removeToast } = useToast();
   const [status, setStatus] = useState<PageStatus>('idle');
   const [results, setResults] = useState<Consultation[]>([]);
@@ -36,6 +38,22 @@ const ConsultationSearchPage: React.FC = () => {
     itemsPerPage: DEFAULT_TOP_K,
   });
   const [searchSessionId, setSearchSessionId] = useState<string | null>(null);
+  const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
+
+  // 쿼리 파라미터에서 detail ID 읽기
+  const detailId = queryParams.get('detail');
+
+  /**
+   * detailId가 변경되면 results에서 해당 상담 찾기
+   */
+  useEffect(() => {
+    if (detailId) {
+      const found = results.find((c) => c.id === detailId);
+      setSelectedConsultation(found || null);
+    } else {
+      setSelectedConsultation(null);
+    }
+  }, [detailId, results]);
 
   const branchOptions = useMemo(
     () => Object.entries(BRANCH_MAP).map(([code, name]) => ({ code, name })),
@@ -191,11 +209,16 @@ const ConsultationSearchPage: React.FC = () => {
   };
 
   const handleRowClick = (consultation: Consultation) => {
-    navigate(`/consultations/${consultation.id}`, {
-      state: {
-        consultation,
-        searchSessionId,
-      },
+    setQueryParams({ detail: consultation.id });
+  };
+
+  const handleCloseModal = () => {
+    setQueryParams({});
+  };
+
+  const handleManualDraftCreated = (draftId: string) => {
+    navigate(`/manuals/draft/${draftId}`, {
+      state: { searchReturnPath: '/consultations/search' },
     });
   };
 
@@ -257,6 +280,15 @@ const ConsultationSearchPage: React.FC = () => {
           onClose={() => removeToast(toast.id)}
         />
       ))}
+
+      {selectedConsultation && (
+        <ConsultationDetailModal
+          consultation={selectedConsultation}
+          isOpen={!!detailId}
+          onClose={handleCloseModal}
+          onManualDraftCreated={handleManualDraftCreated}
+        />
+      )}
     </div>
   );
 };

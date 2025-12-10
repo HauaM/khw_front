@@ -21,8 +21,9 @@ const useConsultationDetail = (consultationId?: string): UseConsultationDetailRe
     let cancelled = false;
 
     if (!consultationId) {
+      // consultationId가 없으면 API 호출하지 않음 (state 데이터 사용 시)
       setData(null);
-      setError(new Error('상담 ID가 없습니다.'));
+      setError(null);
       return () => undefined;
     }
 
@@ -30,9 +31,9 @@ const useConsultationDetail = (consultationId?: string): UseConsultationDetailRe
     setError(null);
 
     getConsultationById(consultationId)
-      .then((res) => {
+      .then((data) => {
         if (cancelled) return;
-        setData(res.data);
+        setData(data);
         setError(null);
       })
       .catch((err: Error) => {
