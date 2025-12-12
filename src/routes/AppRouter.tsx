@@ -12,7 +12,6 @@ import ManualDetailPage from '@/pages/manuals/ManualDetailPage';
 import ManualEditPage from '@/pages/manuals/ManualEditPage';
 import ManualVersionComparePage from '@/pages/manuals/ManualVersionComparePage';
 import ManualDraftListPage from '@/pages/manuals/ManualDraftListPage';
-import ManualDraftDetailPage from '@/pages/manuals/ManualDraftDetailPage';
 import ReviewTaskListPage from '@/pages/reviews/ReviewTaskListPage';
 import ManualReviewDetailPage from '@/pages/reviews/ManualReviewDetailPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
@@ -38,7 +37,7 @@ const AppRouter: React.FC = () => {
             <Route path="search" element={<ManualSearchPage />} />
             <Route path="history" element={<ManualHistoryPage />} />
             <Route path="drafts" element={<ManualDraftListPage />} />
-            <Route path="drafts/:draftId" element={<ManualDraftDetailPage />} />
+            <Route path="drafts/:id" element={<ManualDraftResultPage />} />
             <Route path="draft/:id" element={<ManualDraftResultPage />} />
             <Route path=":manualId/versions/compare" element={<ManualVersionComparePage />} />
             <Route path=":manualId/edit" element={<ManualEditPage />} />

@@ -18,7 +18,6 @@ const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 24px;
   background-color: #fafafa;
   min-height: 100vh;
 `;
@@ -178,7 +177,7 @@ const ManualDraftListPage: React.FC = () => {
         <ManualDraftTable
           drafts={drafts}
           totalCount={drafts.length}
-          onSelectDraft={(draftId) => navigate(`/manuals/drafts/${draftId}`)}
+          onSelectDraft={(draftId) => navigate(`/manuals/drafts/${draftId}`, { replace: false })}
           onDeleteDraft={handleDeleteConfirm}
         />
       )}

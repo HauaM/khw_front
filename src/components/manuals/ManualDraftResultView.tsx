@@ -8,7 +8,8 @@ import Toast from '@/components/common/Toast';
 import { useSaveManualDraft } from '@/hooks/useSaveManualDraft';
 import { useRequestManualReview } from '@/hooks/useRequestManualReview';
 import { useStartManualReviewTask } from '@/hooks/useStartManualReviewTask';
-import { guidelinesToString } from '@/lib/api/manuals';
+import { guidelinesToString, deleteManualDraft } from '@/lib/api/manuals';
+import { getConsultationById } from '@/lib/api/consultations';
 
 interface ManualDraftResultViewProps {
   draft: ManualDraft;
@@ -31,6 +32,9 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   const [newKeyword, setNewKeyword] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoadingConsultation, setIsLoadingConsultation] = useState(false);
 
   // 훅 초기화
   const { mutate: startReviewTask } = useStartManualReviewTask();
@@ -138,6 +142,52 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   // 모달 취소
   const handleCancelModal = () => {
     setShowConfirmModal(false);
+  };
+
+  // 삭제 클릭
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  // 삭제 확인
+  const handleConfirmDelete = async () => {
+    setShowDeleteConfirm(false);
+    setIsDeleting(true);
+    try {
+      await deleteManualDraft(draft.id);
+      showToast('메뉴얼 초안이 삭제되었습니다.', 'success');
+      setTimeout(() => {
+        navigate('/manuals/drafts');
+      }, 1500);
+    } catch (error) {
+      console.error('Error deleting draft:', error);
+      showToast('삭제 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // 삭제 취소
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
+
+  // 원본 상담 열기
+  const handleOpenSourceConsultation = async () => {
+    if (!draft.source_consultation_id) return;
+
+    setIsLoadingConsultation(true);
+    try {
+      const consultation = await getConsultationById(draft.source_consultation_id);
+      navigate(`/consultations/${draft.source_consultation_id}`, {
+        state: { consultation },
+      });
+    } catch (error) {
+      console.error('Error loading consultation:', error);
+      showToast('상담 정보를 불러올 수 없습니다.', 'error');
+    } finally {
+      setIsLoadingConsultation(false);
+    }
   };
 
   // 현재 데이터 (보기 모드: draft, 편집 모드: editedDraft)
@@ -403,7 +453,25 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
               </button>
             </>
           ) : (
-            <>
+            <><button
+                type="button"
+                onClick={handleOpenSourceConsultation}
+                disabled={isLoadingConsultation}
+                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md border border-[#005BAC] bg-white px-5 text-sm font-semibold text-[#005BAC] transition hover:bg-[#E8F1FB] disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+              >
+                {isLoadingConsultation ? (
+                  <Spinner size="sm" className="text-[#005BAC]" />
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    원본 상담 열기
+                  </>
+                )}
+              </button>
               <button
                 type="button"
                 onClick={handleEditClick}
@@ -415,6 +483,22 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
                 </svg>
                 수정하기
               </button>
+              {draft.status === 'DRAFT' && (
+                <button
+                  type="button"
+                  onClick={handleDeleteClick}
+                  disabled={isDeleting}
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md border border-red-500 bg-white px-5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                  </svg>
+                  삭제
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleRequestReview}
@@ -455,6 +539,24 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
           이 메뉴얼 초안을 검토자에게 전송하시겠습니까?
           <br />
           검토 요청 후에는 검토자의 승인이 있어야 수정할 수 있습니다.
+        </p>
+      </Modal>
+
+      {/* 삭제 확인 모달 */}
+      <Modal
+        isOpen={showDeleteConfirm}
+        title="메뉴얼 초안 삭제"
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        confirmText="삭제"
+        cancelText="취소"
+        disableConfirm={isDeleting}
+        disableCancel={isDeleting}
+      >
+        <p className="mb-0">
+          이 메뉴얼 초안을 삭제하시겠습니까?
+          <br />
+          삭제 후에는 복구할 수 없습니다.
         </p>
       </Modal>
     </>

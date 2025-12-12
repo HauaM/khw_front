@@ -242,6 +242,49 @@
         }
       }
     },
+    "/api/v1/consultations/{consultation_id}": {
+      "get": {
+        "tags": [
+          "consultations"
+        ],
+        "summary": "Get consultation details",
+        "description": "Get detailed consultation information by ID\n\nRFP Reference: GET /consultations/{id}\n- Returns full consultation details including summary, inquiry, action\n- Returns user information (employee name)",
+        "operationId": "get_consultation_api_v1_consultations__consultation_id__get",
+        "parameters": [
+          {
+            "name": "consultation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Consultation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/consultations/{consultation_id}/manual-draft": {
       "post": {
         "tags": [
@@ -293,8 +336,8 @@
         "tags": [
           "manuals"
         ],
-        "summary": "Create manual draft from consultation",
-        "description": "FR-2/FR-9: 상담 기반 메뉴얼 초안 생성 (환각 검증 포함).",
+        "summary": "Create manual draft from consultation (v2.1 with comparison)",
+        "description": "FR-2/FR-9/FR-11(v2.1): 상담 기반 메뉴얼 초안 생성 + 비교 + 리뷰 태스크\n\n**Request:**\n```json\n{\n  \"consultation_id\": \"uuid-xxx\",\n  \"enforce_hallucination_check\": true,\n  \"compare_with_manual_id\": \"uuid-yyy\"  // Optional: 특정 버전과 비교\n}\n```\n\n**Response (3 가지 경로):**\n\n1. SIMILAR (기존 메뉴얼과 유사):\n```json\n{\n  \"comparison_type\": \"similar\",\n  \"draft_entry\": {...},\n  \"existing_manual\": {...},\n  \"similarity_score\": 0.97,\n  \"message\": \"기존 메뉴얼과 매우 유사합니다...\"\n}\n```\n\n2. SUPPLEMENT (기존 메뉴얼 보충):\n```json\n{\n  \"comparison_type\": \"supplement\",\n  \"draft_entry\": {...},\n  \"existing_manual\": {...},\n  \"review_task_id\": \"uuid-task\",\n  \"similarity_score\": 0.82,\n  \"message\": \"기존 메뉴얼의 내용을 보충했습니다...\"\n}\n```\n\n3. NEW (신규 메뉴얼):\n```json\n{\n  \"comparison_type\": \"new\",\n  \"draft_entry\": {...},\n  \"existing_manual\": null,\n  \"review_task_id\": \"uuid-task\",\n  \"similarity_score\": null,\n  \"message\": \"신규 메뉴얼 초안으로 생성되었습니다.\"\n}\n```",
         "operationId": "create_manual_draft_api_v1_manuals_draft_post",
         "requestBody": {
           "content": {
@@ -312,7 +355,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ManualDraftResponse"
+                  "$ref": "#/components/schemas/ManualDraftCreateResponse"
                 }
               }
             }
@@ -419,6 +462,78 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ManualVersionInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals/versions": {
+      "get": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Get manual versions by business type and error code",
+        "description": "FR-11(v2.1): business_type + error_code로 메뉴얼 그룹의 버전 목록 조회\n\n**용도:**\n- 초안 작성 전: UI에서 과거 버전 목록 표시\n- 사용자가 특정 버전과 비교하고 싶을 때 선택\n\n**Query Parameters:**\n- business_type: 업무 구분 (필수)\n- error_code: 에러 코드 (필수)\n- include_deprecated: DEPRECATED 버전도 반환할지 여부 (optional)\n\n**Returns:**\n```json\n[\n  {\n    \"value\": \"v1.5\",\n    \"label\": \"v1.5 (DEPRECATED)\",\n    \"date\": \"2024-12-01\",\n    \"status\": \"DEPRECATED\",\n    \"manual_id\": \"uuid-xxx\"\n  },\n  {\n    \"value\": \"v1.6\",\n    \"label\": \"v1.6 (현재 버전)\",\n    \"date\": \"2024-12-05\",\n    \"status\": \"APPROVED\",\n    \"manual_id\": \"uuid-yyy\"\n  }\n]\n```",
+        "operationId": "get_versions_by_group_api_v1_manuals_versions_get",
+        "parameters": [
+          {
+            "name": "business_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "업무 구분 (예: 인터넷뱅킹)",
+              "title": "Business Type"
+            },
+            "description": "업무 구분 (예: 인터넷뱅킹)"
+          },
+          {
+            "name": "error_code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "에러 코드 (예: E001)",
+              "title": "Error Code"
+            },
+            "description": "에러 코드 (예: E001)"
+          },
+          {
+            "name": "include_deprecated",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "DEPRECATED 버전 포함 여부",
+              "default": false,
+              "title": "Include Deprecated"
+            },
+            "description": "DEPRECATED 버전 포함 여부"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ManualVersionResponse"
+                  },
+                  "title": "Response Get Versions By Group Api V1 Manuals Versions Get"
                 }
               }
             }
@@ -861,54 +976,6 @@
         }
       }
     },
-    "/api/v1/manuals/{manual_id}/review": {
-      "post": {
-        "tags": [
-          "manuals"
-        ],
-        "summary": "Create review task for manual",
-        "description": "Create review task for manual entry\n\nRFP Reference: POST /manuals/{id}/review\n- Detects conflicts with existing manuals\n- Creates ManualReviewTask if needed",
-        "operationId": "create_manual_review_api_v1_manuals__manual_id__review_post",
-        "parameters": [
-          {
-            "name": "manual_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Manual Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Create Manual Review Api V1 Manuals  Manual Id  Review Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/manuals/{manual_id}": {
       "put": {
         "tags": [
@@ -991,6 +1058,41 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Delete manual draft",
+        "description": "DRAFT 상태 메뉴얼 항목 삭제.\n\n**요청:**\n- DELETE /manuals/{manual_id}\n\n**응답:**\n- 204 No Content: 삭제 성공\n- 404 Not Found: 메뉴얼을 찾을 수 없음\n- 400 Bad Request: DRAFT 상태가 아님\n\n**제약사항:**\n- DRAFT 상태인 메뉴얼만 삭제 가능\n- 벡터스토어에서도 삭제됨\n- 관련 리뷰 태스크도 함께 삭제됨",
+        "operationId": "delete_manual_api_v1_manuals__manual_id__delete",
+        "parameters": [
+          {
+            "name": "manual_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Manual Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -2594,6 +2696,16 @@
         "title": "CommonCodeItemUpdate",
         "description": "공통코드 항목 수정 요청"
       },
+      "ComparisonType": {
+        "type": "string",
+        "enum": [
+          "similar",
+          "supplement",
+          "new"
+        ],
+        "title": "ComparisonType",
+        "description": "비교 결과 타입 분류 (v2.1)\n\n신규 draft를 기존 메뉴얼과 비교한 결과에 따른 분류:\n- SIMILAR: 기존 메뉴얼과 매우 유사 (≥0.95 유사도)\n- SUPPLEMENT: 기존 메뉴얼 보충/개선 (0.7-0.95 유사도)\n- NEW: 신규 메뉴얼 (\u003C0.7 유사도)"
+      },
       "ConsultationCreate": {
         "properties": {
           "summary": {
@@ -3216,6 +3328,19 @@
             "title": "Enforce Hallucination Check",
             "description": "환각 검증 실패 시 리뷰 태스크 생성 여부",
             "default": true
+          },
+          "compare_with_manual_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compare With Manual Id",
+            "description": "(선택) 특정 메뉴얼과 비교하고 싶을 경우 해당 ID 지정. None이면 최신 APPROVED 버전과 비교."
           }
         },
         "type": "object",
@@ -3223,9 +3348,9 @@
           "consultation_id"
         ],
         "title": "ManualDraftCreateFromConsultationRequest",
-        "description": "FR-2: 상담을 기반으로 메뉴얼 초안을 생성하기 위한 요청."
+        "description": "FR-2/FR-11(v2.1): 상담을 기반으로 메뉴얼 초안을 생성하기 위한 요청.\n\nv2.1: 사용자가 특정 버전과 비교할 수 있는 compare_with_manual_id 추가"
       },
-      "ManualDraftResponse": {
+      "ManualDraftCreateResponse": {
         "properties": {
           "created_at": {
             "type": "string",
@@ -3242,32 +3367,54 @@
             "format": "uuid",
             "title": "Id"
           },
-          "status": {
-            "$ref": "#/components/schemas/ManualStatus"
+          "comparison_type": {
+            "$ref": "#/components/schemas/ComparisonType",
+            "description": "비교 결과 타입: similar/supplement/new"
           },
-          "keywords": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Keywords"
+          "draft_entry": {
+            "$ref": "#/components/schemas/ManualEntryResponse",
+            "description": "생성되거나 기존 메뉴얼 정보"
           },
-          "topic": {
+          "existing_manual": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ManualEntryResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "SIMILAR 경로에서만 존재: 기존 메뉴얼 정보"
+          },
+          "review_task_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Task Id",
+            "description": "SUPPLEMENT/NEW 경로에서만 존재: 생성된 리뷰 태스크 ID"
+          },
+          "similarity_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similarity Score",
+            "description": "SIMILAR/SUPPLEMENT에서 유사도 점수. NEW에서는 null"
+          },
+          "message": {
             "type": "string",
-            "title": "Topic"
-          },
-          "background": {
-            "type": "string",
-            "title": "Background"
-          },
-          "guideline": {
-            "type": "string",
-            "title": "Guideline"
-          },
-          "source_consultation_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Source Consultation Id"
+            "title": "Message",
+            "description": "사용자 친화적 메시지"
           }
         },
         "type": "object",
@@ -3275,15 +3422,12 @@
           "created_at",
           "updated_at",
           "id",
-          "status",
-          "keywords",
-          "topic",
-          "background",
-          "guideline",
-          "source_consultation_id"
+          "comparison_type",
+          "draft_entry",
+          "message"
         ],
-        "title": "ManualDraftResponse",
-        "description": "FR-2: 생성된 메뉴얼 초안 반환."
+        "title": "ManualDraftCreateResponse",
+        "description": "FR-2/FR-11(v2.1): 메뉴얼 초안 생성 응답 (개선된 버전)\n\n3가지 경로:\n1. SIMILAR: 기존 메뉴얼 반환, draft 미생성\n2. SUPPLEMENT: 초안 생성 + 자동 병합 + 리뷰 태스크 생성\n3. NEW: 초안 생성 + 리뷰 태스크 생성"
       },
       "ManualEntryResponse": {
         "properties": {
@@ -3822,7 +3966,8 @@
         "enum": [
           "DRAFT",
           "APPROVED",
-          "DEPRECATED"
+          "DEPRECATED",
+          "ARCHIVED"
         ],
         "title": "ManualStatus",
         "description": "메뉴얼 상태 Enum (FR-4 승인/반려 흐름 반영)"
@@ -3928,17 +4073,41 @@
           "version": {
             "type": "string",
             "title": "Version",
-            "description": "버전 번호 (예: v2.1)"
+            "description": "버전 번호 (예: v1.6)"
           },
           "label": {
             "type": "string",
             "title": "Label",
-            "description": "사용자 표시용 레이블 (버전 + 현재 버전 여부)"
+            "description": "사용자 표시용 레이블 (버전 + 상태)"
           },
           "date": {
             "type": "string",
             "title": "Date",
             "description": "버전 생성/승인 날짜 (YYYY-MM-DD 형식)"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ManualStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "버전 상태 (APPROVED, DEPRECATED) - v2.1에서 추가"
+          },
+          "manual_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manual Id",
+            "description": "이 버전의 메뉴얼 ID (비교 시 사용) - v2.1에서 추가"
           }
         },
         "type": "object",
@@ -3951,7 +4120,7 @@
           "date"
         ],
         "title": "ManualVersionResponse",
-        "description": "Manual version response for version list\n\nRFP Reference: GET /api/v1/manuals/{manual_id}/versions"
+        "description": "Manual version response for version list (v2.1 개선)\n\n기존 /{manual_id}/versions와 새로운 /versions 쿼리 엔드포인트에서\n모두 사용 가능하도록 구조화\n\nRFP Reference: GET /api/v1/manuals/{manual_id}/versions, GET /api/v1/manuals/versions"
       },
       "TaskStatus": {
         "type": "string",
