@@ -8,10 +8,11 @@ import {
   ManualDetail,
   ManualVersionInfo,
   ManualVersionDetail,
+  ManualDraftStatus,
 } from '@/types/manuals';
 
 // Re-export types for convenience
-export type { ManualDraft, ManualDraftResponse };
+export type { ManualDraft, ManualDraftResponse, ManualDetail, ManualDraftStatus };
 
 // OpenAPI: ManualDraftCreateFromConsultationRequest
 export interface ManualDraftCreatePayload {
@@ -330,3 +331,70 @@ export const getManualVersions = async (manualId: string): Promise<ManualVersion
  */
 export const getManualVersionDetail = (manualId: string, version: string) =>
   api.get<ManualVersionDetail>(`/api/v1/manuals/${manualId}/versions/${version}`);
+
+/**
+ * 메뉴얼 초안 목록 조회 및 필터링
+ * FR-16: GET /api/v1/manuals?status_filter=DRAFT&limit=...
+ *
+ * @param filters - 필터 옵션
+ * @returns 메뉴얼 목록 (상태별, business_type_name, error_code 포함)
+ */
+export interface ManualDraftListFilters {
+  status_filter?: string; // default: "DRAFT"
+  limit?: number; // default: 100
+  business_type?: string | null;
+  error_code?: string | null;
+  topic?: string | null;
+  created_at_from?: string | null; // ISO date
+  created_at_to?: string | null; // ISO date
+}
+
+export interface ManualDraftListResponse {
+  id: string;
+  status: ManualDraftStatus;
+  keywords: string[];
+  topic: string;
+  background: string;
+  guideline: string;
+  created_at: string;
+  updated_at: string;
+  source_consultation_id: string;
+  business_type?: string | null;
+  error_code?: string | null;
+  business_type_name?: string | null;
+  version_id?: string | null;
+}
+
+/**
+ * 메뉴얼 초안 목록 조회
+ * GET /api/v1/manuals?status_filter=DRAFT&limit=...
+ *
+ * @param filters - 필터 조건 (status_filter, limit)
+ * @returns 메뉴얼 초안 목록
+ */
+export const getManualDraftList = (filters: ManualDraftListFilters) => {
+  const queryParams = new URLSearchParams();
+
+  // 기본값: status_filter=DRAFT
+  queryParams.append('status_filter', filters.status_filter || 'DRAFT');
+
+  // limit
+  if (filters.limit) {
+    queryParams.append('limit', filters.limit.toString());
+  }
+
+  const queryString = queryParams.toString();
+  return api.get<ManualDraftListResponse[]>(
+    `/api/v1/manuals${queryString ? `?${queryString}` : ''}`
+  );
+};
+
+/**
+ * 메뉴얼 초안 삭제
+ * DELETE /api/v1/manuals/{manual_id}
+ *
+ * @param manualId - 메뉴얼 ID (UUID)
+ * @returns void (204 No Content)
+ */
+export const deleteManualDraft = (manualId: string) =>
+  api.delete(`/api/v1/manuals/${manualId}`);

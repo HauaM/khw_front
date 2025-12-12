@@ -24,13 +24,6 @@ const IconSearch = () => (
   </svg>
 );
 
-const IconFile = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-    <polyline points="14 2 14 8 20 8" />
-  </svg>
-);
-
 const IconCheck = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <polyline points="9 11 12 14 22 4" />
@@ -89,7 +82,8 @@ const menuSections: MenuSection[] = [
   {
     title: '메뉴얼 관리',
     items: [
-      { label: '메뉴얼 검색', path: '/manuals/search', icon: <IconFile /> },
+      { label: '메뉴얼 검색', path: '/manuals/search', icon: <IconSearch /> },
+      { label: '메뉴얼 초안 목록', path: '/manuals/drafts', icon: <IconEdit /> },
       // { label: '메뉴얼 버전 이력', path: '/manuals/history', icon: <IconClock /> },
     ],
   },
