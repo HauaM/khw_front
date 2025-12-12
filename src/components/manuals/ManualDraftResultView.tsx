@@ -7,6 +7,7 @@ import Modal from '@/components/common/Modal';
 import Toast from '@/components/common/Toast';
 import { useSaveManualDraft } from '@/hooks/useSaveManualDraft';
 import { useRequestManualReview } from '@/hooks/useRequestManualReview';
+import { useStartManualReviewTask } from '@/hooks/useStartManualReviewTask';
 import { guidelinesToString } from '@/lib/api/manuals';
 
 interface ManualDraftResultViewProps {
@@ -30,6 +31,9 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   const [newKeyword, setNewKeyword] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // 훅 초기화
+  const { mutate: startReviewTask } = useStartManualReviewTask();
 
   // 편집 모드 진입
   const handleEditClick = () => {
@@ -110,7 +114,11 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
 
     try {
       // OpenAPI: POST /api/v1/manuals/{manual_id}/review
-      await requestReview(draft.id);
+      const reviewTask = await requestReview(draft.id);
+
+      // OpenAPI: PUT /api/v1/manual-review/tasks/{task_id}
+      // FR-6: 검토 태스크를 TODO → IN_PROGRESS로 변경
+      await startReviewTask(reviewTask.id);
 
       showToast(
         '검토 요청이 완료되었습니다. 검토자에게 알림이 전송되었습니다.',

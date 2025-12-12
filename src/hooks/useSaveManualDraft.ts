@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { ManualDraft, ManualDraftUpdateRequest } from '@/types/manuals';
-// TODO: API 연결 시 활성화
-// import { updateManualDraft, convertApiResponseToManualDraft, stringToGuidelines } from '@/lib/api/manuals';
-import { stringToGuidelines } from '@/lib/api/manuals';
+import { updateManualDraft, convertApiResponseToManualDraft } from '@/lib/api/manuals';
 
 export interface UseSaveManualDraftResult {
   mutate: (draftId: string, payload: ManualDraftUpdateRequest) => Promise<ManualDraft>;
@@ -14,7 +12,12 @@ export interface UseSaveManualDraftResult {
 
 /**
  * 메뉴얼 초안을 저장하는 훅
- * OpenAPI: PUT /api/v1/manuals/drafts/{draft_id}
+ * OpenAPI: PUT /api/v1/manuals/{manual_id}
+ *
+ * 백엔드 확인 결과:
+ * - Draft 생성 시 반환되는 id = manual_id (동일)
+ * - Draft 수정은 PUT /api/v1/manuals/{manual_id}로 수행
+ * - Draft와 Manual은 같은 ManualEntry 객체 (상태만 다름)
  */
 export const useSaveManualDraft = (): UseSaveManualDraftResult => {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,27 +31,12 @@ export const useSaveManualDraft = (): UseSaveManualDraftResult => {
     setError(null);
 
     try {
-      // TODO: API 연결 - 아래 주석을 풀면 실제 API 호출
-      // const response = await updateManualDraft(draftId, payload);
-      // const result = convertApiResponseToManualDraft(response);
+      // 실제 API 호출: PUT /api/v1/manuals/{draftId}
+      const response = await updateManualDraft(draftId, payload);
+      const result = convertApiResponseToManualDraft(response);
 
-      // 현재는 mock 저장 (1초 지연)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const mockResult: ManualDraft = {
-        id: draftId,
-        status: 'DRAFT',
-        topic: payload.topic,
-        keywords: payload.keywords,
-        background: payload.background,
-        // payload.guideline은 줄바꿈으로 구분된 문자열이므로 배열로 변환
-        guideline: stringToGuidelines(payload.guideline),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      setData(mockResult);
-      return mockResult;
+      setData(result);
+      return result;
     } catch (err) {
       setIsError(true);
       const error = err instanceof Error ? err : new Error('초안 저장에 실패했습니다.');

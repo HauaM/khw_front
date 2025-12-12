@@ -60,7 +60,9 @@ export const stringToGuidelines = (guidelineStr: string): string[] => {
  * @param apiResponse - API 응답
  * @returns ManualDraft 객체
  */
-export const convertApiResponseToManualDraft = (apiResponse: ManualDraftResponse): ManualDraft => {
+export const convertApiResponseToManualDraft = (
+  apiResponse: ManualDraftResponse | ManualDetail
+): ManualDraft => {
   return {
     id: apiResponse.id,
     status: apiResponse.status,
@@ -86,42 +88,31 @@ export const createManualDraft = (payload: ManualDraftCreatePayload) =>
   });
 
 /**
- * 메뉴얼 초안 조회
- * OpenAPI: GET /api/v1/manuals/drafts/{draft_id} (백엔드에서 구현 필요)
- *
- * @param draftId - 초안 ID (예: 'DRAFT-2024-001' 또는 UUID)
- *
- * TODO: 백엔드에서 다음 엔드포인트를 구현해야 합니다:
- * - GET /api/v1/manuals/drafts/{draft_id}
- * - 응답: ManualDraftResponse
- */
-export const getManualDraft = (draftId: string) =>
-  api.get<ManualDraftResponse>(`/api/v1/manuals/drafts/${draftId}`);
-
-/**
  * 메뉴얼 초안 업데이트
- * OpenAPI: PUT /api/v1/manuals/drafts/{draft_id} (백엔드에서 구현 필요)
+ * OpenAPI: PUT /api/v1/manuals/{manual_id}
  *
- * @param draftId - 초안 ID
+ * 백엔드 확인 완료:
+ * - Draft 생성 시 반환되는 id = manual_id (동일)
+ * - Draft와 Manual은 같은 ManualEntry 객체 (상태만 다름)
+ * - Draft 수정은 PUT /api/v1/manuals/{manual_id}로 수행
+ *
+ * @param draftId - 초안 ID (= manual_id)
  * @param payload - 업데이트할 데이터 (guideline은 줄바꿈으로 구분된 문자열)
- *
- * TODO: 백엔드에서 다음 엔드포인트를 구현해야 합니다:
- * - PUT /api/v1/manuals/drafts/{draft_id}
- * - Request body: { topic, keywords, background, guideline }
- * - 응답: ManualDraftResponse
+ * @returns ManualDraftResponse
  */
 export const updateManualDraft = (draftId: string, payload: ManualDraftUpdateRequest) =>
-  api.put<ManualDraftResponse>(`/api/v1/manuals/drafts/${draftId}`, payload);
+  api.put<ManualDraftResponse>(`/api/v1/manuals/${draftId}`, payload);
 
 /**
- * 메뉴얼 초안 검토 요청
- * OpenAPI: POST /api/v1/manuals/{manual_id}/review
+ * 메뉴얼 초안 검토 요청 (충돌 검사)
+ * OpenAPI: POST /api/v1/manuals/draft/{manual_id}/conflict-check
+ * FR-6: 신규 초안과 기존 메뉴얼 자동 비교
  *
- * @param manualId - 메뉴얼 ID (초안 ID)
- * @returns ManualReviewTaskResponse
+ * @param manualId - 메뉴얼 초안 ID
+ * @returns ManualReviewTaskResponse 또는 null
  */
 export const requestManualReview = (manualId: string) =>
-  api.post<ManualReviewTaskResponse>(`/api/v1/manuals/${manualId}/review`, {});
+  api.post<ManualReviewTaskResponse | null>(`/api/v1/manuals/draft/${manualId}/conflict-check`, {});
 
 /**
  * 메뉴얼 벡터 검색

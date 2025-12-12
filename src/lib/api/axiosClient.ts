@@ -10,7 +10,6 @@ export const axiosClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // 쿠키 전송을 위한 설정
 });
 
 // 요청 인터셉터

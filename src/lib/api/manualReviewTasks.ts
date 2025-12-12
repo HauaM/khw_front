@@ -251,3 +251,26 @@ export async function rejectManualReviewTask(
     throw error;
   }
 }
+
+/**
+ * 메뉴얼 검토 Task 시작 (TODO → IN_PROGRESS)
+ * @param taskId Task ID
+ * @returns 시작된 Task 정보
+ */
+export async function startManualReviewTask(
+  taskId: string
+): Promise<BackendManualReviewTask> {
+  try {
+    // OpenAPI: PUT /api/v1/manual-review/tasks/{task_id}
+    // FR-6: 검토 태스크 시작 (TODO → IN_PROGRESS)
+    const response = await axiosClient.put<BackendManualReviewTask>(
+      `/api/v1/manual-review/tasks/${taskId}`,
+      {}
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Failed to start manual review task:', error);
+    throw error;
+  }
+}

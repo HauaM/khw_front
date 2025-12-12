@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { ManualDraft } from '@/types/manuals';
 import { useManualDraft } from '@/hooks/useManualDraft';
 import ManualDraftResultView from '@/components/manuals/ManualDraftResultView';
 import Spinner from '@/components/common/Spinner';
+import { useToast } from '@/contexts/ToastContext';
 
 /**
  * 메뉴얼 초안 결과 페이지
@@ -13,24 +14,36 @@ import Spinner from '@/components/common/Spinner';
  *    - `location.state.draft`로 초안 데이터 전달
  *    - 예: navigate('/manuals/draft/DRAFT-001', { state: { draft: createdDraft } })
  *
- * 2. 저장된 초안 재조회 (데모/테스트용):
- *    - URL 파라미터 `:id`로 접근 시 mock 데이터 로드
- *    - 추후 백엔드 GET API 구현 후 실제 조회 가능
+ * 2. 저장된 초안 재조회:
+ *    - URL 파라미터 `:id`로 접근 시 API에서 데이터를 조회하고, 없으면 mock을 사용합니다.
  */
 const ManualDraftResultPage: React.FC = () => {
   const location = useLocation();
+  const params = useParams<{ id: string }>();
+  const draftId = params.id ?? '';
   const draftFromState = (location.state as { draft?: ManualDraft } | null)?.draft;
+  const { showToast } = useToast();
+  const toastShownRef = React.useRef(false);
 
-  // 라우트 상태에서 전달받은 draft가 있으면 사용, 없으면 mock 로드
-  const { data: mockDraft, isLoading, isError, error } = useManualDraft('');
-  const [currentDraft, setCurrentDraft] = useState<ManualDraft | null>(draftFromState || mockDraft || null);
+  // 라우트 상태에서 전달받은 draft가 있으면 사용, 없으면 API/모의 데이터를 로드
+  const { data: fetchedDraft, isLoading, isError, error } = useManualDraft(draftId);
+  const [currentDraft, setCurrentDraft] = useState<ManualDraft | null>(
+    draftFromState || fetchedDraft || null
+  );
 
-  // mockDraft가 업데이트되면 currentDraft도 업데이트 (draftFromState가 없을 때만)
+  // API/모의 draft가 업데이트되면 currentDraft도 업데이트 (draftFromState가 없을 때만)
   React.useEffect(() => {
-    if (!draftFromState && mockDraft) {
-      setCurrentDraft(mockDraft);
+    if (!draftFromState && fetchedDraft) {
+      setCurrentDraft(fetchedDraft);
     }
-  }, [mockDraft, draftFromState]);
+  }, [fetchedDraft, draftFromState]);
+
+  React.useEffect(() => {
+    if (!draftId && !toastShownRef.current) {
+      showToast('메뉴얼 ID가 누락되었습니다. URL을 확인해주세요.', 'error');
+      toastShownRef.current = true;
+    }
+  }, [draftId, showToast]);
 
   // 저장 후 초안 데이터 업데이트
   const handleSaved = (updatedDraft: ManualDraft) => {
