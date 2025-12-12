@@ -14,204 +14,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 import { ManualDraftListResponse } from '@/lib/api/manuals';
-
-// ─────────────────────────────────────────────────────────────────
-// Styled Components
-// ─────────────────────────────────────────────────────────────────
-
-const TableCard = styled.div`
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-`;
-
-const TableHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 16px 20px;
-`;
-
-const TableTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 600;
-  color: #212121;
-  margin: 0;
-`;
-
-const TableCount = styled.span`
-  font-size: 13px;
-  font-weight: 600;
-  color: #6e6e6e;
-`;
-
-const TableContainer = styled.div`
-  overflow-x: auto;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-
-  thead tr {
-    background-color: #e8f1fb;
-  }
-
-  th {
-    background-color: #e8f1fb;
-    color: #005bac;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 12px 12px;
-    text-align: left;
-    border-bottom: 1px solid #bdbdbd;
-    white-space: nowrap;
-  }
-
-  td {
-    font-size: 13px;
-    color: #212121;
-    padding: 12px 12px;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
-  tbody tr {
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: #f5f5f5;
-    }
-  }
-`;
-
-const NoDataContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: #6e6e6e;
-`;
-
-const NoDataIcon = styled.div`
-  width: 64px;
-  height: 64px;
-  margin-bottom: 16px;
-  color: #bdbdbd;
-  font-size: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const NoDataTitle = styled.h4`
-  font-size: 16px;
-  font-weight: 600;
-  color: #424242;
-  margin: 0 0 8px 0;
-`;
-
-const NoDataDescription = styled.p`
-  font-size: 13px;
-  color: #6e6e6e;
-  margin: 0;
-`;
-
-const KeywordBadge = styled.span`
-  display: inline-block;
-  background-color: #e8f1fb;
-  color: #1a73e8;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 11px;
-  font-weight: 500;
-  margin-right: 4px;
-
-  &:last-child {
-    margin-right: 0;
-  }
-`;
-
-const StatusBadge = styled.span<{ status: string }>`
-  display: inline-block;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  white-space: nowrap;
-
-  ${(props: { status: string }) => {
-    switch (props.status) {
-      case 'DRAFT':
-        return `
-          background-color: #f5f5f5;
-          color: #6e6e6e;
-        `;
-      case 'APPROVED':
-        return `
-          background-color: #e8f5e9;
-          color: #2e7d32;
-        `;
-      case 'DEPRECATED':
-        return `
-          background-color: #ffebee;
-          color: #c62828;
-        `;
-      default:
-        return `
-          background-color: #f5f5f5;
-          color: #6e6e6e;
-        `;
-    }
-  }}
-`;
-
-const ActionButton = styled.button<{ danger?: boolean }>`
-  min-height: 28px;
-  padding: 2px 8px;
-  margin-right: 4px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s ease;
-
-  ${(props: { danger?: boolean }) =>
-    props.danger
-      ? `
-    background-color: #ffebee;
-    color: #c62828;
-    &:hover {
-      background-color: #c62828;
-      color: #ffffff;
-    }
-  `
-      : `
-    background-color: #e8f1fb;
-    color: #005bac;
-    &:hover {
-      background-color: #005bac;
-      color: #ffffff;
-    }
-  `}
-`;
-
-const ConsultationLink = styled.a`
-  color: #1a73e8;
-  text-decoration: none;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
 
 // ─────────────────────────────────────────────────────────────────
 // Utility Functions
@@ -239,14 +42,12 @@ interface ManualDraftTableProps {
   drafts: ManualDraftListResponse[];
   totalCount: number;
   onSelectDraft: (draftId: string) => void;
-  onDeleteDraft: (draftId: string, topic: string) => void;
 }
 
 const ManualDraftTable: React.FC<ManualDraftTableProps> = ({
   drafts,
   totalCount,
   onSelectDraft,
-  onDeleteDraft,
 }) => {
   const navigate = useNavigate();
 
@@ -256,107 +57,113 @@ const ManualDraftTable: React.FC<ManualDraftTableProps> = ({
     navigate(`/consultations/${consultationId}`);
   };
 
-  const handleDetailClick = (draftId: string): void => {
+  const handleRowClick = (draftId: string): void => {
     onSelectDraft(draftId);
   };
 
-  const handleDeleteClick = (e: React.MouseEvent<HTMLButtonElement>, draftId: string, topic: string): void => {
-    e.stopPropagation();
-    onDeleteDraft(draftId, topic);
+  // 상태별 배지 색상
+  const getStatusBadgeClasses = (status: string): string => {
+    switch (status) {
+      case 'DRAFT':
+        return 'bg-gray-100 text-gray-600';
+      case 'APPROVED':
+        return 'bg-green-100 text-green-700';
+      case 'DEPRECATED':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
   };
 
   return (
-    <TableCard>
-      <TableHeader>
-        <TableTitle>메뉴얼 초안 목록</TableTitle>
-        <TableCount>총 {totalCount}건</TableCount>
-      </TableHeader>
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-gray-300 px-5 py-4">
+        <h3 className="text-base font-semibold text-gray-900 m-0">메뉴얼 초안 목록</h3>
+        <span className="text-xs font-semibold text-gray-600">총 {totalCount}건</span>
+      </div>
 
-      <TableContainer>
+      {/* Table Container */}
+      <div className="overflow-x-auto">
         {drafts.length > 0 ? (
-          <Table>
+          <table className="w-full border-collapse">
             <thead>
-              <tr>
-                <th>주제</th>
-                <th>키워드</th>
-                <th>업무 구분</th>
-                <th>에러 코드</th>
-                <th>생성 일시</th>
-                <th>상태</th>
-                <th>원본 상담</th>
-                <th style={{ textAlign: 'center' }}>작업</th>
+              <tr className="bg-blue-50">
+                <th className="bg-blue-50 text-primary-500 text-xs font-semibold px-3 py-3 text-left border-b border-gray-300 whitespace-nowrap">주제</th>
+                <th className="bg-blue-50 text-primary-500 text-xs font-semibold px-3 py-3 text-left border-b border-gray-300 whitespace-nowrap">키워드</th>
+                <th className="bg-blue-50 text-primary-500 text-xs font-semibold px-3 py-3 text-left border-b border-gray-300 whitespace-nowrap">업무 구분</th>
+                <th className="bg-blue-50 text-primary-500 text-xs font-semibold px-3 py-3 text-left border-b border-gray-300 whitespace-nowrap">에러 코드</th>
+                <th className="bg-blue-50 text-primary-500 text-xs font-semibold px-3 py-3 text-left border-b border-gray-300 whitespace-nowrap">생성 일시</th>
+                <th className="bg-blue-50 text-primary-500 text-xs font-semibold px-3 py-3 text-left border-b border-gray-300 whitespace-nowrap">상태</th>
+                <th className="bg-blue-50 text-primary-500 text-xs font-semibold px-3 py-3 text-left border-b border-gray-300 whitespace-nowrap">원본 상담</th>
               </tr>
             </thead>
             <tbody>
               {drafts.map((draft) => (
-                <tr key={draft.id}>
+                <tr
+                  key={draft.id}
+                  onClick={() => handleRowClick(draft.id)}
+                  className="cursor-pointer transition-colors duration-200 hover:bg-gray-100 border-b border-gray-200"
+                >
                   {/* Topic */}
-                  <td title={draft.topic} style={{ maxWidth: '200px' }}>
+                  <td className="text-xs text-gray-900 px-3 py-3 max-w-[200px]" title={draft.topic}>
                     {truncateText(draft.topic, 50)}
                   </td>
 
                   {/* Keywords */}
-                  <td style={{ maxWidth: '180px' }}>
+                  <td className="text-xs text-gray-900 px-3 py-3 max-w-[180px]">
                     {draft.keywords.slice(0, 2).map((keyword: string, idx: number) => (
-                      <KeywordBadge key={idx}>{keyword}</KeywordBadge>
+                      <span key={idx} className="inline-block bg-blue-50 text-blue-600 rounded px-1.5 py-0.5 text-xs font-medium mr-1">
+                        {keyword}
+                      </span>
                     ))}
                     {draft.keywords.length > 2 && (
-                      <KeywordBadge>+{draft.keywords.length - 2}</KeywordBadge>
+                      <span className="inline-block bg-blue-50 text-blue-600 rounded px-1.5 py-0.5 text-xs font-medium">
+                        +{draft.keywords.length - 2}
+                      </span>
                     )}
                   </td>
 
                   {/* Business Type */}
-                  <td>{draft.business_type_name || '-'}</td>
+                  <td className="text-xs text-gray-900 px-3 py-3">{draft.business_type_name || '-'}</td>
 
                   {/* Error Code */}
-                  <td style={{ fontFamily: 'monospace' }}>{draft.error_code || '-'}</td>
+                  <td className="text-xs text-gray-900 px-3 py-3 font-mono">{draft.error_code || '-'}</td>
 
                   {/* Created At */}
-                  <td style={{ whiteSpace: 'nowrap' }}>{formatDate(draft.created_at)}</td>
+                  <td className="text-xs text-gray-900 px-3 py-3 whitespace-nowrap">{formatDate(draft.created_at)}</td>
 
                   {/* Status */}
-                  <td>
-                    <StatusBadge status={draft.status}>{draft.status}</StatusBadge>
+                  <td className="text-xs text-gray-900 px-3 py-3">
+                    <span className={`inline-block rounded-full text-xs font-semibold px-2 py-0.5 whitespace-nowrap ${getStatusBadgeClasses(draft.status)}`}>
+                      {draft.status}
+                    </span>
                   </td>
 
                   {/* Source Consultation */}
-                  <td>
-                    <ConsultationLink
+                  <td className="text-xs px-3 py-3">
+                    <a
                       onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
                         handleConsultationClick(e, draft.source_consultation_id)
                       }
+                      className="text-blue-500 hover:text-blue-700 hover:underline font-medium cursor-pointer"
                     >
                       {truncateText(draft.source_consultation_id, 12)}
-                    </ConsultationLink>
-                  </td>
-
-                  {/* Actions */}
-                  <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
-                    <ActionButton onClick={() => handleDetailClick(draft.id)}>
-                      상세보기
-                    </ActionButton>
-                    {draft.status === 'DRAFT' && (
-                      <ActionButton
-                        danger
-                        onClick={(e) => handleDeleteClick(e, draft.id, draft.topic)}
-                      >
-                        삭제
-                      </ActionButton>
-                    )}
+                    </a>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </Table>
+          </table>
         ) : (
-          <NoDataContainer>
-            <NoDataIcon>📋</NoDataIcon>
-            <NoDataTitle>초안이 없습니다</NoDataTitle>
-            <NoDataDescription>필터 조건을 변경해보세요</NoDataDescription>
-          </NoDataContainer>
+          <div className="flex flex-col items-center justify-center px-5 py-15">
+            <div className="mb-4 text-6xl text-gray-300 flex items-center justify-center w-16 h-16">📋</div>
+            <h4 className="text-base font-semibold text-gray-700 mb-2 m-0">초안이 없습니다</h4>
+            <p className="text-xs text-gray-600 m-0">필터 조건을 변경해보세요</p>
+          </div>
         )}
-      </TableContainer>
-    </TableCard>
+      </div>
+    </div>
   );
 };
 
