@@ -9,13 +9,13 @@ export default {
       colors: {
         // 광주은행 브랜드 컬러
         primary: {
-          50: '#e6f0ff',
-          100: '#b3d4ff',
-          200: '#80b8ff',
-          300: '#4d9cff',
-          400: '#1a80ff',
-          500: '#0066e6',  // 메인 블루
-          600: '#0052b8',
+          50: '#f0f6ff',
+          100: '#d9e9ff',
+          200: '#b3d4ff',
+          300: '#8db8ff',
+          400: '#6699ff',
+          500: '#005BAC',  // 광주은행 메인 색상
+          600: '#00437F',  // 호버/선택 색상
           700: '#003d8a',
           800: '#00295c',
           900: '#00142e',
@@ -53,6 +53,15 @@ export default {
           light: '#dbeafe',
           DEFAULT: '#3b82f6',
           dark: '#1e40af',
+        },
+        // 추가 커스텀 색상
+        'brand': {
+          'light': '#E8F1FB',
+          'focus': '#1A73E8',
+        },
+        'text': {
+          'primary': '#212121',
+          'secondary': '#6E6E6E',
         },
       },
       fontFamily: {

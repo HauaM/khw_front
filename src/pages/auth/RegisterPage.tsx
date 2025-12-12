@@ -23,11 +23,11 @@ const RegisterPage: React.FC = () => {
 
 const AuthHeader: React.FC<{ title: string; subtitle: string }> = ({ title, subtitle }) => (
   <div className="text-center space-y-4">
-    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-[#005BAC] text-2xl font-bold text-white">
+    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-primary-500 text-2xl font-bold text-white">
       KJB
     </div>
     <div className="space-y-1">
-      <h1 className="text-2xl font-bold text-[#005BAC]">{title}</h1>
+      <h1 className="text-2xl font-bold text-primary-500">{title}</h1>
       <p className="text-sm text-gray-600">{subtitle}</p>
     </div>
   </div>

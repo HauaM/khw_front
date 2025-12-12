@@ -24,7 +24,7 @@ const ManualDetailPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-700 rounded-full animate-spin mb-4"></div>
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-primary-500 rounded-full animate-spin mb-4"></div>
         <p className="text-gray-700">메뉴얼을 불러오는 중입니다...</p>
       </div>
     );

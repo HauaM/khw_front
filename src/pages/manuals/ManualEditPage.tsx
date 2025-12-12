@@ -44,7 +44,7 @@ const ManualEditPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="inline-block w-12 h-12 border-4 border-gray-300 border-t-[#005BAC] rounded-full animate-spin mb-4"></div>
+          <div className="inline-block w-12 h-12 border-4 border-gray-300 border-t-primary-500 rounded-full animate-spin mb-4"></div>
           <p className="text-sm text-gray-600">메뉴얼을 불러오는 중입니다...</p>
         </div>
       </div>

@@ -54,7 +54,7 @@ const ManualDraftResultPage: React.FC = () => {
   if (!draftFromState && isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <Spinner size="lg" className="mb-4 text-[#005BAC]" />
+        <Spinner size="lg" className="mb-4 text-primary-500" />
         <p className="text-gray-600">초안 데이터를 불러오는 중입니다...</p>
       </div>
     );
