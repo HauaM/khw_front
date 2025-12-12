@@ -288,10 +288,11 @@ const ConsultationSearchPage: React.FC = () => {
 
       {selectedConsultation && (
         <ConsultationDetailModal
-          consultation={selectedConsultation}
+          consultationId={selectedConsultation.id}
           isOpen={!!detailId}
           onClose={handleCloseModal}
           onManualDraftCreated={handleManualDraftCreated}
+          isNew={true}
         />
       )}
     </div>
