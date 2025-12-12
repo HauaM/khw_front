@@ -11,6 +11,8 @@ import ManualDraftResultPage from '@/pages/manuals/ManualDraftResultPage';
 import ManualDetailPage from '@/pages/manuals/ManualDetailPage';
 import ManualEditPage from '@/pages/manuals/ManualEditPage';
 import ManualVersionComparePage from '@/pages/manuals/ManualVersionComparePage';
+import ManualDraftListPage from '@/pages/manuals/ManualDraftListPage';
+import ManualDraftDetailPage from '@/pages/manuals/ManualDraftDetailPage';
 import ReviewTaskListPage from '@/pages/reviews/ReviewTaskListPage';
 import ManualReviewDetailPage from '@/pages/reviews/ManualReviewDetailPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
@@ -35,12 +37,12 @@ const AppRouter: React.FC = () => {
           <Route path="manuals">
             <Route path="search" element={<ManualSearchPage />} />
             <Route path="history" element={<ManualHistoryPage />} />
+            <Route path="drafts" element={<ManualDraftListPage />} />
+            <Route path="drafts/:draftId" element={<ManualDraftDetailPage />} />
             <Route path="draft/:id" element={<ManualDraftResultPage />} />
             <Route path=":manualId/versions/compare" element={<ManualVersionComparePage />} />
             <Route path=":manualId/edit" element={<ManualEditPage />} />
             <Route path=":manualId" element={<ManualDetailPage />} />
-            {/* TODO: 메뉴얼 검토 대기 목록 페이지 추가 예정 */}
-            {/* <Route path="drafts" element={<ManualDraftListPage />} /> */}
           </Route>
           <Route path="reviews">
             <Route path="tasks" element={<ReviewTaskListPage />} />
