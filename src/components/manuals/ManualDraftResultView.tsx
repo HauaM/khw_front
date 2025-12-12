@@ -9,7 +9,7 @@ import { useSaveManualDraft } from '@/hooks/useSaveManualDraft';
 import { useRequestManualReview } from '@/hooks/useRequestManualReview';
 import { useStartManualReviewTask } from '@/hooks/useStartManualReviewTask';
 import { guidelinesToString, deleteManualDraft } from '@/lib/api/manuals';
-import { getConsultationById } from '@/lib/api/consultations';
+import ConsultationDetailModal from '@/components/modals/ConsultationDetailModal';
 
 interface ManualDraftResultViewProps {
   draft: ManualDraft;
@@ -34,7 +34,7 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isLoadingConsultation, setIsLoadingConsultation] = useState(false);
+  const [showConsultationModal, setShowConsultationModal] = useState(false);
 
   // 훅 초기화
   const { mutate: startReviewTask } = useStartManualReviewTask();
@@ -173,21 +173,14 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   };
 
   // 원본 상담 열기
-  const handleOpenSourceConsultation = async () => {
+  const handleOpenSourceConsultation = () => {
     if (!draft.source_consultation_id) return;
+    setShowConsultationModal(true);
+  };
 
-    setIsLoadingConsultation(true);
-    try {
-      const consultation = await getConsultationById(draft.source_consultation_id);
-      navigate(`/consultations/${draft.source_consultation_id}`, {
-        state: { consultation },
-      });
-    } catch (error) {
-      console.error('Error loading consultation:', error);
-      showToast('상담 정보를 불러올 수 없습니다.', 'error');
-    } finally {
-      setIsLoadingConsultation(false);
-    }
+  // 모달 닫기
+  const handleCloseConsultationModal = () => {
+    setShowConsultationModal(false);
   };
 
   // 현재 데이터 (보기 모드: draft, 편집 모드: editedDraft)
@@ -456,21 +449,14 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
             <><button
                 type="button"
                 onClick={handleOpenSourceConsultation}
-                disabled={isLoadingConsultation}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md border border-[#005BAC] bg-white px-5 text-sm font-semibold text-[#005BAC] transition hover:bg-[#E8F1FB] disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md border border-[#005BAC] bg-white px-5 text-sm font-semibold text-[#005BAC] transition hover:bg-[#E8F1FB]"
               >
-                {isLoadingConsultation ? (
-                  <Spinner size="sm" className="text-[#005BAC]" />
-                ) : (
-                  <>
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                      <polyline points="15 3 21 3 21 9" />
-                      <line x1="10" y1="14" x2="21" y2="3" />
-                    </svg>
-                    원본 상담 열기
-                  </>
-                )}
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+                원본 상담 열기
               </button>
               <button
                 type="button"
@@ -523,6 +509,14 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
           )}
         </div>
       </div>
+
+      {/* 상담 상세 조회 모달 */}
+      <ConsultationDetailModal
+        consultationId={draft.source_consultation_id || ''}
+        isOpen={showConsultationModal}
+        onClose={handleCloseConsultationModal}
+        isNew={false}
+      />
 
       {/* 검토 요청 확인 모달 */}
       <Modal

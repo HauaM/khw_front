@@ -103,54 +103,10 @@ const ConsultationDetailPage: React.FC = () => {
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
-            목록으로
-          </button>
-          <button
-            type="button"
-            disabled={!data || isCreating}
-            onClick={handleCreateDraft}
-            className="bg-primary-600 text-white rounded-md min-h-[36px] px-4 text-sm font-semibold transition hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {isCreating ? (
-              <>
-                <Spinner size="sm" className="!text-white" />
-                <span>생성 중...</span>
-              </>
-            ) : (
-              <>
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="12" y1="18" x2="12" y2="12" />
-                  <line x1="9" y1="15" x2="15" y2="15" />
-                </svg>
-                <span>메뉴얼 초안 생성</span>
-              </>
-            )}
+            이전으로
           </button>
         </div>
       </header>
-
-      <div className="bg-[#e3f2fd] border-l-4 border-[#1976d2] rounded px-4 py-3 mb-2 flex items-start gap-3">
-        <svg
-          className="h-5 w-5 text-[#1976d2] mt-[2px]"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 16v-4" />
-          <path d="M12 8h.01" />
-        </svg>
-        <div className="space-y-1">
-          <p className="text-sm font-semibold text-[#1565c0]">메뉴얼 초안 생성 안내</p>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            이 상담 내용을 기반으로 AI가 메뉴얼 초안을 자동 생성합니다. 생성된 초안은 검토자의 승인 후 최종 메뉴얼로 게시됩니다.
-          </p>
-        </div>
-      </div>
-
       {isLoading && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-10 flex items-center justify-center gap-3">
           <Spinner />
