@@ -61,10 +61,10 @@ const ManualSearchPage: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* 페이지 헤더 */}
-      <div className="mb-6">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">메뉴얼 검색</h1>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-bold text-gray-900">메뉴얼 검색</h1>
         <p className="text-sm text-gray-600">VectorStore 기반 메뉴얼 검색 및 조회</p>
       </div>
 

@@ -10,6 +10,7 @@ import {
   ManualVersionDetail,
   ManualDraftStatus,
 } from '@/types/manuals';
+import { BackendManualReviewTask } from '@/types/reviews';
 
 // Re-export types for convenience
 export type { ManualDraft, ManualDraftResponse, ManualDetail, ManualDraftStatus };
@@ -18,21 +19,6 @@ export type { ManualDraft, ManualDraftResponse, ManualDetail, ManualDraftStatus 
 export interface ManualDraftCreatePayload {
   consultation_id: string;
   enforce_hallucination_check?: boolean; // default true
-}
-
-/**
- * OpenAPI: ManualReviewTaskResponse (검토 태스크 생성 응답)
- */
-export interface ManualReviewTaskResponse {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  old_entry_id: string | null;
-  new_entry_id: string;
-  similarity: number;
-  status: 'TODO' | 'IN_PROGRESS' | 'DONE' | 'REJECTED';
-  reviewer_id: string | null;
-  review_notes: string | null;
 }
 
 /**
@@ -103,6 +89,27 @@ export const createManualDraft = (payload: ManualDraftCreatePayload) =>
  */
 export const updateManualDraft = (draftId: string, payload: ManualDraftUpdateRequest) =>
   api.put<ManualDraftResponse>(`/api/v1/manuals/${draftId}`, payload);
+
+/**
+ * 메뉴얼 검토 요청
+ * OpenAPI: PUT /api/v1/manual-review/tasks/{task_id}
+ * FR-6: 검토 요청을 위해 상태를 갱신합니다.
+ *
+ * @param taskId - 메뉴얼 ID (UUID)
+ * @returns ManualDetail
+ */
+export const requestManualReview = (taskId: string) =>
+  api.put<ManualDetail>(`/api/v1/manual-review/tasks/${taskId}`, { });
+
+/**
+ * 메뉴얼에 대한 검토 Task 목록 조회
+ * OpenAPI: GET /api/v1/manuals/{manual_id}/review-tasks
+ *
+ * @param manualId - 메뉴얼 ID (UUID)
+ * @returns ManualReviewTaskResponse 배열
+ */
+export const fetchManualReviewTasksByManualId = (manualId: string) =>
+  api.get<BackendManualReviewTask[]>(`/api/v1/manuals/${manualId}/review-tasks`);
 
 
 /**

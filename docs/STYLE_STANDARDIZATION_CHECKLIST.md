@@ -340,7 +340,7 @@ git commit -m "refactor: ManualDraftListPage에서 styled-components → Tailwin
 
 ```tsx
 // Line 30
-<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-[#005BAC] text-2xl font-bold text-white">
+<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-[#005BAC] text-2xl font-bold text-white">
 
 // Line 34
 <h1 className="text-2xl font-bold text-[#005BAC]">{title}</h1>
@@ -350,7 +350,7 @@ git commit -m "refactor: ManualDraftListPage에서 styled-components → Tailwin
 
 ```tsx
 // Line 30
-<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-primary-500 text-2xl font-bold text-white">
+<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-primary-500 text-2xl font-bold text-white">
 
 // Line 34
 <h1 className="text-2xl font-bold text-primary-500">{title}</h1>
@@ -378,7 +378,7 @@ git commit -m "refactor: ManualDraftListPage에서 styled-components → Tailwin
 
 ```tsx
 // Line 26-27
-<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-[#005BAC]">
+<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-[#005BAC]">
 <h1 className="text-2xl font-bold text-[#005BAC]">
 ```
 
@@ -386,7 +386,7 @@ git commit -m "refactor: ManualDraftListPage에서 styled-components → Tailwin
 
 ```tsx
 // Line 26-27
-<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-primary-500">
+<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-primary-500">
 <h1 className="text-2xl font-bold text-primary-500">
 ```
 

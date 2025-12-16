@@ -196,50 +196,6 @@
             }
           }
         }
-      },
-      "post": {
-        "tags": [
-          "consultations"
-        ],
-        "summary": "Search consultations (vector)",
-        "description": "FR-3/FR-8: 벡터 기반 상담 검색 (POST).",
-        "operationId": "search_consultations_post_api_v1_consultations_search_post",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConsultationSearchRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ConsultationSearchResult"
-                  },
-                  "title": "Response Search Consultations Post Api V1 Consultations Search Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v1/consultations/{consultation_id}": {
@@ -285,52 +241,6 @@
         }
       }
     },
-    "/api/v1/consultations/{consultation_id}/manual-draft": {
-      "post": {
-        "tags": [
-          "consultations"
-        ],
-        "summary": "Generate manual draft from consultation",
-        "description": "Generate manual draft from consultation using LLM\n\nRFP Reference: POST /consultations/{id}/manual-draft\n- LLM extracts keywords\n- LLM generates manual structure\n- Returns draft for user review\n\nTODO: Implement actual logic",
-        "operationId": "generate_manual_draft_api_v1_consultations__consultation_id__manual_draft_post",
-        "parameters": [
-          {
-            "name": "consultation_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Consultation Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Generate Manual Draft Api V1 Consultations  Consultation Id  Manual Draft Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/manuals/draft": {
       "post": {
         "tags": [
@@ -356,58 +266,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ManualDraftCreateResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/manuals/draft/{manual_id}/conflict-check": {
-      "post": {
-        "tags": [
-          "manuals"
-        ],
-        "summary": "Check conflict and create review task",
-        "description": "FR-6: 신규 초안과 기존 메뉴얼 자동 비교.",
-        "operationId": "check_conflict_api_v1_manuals_draft__manual_id__conflict_check_post",
-        "parameters": [
-          {
-            "name": "manual_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Manual Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/ManualReviewTaskResponse"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Response Check Conflict Api V1 Manuals Draft  Manual Id  Conflict Check Post"
                 }
               }
             }
@@ -1093,6 +951,54 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manuals/{manual_id}/review-tasks": {
+      "get": {
+        "tags": [
+          "manuals"
+        ],
+        "summary": "Get review tasks for a manual",
+        "description": "메뉴얼에 해당하는 검토 로직 정보 조회\n\n프론트엔드에서 메뉴얼 상세 페이지에서 해당 메뉴얼의 검토 태스크 정보를 불러올 때 사용.\n\n**요청:**\n- GET /manuals/{manual_id}/review-tasks\n\n**응답 (200 OK):**\n```json\n[\n  {\n    \"id\": \"uuid-task-1\",\n    \"new_entry_id\": \"uuid-manual-draft\",\n    \"old_entry_id\": \"uuid-manual-existing\",\n    \"similarity\": 0.82,\n    \"comparison_type\": \"supplement\",\n    \"status\": \"TODO\",\n    \"reviewer_id\": \"reviewer-001\",\n    \"review_notes\": null,\n    \"new_manual_summary\": \"신규 메뉴얼 요약\",\n    \"old_manual_summary\": \"기존 메뉴얼 요약\",\n    \"business_type\": \"INTERNET_BANKING\",\n    \"business_type_name\": \"인터넷뱅킹\",\n    \"new_error_code\": \"E001\",\n    \"new_manual_topic\": \"로그인 실패\",\n    \"new_manual_keywords\": [\"로그인\", \"실패\"],\n    \"old_business_type\": \"INTERNET_BANKING\",\n    \"old_business_type_name\": \"인터넷뱅킹\",\n    \"old_error_code\": \"E001\",\n    \"old_manual_topic\": \"로그인 오류\",\n    \"created_at\": \"2024-12-10T12:00:00Z\",\n    \"updated_at\": \"2024-12-10T12:00:00Z\"\n  }\n]\n```\n\n**에러 응답:**\n- 404 Not Found: 메뉴얼을 찾을 수 없음\n\n**주요 필드:**\n- new_entry_id: 신규 상담 기반 초안 (검색 대상)\n- old_entry_id: 기존 메뉴얼 (없으면 신규 생성)\n- similarity: 기존/신규 유사도 점수 (0-1)\n- comparison_type: similar/supplement/new (비교 타입)\n- status: TODO/IN_PROGRESS/DONE/REJECTED (검토 상태)",
+        "operationId": "get_manual_review_tasks_api_v1_manuals__manual_id__review_tasks_get",
+        "parameters": [
+          {
+            "name": "manual_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Manual Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ManualReviewTaskResponse"
+                  },
+                  "title": "Response Get Manual Review Tasks Api V1 Manuals  Manual Id  Review Tasks Get"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -2936,102 +2842,6 @@
         ],
         "title": "ConsultationResponse",
         "description": "Schema for consultation response\n\nIncludes all base fields plus ID and timestamps"
-      },
-      "ConsultationSearchFilters": {
-        "properties": {
-          "branch_code": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 50
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Branch Code"
-          },
-          "business_type": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 50
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Business Type"
-          },
-          "error_code": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 50
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Error Code"
-          },
-          "start_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Start Date",
-            "description": "조회 시작 시각 (created_at 이상)"
-          },
-          "end_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "End Date",
-            "description": "조회 종료 시각 (created_at 이하)"
-          }
-        },
-        "type": "object",
-        "title": "ConsultationSearchFilters",
-        "description": "VectorStore 재조회 시 적용할 메타데이터 필터 (FR-3 대비 사전 정의).\n\n나중 Task에서 사용할 예정이지만, Repository와 Service 계약을 맞추기 위해\n기본 필드를 미리 선언한다."
-      },
-      "ConsultationSearchRequest": {
-        "properties": {
-          "query": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Query",
-            "description": "검색 쿼리"
-          },
-          "top_k": {
-            "type": "integer",
-            "maximum": 50,
-            "minimum": 1,
-            "title": "Top K",
-            "default": 10
-          },
-          "filters": {
-            "$ref": "#/components/schemas/ConsultationSearchFilters",
-            "description": "branch/business/error 등 메타 필터"
-          }
-        },
-        "type": "object",
-        "required": [
-          "query"
-        ],
-        "title": "ConsultationSearchRequest",
-        "description": "FR-3: 상담 검색 요청 스키마."
       },
       "ConsultationSearchResponse": {
         "properties": {

@@ -14,8 +14,6 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ManualDraftListResponse } from '@/lib/api/manuals';
-
 // ─────────────────────────────────────────────────────────────────
 // Utility Functions
 // ─────────────────────────────────────────────────────────────────
@@ -38,10 +36,23 @@ const truncateText = (text: string, maxLength: number): string => {
 // Component
 // ─────────────────────────────────────────────────────────────────
 
+export interface ManualDraftTableRow {
+  id: string;
+  manual_id: string;
+  reviewTaskId?: string;
+  topic: string;
+  keywords: string[];
+  business_type_name?: string | null;
+  error_code?: string | null;
+  created_at: string;
+  status: string;
+  source_consultation_id?: string | null;
+}
+
 interface ManualDraftTableProps {
-  drafts: ManualDraftListResponse[];
+  drafts: ManualDraftTableRow[];
   totalCount: number;
-  onSelectDraft: (draftId: string) => void;
+  onSelectDraft: (draft: ManualDraftTableRow) => void;
 }
 
 const ManualDraftTable: React.FC<ManualDraftTableProps> = ({
@@ -57,8 +68,8 @@ const ManualDraftTable: React.FC<ManualDraftTableProps> = ({
     navigate(`/consultations/${consultationId}`);
   };
 
-  const handleRowClick = (draftId: string): void => {
-    onSelectDraft(draftId);
+  const handleRowClick = (draft: ManualDraftTableRow): void => {
+    onSelectDraft(draft);
   };
 
   // 상태별 배지 색상
@@ -76,7 +87,7 @@ const ManualDraftTable: React.FC<ManualDraftTableProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-300 px-5 py-4">
         <h3 className="text-base font-semibold text-gray-900 m-0">메뉴얼 초안 목록</h3>
@@ -102,7 +113,7 @@ const ManualDraftTable: React.FC<ManualDraftTableProps> = ({
               {drafts.map((draft) => (
                 <tr
                   key={draft.id}
-                  onClick={() => handleRowClick(draft.id)}
+                  onClick={() => handleRowClick(draft)}
                   className="cursor-pointer transition-colors duration-200 hover:bg-gray-100 border-b border-gray-200"
                 >
                   {/* Topic */}
@@ -142,14 +153,18 @@ const ManualDraftTable: React.FC<ManualDraftTableProps> = ({
 
                   {/* Source Consultation */}
                   <td className="text-xs px-3 py-3">
-                    <a
-                      onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
-                        handleConsultationClick(e, draft.source_consultation_id)
-                      }
-                      className="text-blue-500 hover:text-blue-700 hover:underline font-medium cursor-pointer"
-                    >
-                      {truncateText(draft.source_consultation_id, 12)}
-                    </a>
+                    {draft.source_consultation_id ? (
+                      <a
+                        onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
+                          handleConsultationClick(e, draft.source_consultation_id!)
+                        }
+                        className="text-blue-500 hover:text-blue-700 hover:underline font-medium cursor-pointer"
+                      >
+                        {truncateText(draft.source_consultation_id, 12)}
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -288,7 +288,7 @@ const ConsultationCreateForm: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-[900px] rounded-lg bg-white p-5 shadow-sm">
+      <div className="max-w-[900px] bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <section className="space-y-4">
             <h3 className="mb-4 border-b border-gray-200 pb-2 text-[16px] font-semibold text-gray-900">

@@ -463,13 +463,13 @@ const ManualDraftListPage: React.FC = () => {
 
 ```tsx
 // ❌ 변경 전
-<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-[#005BAC] text-2xl font-bold text-white">
+<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-[#005BAC] text-2xl font-bold text-white">
   KJB
 </div>
 <h1 className="text-2xl font-bold text-[#005BAC]">{title}</h1>
 
 // ✅ 변경 후
-<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-primary-500 text-2xl font-bold text-white">
+<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-primary-500 text-2xl font-bold text-white">
   KJB
 </div>
 <h1 className="text-2xl font-bold text-primary-500">{title}</h1>

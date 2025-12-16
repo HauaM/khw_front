@@ -34,7 +34,7 @@ const ConsultationResultTable: React.FC<ConsultationResultTableProps> = ({
   resolveBranchName,
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">검색 결과</h3>

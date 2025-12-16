@@ -234,11 +234,10 @@ const ConsultationSearchPage: React.FC = () => {
         <p className="text-gray-600">조건을 입력해 상담 내역을 검색할 수 있습니다.</p>
       </header>
 
-      <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">검색 조건</h2>
-            <p className="text-sm text-gray-500">검색어, 업무구분, 기간 등으로 세분화 검색</p>
+            <h2 className="text-lg font-semibold text-gray-900 ">검색 조건</h2>
           </div>
         </div>
         <ConsultationSearchForm onSearch={handleSearch} branchOptions={branchOptions} />
@@ -246,7 +245,7 @@ const ConsultationSearchPage: React.FC = () => {
 
       <section>
         {status === 'loading' && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-10 flex flex-col items-center justify-center gap-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-10 flex flex-col items-center justify-center gap-3">
             <Spinner />
             <p className="text-gray-600">검색 중입니다. 잠시만 기다려주세요.</p>
           </div>
@@ -300,7 +299,7 @@ const ConsultationSearchPage: React.FC = () => {
 };
 
 const StateCard: React.FC<{ title: string; description: string }> = ({ title, description }) => (
-  <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-10 flex flex-col items-center text-center gap-3">
+  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-10 flex flex-col items-center text-center gap-3">
     <div className="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold">
       ℹ
     </div>

@@ -33,7 +33,7 @@ const ManualSearchResults: React.FC<ManualSearchResultsProps> = ({
   const safeResults = results || [];
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow-sm">
+    <div className="rounded-lg bg-white p-6 border border-gray-200 shadow-sm">
       {/* 결과 헤더 */}
       <div className="mb-5 flex items-center justify-between">
         <h3 className="text-base font-bold text-gray-900">검색 결과</h3>

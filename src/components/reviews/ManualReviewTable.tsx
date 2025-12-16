@@ -48,7 +48,7 @@ const ManualReviewTable: React.FC<ManualReviewTableProps> = ({
   onRowClick,
 }) => {
   return (
-    <div className="rounded-lg bg-white shadow-sm overflow-hidden">
+    <div className="rounded-lg bg-white shadow-sm border border-gray-200 overflow-hidden">
       {/* 테이블 헤더 */}
       <div className="border-b border-gray-200 px-5 py-4 flex items-center justify-between">
         <h3 className="text-base font-semibold text-gray-900">검토 Task 목록</h3>

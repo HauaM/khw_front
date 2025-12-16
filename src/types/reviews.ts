@@ -43,8 +43,10 @@ export interface ManualReviewTask {
   created_at: string; // ISO datetime string
   // 테이블 표시용 필드
   new_manual_topic?: string; // 신규 초안의 주제
+  new_manual_keywords?: string[]; // 신규 초안 키워드
   business_type_name?: string; // 업무구분 이름
   new_error_code?: string; // 신규 초안의 에러코드
+  source_consultation_id?: string | null;
   // 기존 필드 (하위호환성)
   business_type?: BusinessType;
   // 추가 필드 (API에서 제공)

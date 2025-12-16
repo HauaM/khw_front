@@ -56,13 +56,9 @@ const ManualSearchForm: React.FC<ManualSearchFormProps> = ({
   };
 
   return (
-    <div className="mb-6 rounded-lg bg-white p-6 shadow-sm">
+    <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       {/* 카드 헤더 */}
       <h3 className="mb-5 flex items-center gap-2 text-base font-bold text-gray-900">
-        <svg className="h-5 w-5 text-[#005BAC]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
-        </svg>
         검색 조건
       </h3>
 

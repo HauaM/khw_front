@@ -21,7 +21,9 @@ const ManualDraftResultPage: React.FC = () => {
   const location = useLocation();
   const params = useParams<{ id: string }>();
   const draftId = params.id ?? '';
-  const draftFromState = (location.state as { draft?: ManualDraft } | null)?.draft;
+  const locationState = (location.state as { draft?: ManualDraft; reviewTaskId?: string } | null) ?? {};
+  const draftFromState = locationState.draft;
+  const reviewTaskId = locationState.reviewTaskId;
   const { showToast } = useToast();
   const toastShownRef = React.useRef(false);
 
@@ -92,7 +94,9 @@ const ManualDraftResultPage: React.FC = () => {
     );
   }
 
-  return <ManualDraftResultView draft={currentDraft} onSaved={handleSaved} />;
+  return (
+    <ManualDraftResultView draft={currentDraft} onSaved={handleSaved} reviewTaskId={reviewTaskId} />
+  );
 };
 
 export default ManualDraftResultPage;

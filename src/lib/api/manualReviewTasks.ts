@@ -30,8 +30,10 @@ export function transformBackendTask(task: BackendManualReviewTask & Record<stri
     created_at: task.created_at,
     // 테이블 표시용 필드 (API에서 제공 시)
     new_manual_topic: task.new_manual_topic,
+    new_manual_keywords: task.new_manual_keywords,
     business_type_name: task.business_type_name,
     new_error_code: task.new_error_code,
+    source_consultation_id: task.source_consultation_id,
     // 기존 필드 (하위호환성)
     business_type: (task.business_type || '인터넷뱅킹') as BusinessType,
     // 추가 필드

@@ -75,7 +75,7 @@ const ManualReviewFilter: React.FC<ManualReviewFilterProps> = ({
   };
 
   return (
-    <div className="mb-6 rounded-lg bg-white p-5 shadow-sm">
+    <div className="mb-6 rounded-lg bg-white p-5 shadow-sm border border-gray-200">
       {/* 필터 헤더 */}
       <div className="mb-4 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">

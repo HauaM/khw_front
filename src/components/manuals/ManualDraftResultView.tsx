@@ -6,9 +6,8 @@ import Spinner from '@/components/common/Spinner';
 import Modal from '@/components/common/Modal';
 import Toast from '@/components/common/Toast';
 import { useSaveManualDraft } from '@/hooks/useSaveManualDraft';
-import { useRequestManualReview } from '@/hooks/useRequestManualReview';
 import { useStartManualReviewTask } from '@/hooks/useStartManualReviewTask';
-import { guidelinesToString, deleteManualDraft } from '@/lib/api/manuals';
+import { guidelinesToString, deleteManualDraft, fetchManualReviewTasksByManualId } from '@/lib/api/manuals';
 import ConsultationDetailModal from '@/components/modals/ConsultationDetailModal';
 
 interface ManualDraftResultViewProps {
@@ -24,7 +23,6 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   const navigate = useNavigate();
   const { toasts, showToast, removeToast } = useToast();
   const { mutate: saveDraft } = useSaveManualDraft();
-  const { mutate: requestReview, isLoading: isReviewLoading } = useRequestManualReview();
 
   // 상태 관리
   const [isEditMode, setIsEditMode] = useState(false);
@@ -35,9 +33,12 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConsultationModal, setShowConsultationModal] = useState(false);
+  const [reviewTaskId, setReviewTaskId] = useState<string | null>(null);
+  const [isFetchingReviewTask, setIsFetchingReviewTask] = useState(false);
 
   // 훅 초기화
-  const { mutate: startReviewTask } = useStartManualReviewTask();
+  const { mutate: startReviewTask, isLoading: isStartingReviewTask } = useStartManualReviewTask();
+  const isRequestingReview = isStartingReviewTask || isFetchingReviewTask;
 
   // 편집 모드 진입
   const handleEditClick = () => {
@@ -108,21 +109,40 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   };
 
   // 검토 요청 클릭
-  const handleRequestReview = () => {
-    setShowConfirmModal(true);
+  const handleRequestReview = async () => {
+    setIsFetchingReviewTask(true);
+    setReviewTaskId(null);
+
+    try {
+      const response = await fetchManualReviewTasksByManualId(draft.id);
+      if (!response || response.length === 0) {
+        showToast('이 메뉴얼의 검토 태스크를 찾을 수 없습니다.', 'error');
+        return;
+      }
+
+      const todoTask = response.find((task) => task.status === 'TODO') || response[0];
+      setReviewTaskId(todoTask.id);
+      setShowConfirmModal(true);
+    } catch (error) {
+      console.error('Error fetching review tasks:', error);
+      showToast('검토 태스크 정보를 불러오지 못했습니다. 다시 시도해주세요.', 'error');
+    } finally {
+      setIsFetchingReviewTask(false);
+    }
   };
 
   // 검토 요청 확인
   const handleConfirmReview = async () => {
     setShowConfirmModal(false);
 
-    try {
-      // OpenAPI: POST /api/v1/manuals/{manual_id}/review
-      const reviewTask = await requestReview(draft.id);
+    if (!reviewTaskId) {
+      showToast('검토 태스크가 설정되지 않았습니다. 다시 시도해주세요.', 'error');
+      return;
+    }
 
-      // OpenAPI: PUT /api/v1/manual-review/tasks/{task_id}
-      // FR-6: 검토 태스크를 TODO → IN_PROGRESS로 변경
-      await startReviewTask(reviewTask.id);
+    try {
+      await startReviewTask(reviewTaskId);
+      setReviewTaskId(null);
 
       showToast(
         '검토 요청이 완료되었습니다. 검토자에게 알림이 전송되었습니다.',
@@ -488,10 +508,10 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
               <button
                 type="button"
                 onClick={handleRequestReview}
-                disabled={isReviewLoading}
+                disabled={isRequestingReview}
                 className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-[#005BAC] px-5 text-sm font-semibold text-white transition hover:bg-[#00437F] disabled:cursor-not-allowed disabled:bg-gray-400"
               >
-                {isReviewLoading ? (
+                {isRequestingReview ? (
                   <>
                     <Spinner size="sm" className="text-white" />
                   </>
@@ -526,8 +546,8 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
         onConfirm={handleConfirmReview}
         confirmText="요청하기"
         cancelText="취소"
-        disableConfirm={isReviewLoading}
-        disableCancel={isReviewLoading}
+        disableConfirm={isRequestingReview}
+        disableCancel={isRequestingReview}
       >
         <p className="mb-0">
           이 메뉴얼 초안을 검토자에게 전송하시겠습니까?
