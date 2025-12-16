@@ -1,4 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ApiResponse, API_ERROR_CODES } from '@/types/api';
+import { axiosErrorToApiError } from './responseHandler';
 
 // API 기본 URL (환경변수로 관리)
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
@@ -31,59 +33,119 @@ axiosClient.interceptors.request.use(
 
 // 응답 인터셉터
 axiosClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response;
+  (response: AxiosResponse<any>) => {
+    const responseData = response.data as ApiResponse<any>;
+
+    // API 공통 규격에서 에러가 있으면 에러로 처리
+    if (!responseData.success && responseData.error) {
+      const apiError = axiosErrorToApiError(
+        new AxiosError('API Error', '', response.config, response.request, response)
+      );
+
+      if (apiError) {
+        return Promise.reject(apiError);
+      }
+    }
+
+    // 원본 응답 객체를 반환하여 기존 코드 호환성 유지
+    return response as any;
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-    // 401 Unauthorized - 토큰 만료 처리
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // API 공통 규격 에러 응답 확인
+    const apiError = axiosErrorToApiError(error);
+    if (apiError) {
+      // 인증 토큰 관련 에러
+      const errorCode = apiError.error.code;
+
+      if (
+        (errorCode === API_ERROR_CODES.AUTH_EXPIRED_TOKEN ||
+          errorCode === API_ERROR_CODES.AUTH_INVALID_TOKEN) &&
+        !originalRequest._retry
+      ) {
+        originalRequest._retry = true;
+
+        try {
+          // 리프레시 토큰으로 새로운 액세스 토큰 발급
+          const refreshToken = localStorage.getItem('refreshToken');
+
+          if (!refreshToken) {
+            throw new Error('No refresh token available');
+          }
+
+          const response = await axios.post(`${BASE_URL}/api/v1/auth/refresh`, {
+            refreshToken,
+          });
+
+          const { accessToken } = response.data;
+          localStorage.setItem('accessToken', accessToken);
+
+          // 재시도
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          }
+          return axiosClient(originalRequest);
+        } catch (refreshError) {
+          // 리프레시 토큰도 만료된 경우 로그인 페이지로 리다이렉트
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          window.location.href = '/auth/login';
+          return Promise.reject(refreshError);
+        }
+      }
+
+      // 권한 없음
+      if (errorCode === API_ERROR_CODES.AUTH_FORBIDDEN) {
+        // 권한 없음 페이지로 리다이렉트 또는 알림 표시 (토스트로 처리)
+      }
+
+      return Promise.reject(apiError);
+    }
+
+    // API 공통 규격이 아닌 일반 HTTP 에러
+    const status = error.response?.status;
+
+    if (status === 401 && !originalRequest._retry) {
+      // 토큰 만료 재시도 로직
       originalRequest._retry = true;
 
       try {
-        // 리프레시 토큰으로 새로운 액세스 토큰 발급
         const refreshToken = localStorage.getItem('refreshToken');
 
         if (!refreshToken) {
           throw new Error('No refresh token available');
         }
 
-        const response = await axios.post(`${BASE_URL}/auth/refresh`, {
+        const response = await axios.post(`${BASE_URL}/api/v1/auth/refresh`, {
           refreshToken,
         });
 
         const { accessToken } = response.data;
         localStorage.setItem('accessToken', accessToken);
 
-        // 재시도
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         }
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        // 리프레시 토큰도 만료된 경우 로그인 페이지로 리다이렉트
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        window.location.href = '/auth/login';
         return Promise.reject(refreshError);
       }
     }
 
-    // 403 Forbidden - 권한 없음
-    if (error.response?.status === 403) {
-      console.error('접근 권한이 없습니다.');
-      // 권한 없음 페이지로 리다이렉트 또는 알림 표시
+    if (status === 403) {
+      // 권한 없음 처리
     }
 
-    // 404 Not Found
-    if (error.response?.status === 404) {
-      console.error('요청한 리소스를 찾을 수 없습니다.');
+    if (status === 404) {
+      // 리소스 없음 처리
     }
 
-    // 500 Internal Server Error
-    if (error.response?.status === 500) {
-      console.error('서버 오류가 발생했습니다.');
+    if (status === 500) {
+      // 서버 오류 처리
     }
 
     return Promise.reject(error);

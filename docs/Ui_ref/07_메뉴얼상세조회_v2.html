@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ko" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Detail - 광주은행</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#E6F0F9',
+              100: '#CCE1F3',
+              200: '#99C3E7',
+              300: '#66A5DB',
+              400: '#3387CF',
+              500: '#0069C3',
+              600: '#005BAC',
+              700: '#004D95',
+              800: '#003F7E',
+              900: '#003167'
+            },
+            gray: {
+              50: '#F9FAFB',
+              100: '#F3F4F6',
+              200: '#E5E7EB',
+              300: '#D1D5DB',
+              400: '#9CA3AF',
+              500: '#6B7280',
+              600: '#4B5563',
+              700: '#374151',
+              800: '#1F2937',
+              900: '#111827'
+            },
+            brand: {
+              light: '#F0F7FF',
+              focus: '#0069C3'
+            },
+            success: {
+              light: '#D1FAE5',
+              DEFAULT: '#059669'
+            },
+            error: {
+              light: '#FEE2E2',
+              DEFAULT: '#DC2626',
+              dark: '#B91C1C'
+            },
+            warning: {
+              light: '#FEF3C7',
+              DEFAULT: '#F59E0B'
+            },
+            info: {
+              light: '#DBEAFE',
+              DEFAULT: '#3B82F6'
+            },
+            text: {
+              primary: '#111827',
+              secondary: '#6B7280'
+            }
+          },
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-gray-50 font-sans">
+  <main id="app" class="h-full w-full"></main>
+  <script>
+    // Utility function for conditional classes
+    function cn(...classes) {
+      return classes.filter(Boolean).join(' ');
+    }
+
+    // Mock Data & State
+    let state = {
+      manuals: [],
+      consultationData: null,
+      showConsultationModal: false,
+      loading: false,
+      error: null,
+      businessType: 'INTERNET_BANKING',
+      errorCode: 'E001',
+      targetManualId: null
+    };
+
+    // API Functions
+    async function fetchManuals(businessType, errorCode) {
+      state.loading = true;
+      state.error = null;
+      render();
+
+      try {
+        // Mock data for demonstration - 8개의 카드로 스크롤 테스트
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const mockData = [
+          {
+            id: "3c4a6bbf-6d3a-4f6c-92cb-7e1e7ab2f0f9",
+            keywords: ["로그인", "인증"],
+            topic: "로그인 실패 시 대응",
+            background: "인증 서버 장애로 N건 이상 발생",
+            guideline: "1. 사용자 인증 정보 확인\n2. 서버 상태 점검\n3. 장애 접수 및 처리\n4. 고객 안내",
+            business_type: "INTERNET_BANKING",
+            error_code: "E001",
+            source_consultation_id: "d9af8c29-3b07-4b71-9ef1-5b2c7a7890f4",
+            version_id: "23b7a2d1-1d38-4f28-b5f3-2d9c5d7d4fce",
+            status: "APPROVED",
+            business_type_name: "인터넷뱅킹",
+            created_at: "2025-12-10T08:00:00Z",
+            updated_at: "2025-12-11T09:12:00Z"
+          },
+          {
+            id: "5eecac0d-6cb3-4b5a-9e2b-6a5d32fd3447",
+            keywords: ["인증", "보안"],
+            topic: "로그인 오류 대응",
+            background: "더 많은 사용자 문의",
+            guideline: "1. 계정 상태 확인\n2. 보안 인증 재설정\n3. 임시 비밀번호 발급",
+            business_type: "INTERNET_BANKING",
+            error_code: "E001",
+            source_consultation_id: "f1e0828b-96c2-4955-9ee2-13c1d1f5c0e5",
+            version_id: "5f1d8fde-13c3-4b10-95a4-9e432d41f4fc",
+            status: "APPROVED",
+            business_type_name: "인터넷뱅킹",
+            created_at: "2025-12-09T07:32:00Z",
+            updated_at: "2025-12-09T08:00:00Z"
+          },
+          {
+            id: "a1b2c3d4-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+            keywords: ["계좌", "이체"],
+            topic: "계좌 이체 실패 처리",
+            background: "시스템 점검 시간 중 이체 시도 증가",
+            guideline: "1. 점검 시간 확인\n2. 고객 안내\n3. 이체 재시도 안내\n4. 필요시 수동 처리",
+            business_type: "INTERNET_BANKING",
+            error_code: "E002",
+            source_consultation_id: "a9b8c7d6-e5f4-3210-9876-fedcba098765",
+            version_id: "v1v2v3v4-w5w6-x7x8-y9y0-z1z2z3z4z5z6",
+            status: "APPROVED",
+            business_type_name: "인터넷뱅킹",
+            created_at: "2025-12-08T10:15:00Z",
+            updated_at: "2025-12-08T11:30:00Z"
+          },
+          {
+            id: "q2w3e4r5-t6y7-u8i9-o0p1-a2s3d4f5g6h7",
+            keywords: ["비밀번호", "찾기"],
+            topic: "비밀번호 찾기 오류",
+            background: "SMS 인증 지연으로 인한 문의 증가",
+            guideline: "1. SMS 발송 이력 확인\n2. 통신사 장애 확인\n3. 대체 인증 수단 안내\n4. 영업점 방문 안내",
+            business_type: "INTERNET_BANKING",
+            error_code: "E003",
+            source_consultation_id: "z9y8x7w6-v5u4-t3s2-r1q0-p9o8n7m6l5k4",
+            version_id: "k4l5m6n7-o8p9-q0r1-s2t3-u4v5w6x7y8z9",
+            status: "APPROVED",
+            business_type_name: "인터넷뱅킹",
+            created_at: "2025-12-07T14:20:00Z",
+            updated_at: "2025-12-07T15:45:00Z"
+          },
+          {
+            id: "j8k9l0m1-n2o3-p4q5-r6s7-t8u9v0w1x2y3",
+            keywords: ["공인인증서", "갱신"],
+            topic: "공인인증서 갱신 오류",
+            background: "만료 임박 인증서 갱신 시도 증가",
+            guideline: "1. 인증서 만료일 확인\n2. 브라우저 호환성 점검\n3. 보안프로그램 설치 확인\n4. 재발급 안내",
+            business_type: "INTERNET_BANKING",
+            error_code: "E004",
+            source_consultation_id: "h7g6f5e4-d3c2-b1a0-9876-543210fedcba",
+            version_id: "m1n2o3p4-q5r6-s7t8-u9v0-w1x2y3z4a5b6",
+            status: "APPROVED",
+            business_type_name: "인터넷뱅킹",
+            created_at: "2025-12-06T09:30:00Z",
+            updated_at: "2025-12-06T10:00:00Z"
+          },
+          {
+            id: "c7d8e9f0-g1h2-i3j4-k5l6-m7n8o9p0q1r2",
+            keywords: ["잔액", "조회"],
+            topic: "잔액 조회 불가 처리",
+            background: "DB 동기화 지연으로 인한 일시적 오류",
+            guideline: "1. 시스템 상태 확인\n2. 캐시 삭제 안내\n3. 재로그인 요청\n4. 지속 시 고객센터 연결",
+            business_type: "INTERNET_BANKING",
+            error_code: "E005",
+            source_consultation_id: "r2q1p0o9-n8m7-l6k5-j4i3-h2g1f0e9d8c7",
+            version_id: "s3t4u5v6-w7x8-y9z0-a1b2-c3d4e5f6g7h8",
+            status: "APPROVED",
+            business_type_name: "인터넷뱅킹",
+            created_at: "2025-12-05T16:45:00Z",
+            updated_at: "2025-12-05T17:20:00Z"
+          },
+          {
+            id: "i9j0k1l2-m3n4-o5p6-q7r8-s9t0u1v2w3x4",
+            keywords: ["모바일", "앱"],
+            topic: "모바일 앱 로그인 오류",
+            background: "앱 업데이트 후 일부 기기에서 발생",
+            guideline: "1. 앱 버전 확인\n2. 재설치 안내\n3. OS 버전 확인\n4. 웹 뱅킹 대체 이용 안내",
+            business_type: "MOBILE_BANKING",
+            error_code: "E006",
+            source_consultation_id: "x4w3v2u1-t0s9-r8q7-p6o5-n4m3l2k1j0i9",
+            version_id: "y5z6a7b8-c9d0-e1f2-g3h4-i5j6k7l8m9n0",
+            status: "APPROVED",
+            business_type_name: "모바일뱅킹",
+            created_at: "2025-12-04T11:00:00Z",
+            updated_at: "2025-12-04T12:15:00Z"
+          },
+          {
+            id: "o0p1q2r3-s4t5-u6v7-w8x9-y0z1a2b3c4d5",
+            keywords: ["송금", "한도"],
+            topic: "송금 한도 초과 처리",
+            background: "일일 한도 초과로 인한 문의",
+            guideline: "1. 현재 한도 확인\n2. 한도 상향 절차 안내\n3. 분할 송금 제안\n4. 영업점 방문 안내",
+            business_type: "INTERNET_BANKING",
+            error_code: "E007",
+            source_consultation_id: "d5c4b3a2-z1y0-x9w8-v7u6-t5s4r3q2p1o0",
+            version_id: "e6f7g8h9-i0j1-k2l3-m4n5-o6p7q8r9s0t1",
+            status: "APPROVED",
+            business_type_name: "인터넷뱅킹",
+            created_at: "2025-12-03T13:25:00Z",
+            updated_at: "2025-12-03T14:50:00Z"
+          }
+        ];
+
+        state.manuals = mockData;
+      } catch (err) {
+        state.error = err.message;
+      } finally {
+        state.loading = false;
+        render();
+      }
+    }
+
+    async function fetchConsultation(consultationId) {
+      state.loading = true;
+      render();
+
+      try {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        state.consultationData = {
+          id: consultationId,
+          summary: "로그인 오류로 인한 고객 문의",
+          inquiry: "인터넷뱅킹 로그인 시 E001 오류가 발생합니다. 비밀번호는 정확한데 계속 실패합니다.",
+          action: "1. 고객 계정 상태 확인 완료\n2. 서버 장애 이력 확인\n3. 임시 조치 완료 및 고객 안내",
+          created_at: "2025-12-09T15:30:00Z"
+        };
+        state.showConsultationModal = true;
+      } catch (err) {
+        state.error = err.message;
+      } finally {
+        state.loading = false;
+        render();
+      }
+    }
+
+    function closeConsultationModal() {
+      state.showConsultationModal = false;
+      state.consultationData = null;
+      render();
+    }
+
+    // Components
+    function Badge({ children, variant = 'neutral' }) {
+      const variants = {
+        neutral: 'bg-gray-100 text-gray-600',
+        info: 'bg-info-light text-info',
+        success: 'bg-success-light text-success',
+        error: 'bg-error-light text-error',
+        warning: 'bg-warning-light text-warning'
+      };
+
+      return `
+        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${variants[variant]}">
+          ${children}
+        </span>
+      `;
+    }
+
+    function Button({ children, variant = 'primary', onClick, disabled = false }) {
+      const baseClass = 'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed';
+      
+      const variants = {
+        primary: 'bg-primary-500 text-white hover:bg-primary-600',
+        secondary: 'bg-white text-primary-500 border border-primary-500 hover:bg-primary-50',
+        danger: 'bg-error text-white hover:bg-error-dark'
+      };
+
+      return `
+        <button 
+          class="${baseClass} ${variants[variant]}"
+          onclick="${onClick}"
+          ${disabled ? 'disabled' : ''}
+        >
+          ${children}
+        </button>
+      `;
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function ManualCards() {
+      if (state.loading && state.manuals.length === 0) {
+        return `
+          <div class="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-6">
+            <p class="text-sm text-text-secondary">데이터를 불러오는 중...</p>
+          </div>
+        `;
+      }
+
+      if (state.error) {
+        return `
+          <div class="flex items-center justify-center rounded-lg border border-error bg-error-light p-6">
+            <p class="text-sm text-error">${state.error}</p>
+          </div>
+        `;
+      }
+
+      if (state.manuals.length === 0) {
+        return `
+          <div class="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-6">
+            <p class="text-sm text-text-secondary">승인된 메뉴얼이 없습니다.</p>
+          </div>
+        `;
+      }
+
+      return state.manuals.map(manual => {
+        const guidelineSteps = manual.guideline.split('\n').filter(s => s.trim());
+        const isHighlighted = state.targetManualId === manual.id;
+        
+        return `
+          <div id="manual-${manual.id}" class="rounded-lg border ${isHighlighted ? 'border-primary-500 shadow-lg' : 'border-gray-200'} bg-white p-4 shadow-sm transition-all">
+            <!-- Card Header -->
+            <div class="flex items-start justify-between border-b border-gray-200 pb-3 mb-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  ${Badge({ children: manual.status === 'APPROVED' ? '승인' : manual.status, variant: 'success' })}
+                  <h3 class="text-base font-semibold text-gray-900">${manual.topic}</h3>
+                </div>
+                <p class="text-xs text-gray-400 font-mono">ID: ${manual.id}</p>
+              </div>
+              <button 
+                class="rounded-md p-1.5 text-primary-500 hover:bg-primary-50 transition flex-shrink-0"
+                onclick="fetchConsultation('${manual.source_consultation_id}')"
+                title="상담 원본 보기"
+              >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Keywords -->
+            <div class="mb-4 space-y-1">
+              <label class="text-xs font-semibold text-gray-700">키워드</label>
+              <div class="flex flex-wrap gap-1">
+                ${manual.keywords.map(kw => Badge({ children: kw, variant: 'info' })).join('')}
+              </div>
+            </div>
+
+            <!-- Background -->
+            <div class="mb-4 space-y-1">
+              <label class="text-xs font-semibold text-gray-700">배경</label>
+              <p class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+                ${manual.background}
+              </p>
+            </div>
+
+            <!-- Guideline -->
+            <div class="mb-4 space-y-1">
+              <label class="text-xs font-semibold text-gray-700">처리 가이드라인</label>
+              <div class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                <ol class="space-y-2">
+                  ${guidelineSteps.map(step => `
+                    <li class="text-sm text-gray-900">${step}</li>
+                  `).join('')}
+                </ol>
+              </div>
+            </div>
+
+            <!-- Metadata -->
+            <div class="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+              <span>최종 수정 ${formatDate(manual.updated_at)}</span>
+              <span class="text-gray-400">•</span>
+              <span>생성 ${formatDate(manual.created_at)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function ConsultationModal() {
+      if (!state.showConsultationModal || !state.consultationData) {
+        return '';
+      }
+
+      const consultation = state.consultationData;
+
+      return `
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50" onclick="closeConsultationModal()">
+          <div class="w-full max-w-2xl rounded-lg border border-gray-200 bg-white p-6 shadow-lg" onclick="event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="mb-4 flex items-center justify-between border-b border-gray-200 pb-3">
+              <h2 class="text-xl font-semibold text-gray-900">상담 원본 정보</h2>
+              <button 
+                class="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                onclick="closeConsultationModal()"
+              >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="space-y-4">
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-700">상담 요약</label>
+                <p class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">${consultation.summary}</p>
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-700">문의 내용</label>
+                <p class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">${consultation.inquiry}</p>
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-700">조치 내역</label>
+                <div class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                  <p class="whitespace-pre-line text-sm text-gray-900">${consultation.action}</p>
+                </div>
+              </div>
+
+              <div class="rounded-md border border-gray-200 bg-gray-50 p-3">
+                <p class="text-xs font-semibold text-gray-700">상담 ID</p>
+                <p class="mt-1 text-xs text-gray-900">${consultation.id}</p>
+                <p class="mt-2 text-xs text-text-secondary">생성일: ${formatDate(consultation.created_at)}</p>
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="mt-6 flex justify-end">
+              ${Button({
+                children: '닫기',
+                variant: 'secondary',
+                onClick: 'closeConsultationModal()'
+              })}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Main Render
+    function render() {
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="flex h-full w-full flex-col gap-6 overflow-auto px-6 py-6">
+          <!-- Page Header -->
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <h1 class="text-2xl font-bold text-gray-900">승인된 메뉴얼</h1>
+              <p class="mt-1 text-sm text-text-secondary">
+                업무구분: <span class="font-semibold">${state.businessType}</span> / 
+                에러코드: <span class="font-semibold">${state.errorCode}</span>
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                id="manualIdInput"
+                placeholder="Manual ID 입력"
+                class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                style="min-width: 280px;"
+              />
+              <button 
+                onclick="scrollToManual()"
+                class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 transition"
+              >
+                이동
+              </button>
+            </div>
+          </div>
+
+          <!-- Content Cards -->
+          <div id="manualCardsContainer" class="flex flex-col gap-4 overflow-auto">
+            ${ManualCards()}
+          </div>
+        </div>
+
+        <!-- Consultation Modal -->
+        ${ConsultationModal()}
+      `;
+
+      // Re-attach event listener for Enter key
+      const input = document.getElementById('manualIdInput');
+      if (input) {
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            scrollToManual();
+          }
+        });
+      }
+    }
+
+    // Scroll to manual card by ID
+    function scrollToManual(manualId) {
+      const input = document.getElementById('manualIdInput');
+      const id = manualId || input?.value?.trim();
+      
+      if (!id) {
+        alert('Manual ID를 입력해주세요.');
+        return;
+      }
+
+      const targetElement = document.getElementById(`manual-${id}`);
+      
+      if (targetElement) {
+        state.targetManualId = id;
+        render();
+        
+        // Wait for render to complete, then scroll
+        setTimeout(() => {
+          const element = document.getElementById(`manual-${id}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Clear highlight after 3 seconds
+            setTimeout(() => {
+              state.targetManualId = null;
+              render();
+            }, 3000);
+          }
+        }, 100);
+      } else {
+        alert('해당 Manual ID를 찾을 수 없습니다.\n\n사용 가능한 ID:\n- 3c4a6bbf-6d3a-4f6c-92cb-7e1e7ab2f0f9\n- 5eecac0d-6cb3-4b5a-9e2b-6a5d32fd3447\n- a1b2c3d4-5e6f-7g8h-9i0j-k1l2m3n4o5p6\n- q2w3e4r5-t6y7-u8i9-o0p1-a2s3d4f5g6h7\n- j8k9l0m1-n2o3-p4q5-r6s7-t8u9v0w1x2y3\n- c7d8e9f0-g1h2-i3j4-k5l6-m7n8o9p0q1r2\n- i9j0k1l2-m3n4-o5p6-q7r8-s9t0u1v2w3x4\n- o0p1q2r3-s4t5-u6v7-w8x9-y0z1a2b3c4d5');
+      }
+    }
+
+    // Check for URL parameter on page load
+    function checkUrlParameter() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const manualId = urlParams.get('manual_id');
+      
+      if (manualId) {
+        state.targetManualId = manualId;
+      }
+    }
+
+    // Auto-scroll after data loads
+    function autoScrollToTarget() {
+      if (state.targetManualId && state.manuals.length > 0) {
+        setTimeout(() => {
+          scrollToManual(state.targetManualId);
+        }, 300);
+      }
+    }
+
+    // Make functions globally accessible
+    window.fetchConsultation = (id) => fetchConsultation(id);
+    window.closeConsultationModal = () => closeConsultationModal();
+    window.scrollToManual = (id) => scrollToManual(id);
+
+    // Initialize
+    checkUrlParameter();
+    fetchManuals(state.businessType, state.errorCode).then(() => {
+      autoScrollToTarget();
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aee56c883063278',t:'MTc2NTg4OTc2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

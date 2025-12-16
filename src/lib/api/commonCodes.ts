@@ -6,6 +6,7 @@
 
 import { api } from '@/lib/api/axiosClient';
 import { AxiosError } from 'axios';
+import { ApiResponse } from '@/types/api';
 
 /**
  * 백엔드 에러 응답에서 메시지 추출
@@ -169,14 +170,24 @@ function transformItem(data: CommonCodeItemResponse): CommonCodeItem {
 export async function fetchCommonCodeGroups(
   page: number = 1,
   pageSize: number = 100
-): Promise<CommonCodeGroup[]> {
-  const response = await api.get<CommonCodeGroupListResponse>(
+): Promise<ApiResponse<CommonCodeGroup[]>> {
+  const response = await api.get<ApiResponse<CommonCodeGroupListResponse>>(
     '/api/v1/admin/common-codes/groups',
     {
       params: { page, page_size: pageSize },
     }
   );
-  return response.items.map(transformGroup);
+
+  const apiResponse = response.data as ApiResponse<CommonCodeGroupListResponse>;
+
+  if (!apiResponse.success) {
+    return apiResponse as ApiResponse<CommonCodeGroup[]>;
+  }
+
+  return {
+    ...apiResponse,
+    data: apiResponse.data.items.map(transformGroup),
+  };
 }
 
 /**
@@ -185,8 +196,8 @@ export async function fetchCommonCodeGroups(
  */
 export async function createCommonCodeGroup(
   payload: CommonCodeGroupPayload
-): Promise<CommonCodeGroup> {
-  const response = await api.post<CommonCodeGroupResponse>(
+): Promise<ApiResponse<CommonCodeGroup>> {
+  const response = await api.post<ApiResponse<CommonCodeGroup>>(
     '/api/v1/admin/common-codes/groups',
     {
       group_code: payload.groupCode,
@@ -195,7 +206,8 @@ export async function createCommonCodeGroup(
       is_active: payload.isActive,
     }
   );
-  return transformGroup(response);
+
+  return response.data as ApiResponse<CommonCodeGroup>;
 }
 
 /**
@@ -205,8 +217,8 @@ export async function createCommonCodeGroup(
 export async function updateCommonCodeGroup(
   groupId: string,
   payload: CommonCodeGroupPayload
-): Promise<CommonCodeGroup> {
-  const response = await api.put<CommonCodeGroupResponse>(
+): Promise<ApiResponse<CommonCodeGroup>> {
+  const response = await api.put<ApiResponse<CommonCodeGroup>>(
     `/api/v1/admin/common-codes/groups/${groupId}`,
     {
       group_code: payload.groupCode,
@@ -215,15 +227,20 @@ export async function updateCommonCodeGroup(
       is_active: payload.isActive,
     }
   );
-  return transformGroup(response);
+
+  return response.data as ApiResponse<CommonCodeGroup>;
 }
 
 /**
  * 공통코드 그룹 삭제
  * API: DELETE /api/v1/admin/common-codes/groups/{group_id}
  */
-export async function deleteCommonCodeGroup(groupId: string): Promise<void> {
-  await api.delete(`/api/v1/admin/common-codes/groups/${groupId}`);
+export async function deleteCommonCodeGroup(groupId: string): Promise<ApiResponse<null>> {
+  const response = await api.delete<ApiResponse<null>>(
+    `/api/v1/admin/common-codes/groups/${groupId}`
+  );
+
+  return response.data as ApiResponse<null>;
 }
 
 /**
@@ -235,20 +252,29 @@ export async function fetchCommonCodeItems(
   groupCode: string,
   page: number = 1,
   pageSize: number = 100
-): Promise<CommonCodeItem[]> {
-  const response = await api.get<any>(
+): Promise<ApiResponse<CommonCodeItem[]>> {
+  const response = await api.get<ApiResponse<CommonCodeItemListResponse>>(
     `/api/v1/common-codes/${groupCode}`,
     {
       params: { page, page_size: pageSize },
     }
   );
 
-  // response.items에서 항목 추출
-  const rawItems = response?.items || [];
+  const apiResponse = response.data as ApiResponse<CommonCodeItemListResponse>;
+
+  if (!apiResponse.success) {
+    return apiResponse as ApiResponse<CommonCodeItem[]>;
+  }
+
+  // response.data.items에서 항목 추출
+  const rawItems = apiResponse.data?.items || [];
 
   if (!Array.isArray(rawItems)) {
-    console.error('Invalid API response structure:', response);
-    return [];
+    console.error('Invalid API response structure:', apiResponse);
+    return {
+      ...apiResponse,
+      data: [],
+    };
   }
 
   // API 응답을 CommonCodeItem으로 변환
@@ -269,7 +295,10 @@ export async function fetchCommonCodeItems(
     });
 
   // API의 sort_order를 기준으로 정렬
-  return commonCodeItems.sort((a, b) => a.sortOrder - b.sortOrder);
+  return {
+    ...apiResponse,
+    data: commonCodeItems.sort((a, b) => a.sortOrder - b.sortOrder),
+  };
 }
 
 /**
@@ -281,16 +310,26 @@ export async function fetchCommonCodeItemsForAdmin(
   groupId: string,
   page: number = 1,
   pageSize: number = 100
-): Promise<CommonCodeItem[]> {
-  const response = await api.get<CommonCodeItemListResponse>(
+): Promise<ApiResponse<CommonCodeItem[]>> {
+  const response = await api.get<ApiResponse<CommonCodeItemListResponse>>(
     `/api/v1/admin/common-codes/groups/${groupId}/items`,
     {
       params: { page, page_size: pageSize },
     }
   );
-  return response.items
-    .map(transformItem)
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+
+  const apiResponse = response.data as ApiResponse<CommonCodeItemListResponse>;
+
+  if (!apiResponse.success) {
+    return apiResponse as ApiResponse<CommonCodeItem[]>;
+  }
+
+  return {
+    ...apiResponse,
+    data: apiResponse.data.items
+      .map(transformItem)
+      .sort((a, b) => a.sortOrder - b.sortOrder),
+  };
 }
 
 /**
@@ -300,8 +339,8 @@ export async function fetchCommonCodeItemsForAdmin(
 export async function createCommonCodeItem(
   groupId: string,
   payload: CommonCodeItemPayload
-): Promise<CommonCodeItem> {
-  const response = await api.post<CommonCodeItemResponse>(
+): Promise<ApiResponse<CommonCodeItem>> {
+  const response = await api.post<ApiResponse<CommonCodeItem>>(
     `/api/v1/admin/common-codes/groups/${groupId}/items`,
     {
       code_key: payload.codeKey,
@@ -311,7 +350,8 @@ export async function createCommonCodeItem(
       attributes: payload.attributes,
     }
   );
-  return transformItem(response);
+
+  return response.data as ApiResponse<CommonCodeItem>;
 }
 
 /**
@@ -321,8 +361,8 @@ export async function createCommonCodeItem(
 export async function updateCommonCodeItem(
   itemId: string,
   payload: CommonCodeItemPayload
-): Promise<CommonCodeItem> {
-  const response = await api.put<CommonCodeItemResponse>(
+): Promise<ApiResponse<CommonCodeItem>> {
+  const response = await api.put<ApiResponse<CommonCodeItem>>(
     `/api/v1/admin/common-codes/items/${itemId}`,
     {
       code_key: payload.codeKey,
@@ -332,14 +372,18 @@ export async function updateCommonCodeItem(
       attributes: payload.attributes,
     }
   );
-  return transformItem(response);
+
+  return response.data as ApiResponse<CommonCodeItem>;
 }
 
 /**
  * 공통코드 항목 삭제 (비활성화)
  * API: DELETE /api/v1/admin/common-codes/items/{item_id}
  */
-export async function deactivateCommonCodeItem(itemId: string): Promise<void> {
-  // 항목을 삭제하는 대신 비활성화하기 위해 PUT 사용
-  await api.delete(`/api/v1/admin/common-codes/items/${itemId}`);
+export async function deactivateCommonCodeItem(itemId: string): Promise<ApiResponse<null>> {
+  const response = await api.delete<ApiResponse<null>>(
+    `/api/v1/admin/common-codes/items/${itemId}`
+  );
+
+  return response.data as ApiResponse<null>;
 }

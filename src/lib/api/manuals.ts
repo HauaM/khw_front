@@ -1,3 +1,4 @@
+import { ApiResponse } from '@/types/api';
 import { api } from './axiosClient';
 import {
   ManualDraft,
@@ -67,9 +68,10 @@ export const convertApiResponseToManualDraft = (
  * 상담으로부터 메뉴얼 초안 생성
  * OpenAPI: POST /api/v1/manuals/draft
  * @param payload - ManualDraftCreateFromConsultationRequest
+ * @returns ApiResponse<ManualDraftResponse>
  */
 export const createManualDraft = (payload: ManualDraftCreatePayload) =>
-  api.post<ManualDraftResponse>('/api/v1/manuals/draft', payload, {
+  api.post<ApiResponse<ManualDraftResponse>>('/api/v1/manuals/draft', payload, {
     // 메뉴얼 생성은 시간이 오래 걸릴 수 있어 요청 타임아웃을 넉넉히 120초로 설정
     timeout: 120_000,
   });
@@ -87,8 +89,12 @@ export const createManualDraft = (payload: ManualDraftCreatePayload) =>
  * @param payload - 업데이트할 데이터 (guideline은 줄바꿈으로 구분된 문자열)
  * @returns ManualDraftResponse
  */
+/**
+ * 메뉴얼 초안 업데이트
+ * @returns ApiResponse<ManualDraftResponse>
+ */
 export const updateManualDraft = (draftId: string, payload: ManualDraftUpdateRequest) =>
-  api.put<ManualDraftResponse>(`/api/v1/manuals/${draftId}`, payload);
+  api.put<ApiResponse<ManualDraftResponse>>(`/api/v1/manuals/${draftId}`, payload);
 
 /**
  * 메뉴얼 검토 요청
@@ -96,20 +102,20 @@ export const updateManualDraft = (draftId: string, payload: ManualDraftUpdateReq
  * FR-6: 검토 요청을 위해 상태를 갱신합니다.
  *
  * @param taskId - 메뉴얼 ID (UUID)
- * @returns ManualDetail
+ * @returns ApiResponse<ManualDetail>
  */
 export const requestManualReview = (taskId: string) =>
-  api.put<ManualDetail>(`/api/v1/manual-review/tasks/${taskId}`, { });
+  api.put<ApiResponse<ManualDetail>>(`/api/v1/manual-review/tasks/${taskId}`, { });
 
 /**
  * 메뉴얼에 대한 검토 Task 목록 조회
  * OpenAPI: GET /api/v1/manuals/{manual_id}/review-tasks
  *
  * @param manualId - 메뉴얼 ID (UUID)
- * @returns ManualReviewTaskResponse 배열
+ * @returns ApiResponse<BackendManualReviewTask[]>
  */
 export const fetchManualReviewTasksByManualId = (manualId: string) =>
-  api.get<BackendManualReviewTask[]>(`/api/v1/manuals/${manualId}/review-tasks`);
+  api.get<ApiResponse<BackendManualReviewTask[]>>(`/api/v1/manuals/${manualId}/review-tasks`);
 
 
 /**
@@ -162,7 +168,7 @@ export const searchManuals = (params: ManualSearchParams) => {
   }
 
   const queryString = queryParams.toString();
-  return api.get<ManualSearchResult[]>(`/api/v1/manuals/search${queryString ? `?${queryString}` : ''}`);
+  return api.get<ApiResponse<ManualSearchResult[]>>(`/api/v1/manuals/search${queryString ? `?${queryString}` : ''}`);
 };
 
 /**
@@ -170,7 +176,7 @@ export const searchManuals = (params: ManualSearchParams) => {
  * OpenAPI: GET /api/v1/manuals (목록 조회 후 필터링) 또는 GET /api/v1/manuals/{manual_id}
  *
  * @param manualId - 메뉴얼 ID (UUID)
- * @returns ManualDetail 객체 (ManualEntryResponse와 동일한 구조)
+ * @returns ApiResponse<ManualDetail>
  *
  * 참고: OpenAPI에 /api/v1/manuals/{manual_id} 엔드포인트가 명시적으로 없는 경우,
  * 백엔드에서 다음과 같이 구현해야 합니다:
@@ -178,7 +184,7 @@ export const searchManuals = (params: ManualSearchParams) => {
  * - 응답: ManualEntryResponse (ManualDetail 타입과 동일)
  */
 export const getManualDetail = (manualId: string) =>
-  api.get<ManualDetail>(`/api/v1/manuals/${manualId}`);
+  api.get<ApiResponse<ManualDetail>>(`/api/v1/manuals/${manualId}`);
 
 /**
  * 메뉴얼 업데이트
@@ -240,8 +246,12 @@ export const getManualDetail = (manualId: string) =>
  *
  * ===================================================
  */
+/**
+ * 메뉴얼 업데이트
+ * @returns ApiResponse<ManualDetail>
+ */
 export const updateManual = (manualId: string, payload: any) =>
-  api.put<ManualDetail>(`/api/v1/manuals/${manualId}`, payload);
+  api.put<ApiResponse<ManualDetail>>(`/api/v1/manuals/${manualId}`, payload);
 
 /**
  * OpenAPI ManualVersionResponse를 프론트엔드 ManualVersionInfo로 변환
@@ -281,10 +291,16 @@ const convertManualVersionResponse = (apiResponse: any): ManualVersionInfo => {
  * @param manualId - 메뉴얼 ID (manual_group_id와 동일)
  * @returns 버전 정보 배열 (version → value 변환됨, 최신부터 정렬)
  */
+/**
+ * 메뉴얼 버전 목록 조회
+ * @returns 버전 정보 배열 (version → value 변환됨, 최신부터 정렬)
+ */
 export const getManualVersions = async (manualId: string): Promise<ManualVersionInfo[]> => {
-  const response = await api.get<any[]>(`/api/v1/manuals/${manualId}/versions`);
+  const response = await api.get<ApiResponse<any[]>>(`/api/v1/manuals/${manualId}/versions`);
+  // API 공통 규격의 data 필드에서 배열 추출
+  const versions = response.data || [];
   // OpenAPI 응답의 version 필드를 프론트엔드의 value 필드로 변환
-  return response.map(convertManualVersionResponse);
+  return versions.map(convertManualVersionResponse);
 };
 
 /**
@@ -326,8 +342,12 @@ export const getManualVersions = async (manualId: string): Promise<ManualVersion
  * @param version - 버전 문자열 (예: "v2.1")
  * @returns 버전 상세 정보 (guideline은 배열로 변환됨)
  */
+/**
+ * 메뉴얼 특정 버전 상세 조회
+ * @returns ApiResponse<ManualVersionDetail>
+ */
 export const getManualVersionDetail = (manualId: string, version: string) =>
-  api.get<ManualVersionDetail>(`/api/v1/manuals/${manualId}/versions/${version}`);
+  api.get<ApiResponse<ManualVersionDetail>>(`/api/v1/manuals/${manualId}/versions/${version}`);
 
 /**
  * 메뉴얼 초안 목록 조회 및 필터링
@@ -369,6 +389,10 @@ export interface ManualDraftListResponse {
  * @param filters - 필터 조건 (status_filter, limit)
  * @returns 메뉴얼 초안 목록
  */
+/**
+ * 메뉴얼 초안 목록 조회
+ * @returns ApiResponse<ManualDraftListResponse[]>
+ */
 export const getManualDraftList = (filters: ManualDraftListFilters) => {
   const queryParams = new URLSearchParams();
 
@@ -381,7 +405,7 @@ export const getManualDraftList = (filters: ManualDraftListFilters) => {
   }
 
   const queryString = queryParams.toString();
-  return api.get<ManualDraftListResponse[]>(
+  return api.get<ApiResponse<ManualDraftListResponse[]>>(
     `/api/v1/manuals${queryString ? `?${queryString}` : ''}`
   );
 };

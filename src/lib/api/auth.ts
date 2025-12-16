@@ -1,3 +1,4 @@
+import { ApiResponse } from '@/types/api';
 import axiosClient, { api } from './axiosClient';
 import { ApiUser, AuthUser, TokenResponse, UserRole } from '@/types/auth';
 
@@ -16,9 +17,9 @@ export interface SignupPayload {
 }
 
 export const authApi = {
-  login: (payload: LoginPayload) => api.post<TokenResponse>('/api/v1/auth/login', payload),
-  signup: (payload: SignupPayload) => api.post<ApiUser>('/api/v1/auth/signup', payload),
-  me: () => api.get<ApiUser>('/api/v1/auth/me'),
+  login: (payload: LoginPayload) => api.post<ApiResponse<TokenResponse>>('/api/v1/auth/login', payload),
+  signup: (payload: SignupPayload) => api.post<ApiResponse<ApiUser>>('/api/v1/auth/signup', payload),
+  me: () => api.get<ApiResponse<ApiUser>>('/api/v1/auth/me'),
 };
 
 export const setAuthToken = (token: string) => {

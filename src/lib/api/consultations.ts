@@ -1,3 +1,4 @@
+import { ApiResponse } from '@/types/api';
 import { api } from './axiosClient';
 
 export type BusinessType =
@@ -56,8 +57,16 @@ export interface ConsultationResponse {
   manual_entry_id?: string | null;
 }
 
+/**
+ * 상담 생성 API
+ * @returns ApiResponse<ConsultationResponse>
+ */
 export const createConsultation = (payload: ConsultationCreatePayload) =>
-  api.post<ConsultationResponse>('/api/v1/consultations', payload);
+  api.post<ApiResponse<ConsultationResponse>>('/api/v1/consultations', payload);
 
+/**
+ * 상담 상세 조회 API
+ * @returns ApiResponse<Consultation>
+ */
 export const getConsultationById = (id: string) =>
-  api.get<Consultation>(`/api/v1/consultations/${id}`);
+  api.get<ApiResponse<Consultation>>(`/api/v1/consultations/${id}`);

@@ -7,6 +7,7 @@
  */
 
 import axiosClient from '@/lib/api/axiosClient';
+import { ApiResponse } from '@/types/api';
 import {
   ManualReviewTask,
   BackendManualReviewTask,
@@ -54,11 +55,11 @@ export function transformBackendTask(task: BackendManualReviewTask & Record<stri
  */
 export async function fetchManualReviewTasks(
   params?: ManualReviewTaskQueryParams
-): Promise<ManualReviewTasksResponse> {
+): Promise<ApiResponse<ManualReviewTasksResponse>> {
   try {
     // OpenAPI: GET /api/v1/manual-review/tasks
     // status는 optional(str | None)이므로, undefined일 때는 자동으로 제외됨
-    const response = await axiosClient.get<BackendManualReviewTask[]>(
+    const response = await axiosClient.get<ApiResponse<BackendManualReviewTask[]>>(
       '/api/v1/manual-review/tasks',
       {
         params: {
@@ -68,13 +69,22 @@ export async function fetchManualReviewTasks(
       }
     );
 
-    const tasks = response.data.map(transformBackendTask);
+    const apiResponse = response.data as ApiResponse<BackendManualReviewTask[]>;
+
+    if (!apiResponse.success) {
+      return apiResponse as ApiResponse<ManualReviewTasksResponse>;
+    }
+
+    const tasks = apiResponse.data.map(transformBackendTask);
 
     return {
-      data: tasks,
-      total: tasks.length,
-      page: params?.page || 1,
-      limit: params?.limit || 10,
+      ...apiResponse,
+      data: {
+        data: tasks,
+        total: tasks.length,
+        page: params?.page || 1,
+        limit: params?.limit || 10,
+      },
     };
   } catch (error) {
     console.error('Failed to fetch manual review tasks:', error);
@@ -136,10 +146,10 @@ export async function fetchManualEntry(entryId: string): Promise<ManualEntry | n
  */
 export async function fetchManualReviewDetail(
   taskId: string
-): Promise<ManualReviewDetail> {
+): Promise<ApiResponse<ManualReviewDetail>> {
   try {
     // 1. Task 조회
-    const tasksResponse = await axiosClient.get<BackendManualReviewTask[]>(
+    const tasksResponse = await axiosClient.get<ApiResponse<BackendManualReviewTask[]>>(
       '/api/v1/manual-review/tasks',
       {
         params: {
@@ -149,7 +159,13 @@ export async function fetchManualReviewDetail(
       }
     );
 
-    const backendTask = tasksResponse.data.find((t) => t.id === taskId);
+    const tasksApiResponse = tasksResponse.data as ApiResponse<BackendManualReviewTask[]>;
+
+    if (!tasksApiResponse.success) {
+      return tasksApiResponse as ApiResponse<ManualReviewDetail>;
+    }
+
+    const backendTask = tasksApiResponse.data.find((t) => t.id === taskId);
     if (!backendTask) {
       throw new Error(`Manual review task not found: ${taskId}`);
     }
@@ -183,7 +199,10 @@ export async function fetchManualReviewDetail(
       new_manual: newManualData || undefined,
     };
 
-    return detail;
+    return {
+      ...tasksApiResponse,
+      data: detail,
+    };
   } catch (error) {
     console.error('Failed to fetch manual review detail:', error);
     throw error;
@@ -201,7 +220,7 @@ export async function approveManualReviewTask(
   taskId: string,
   employeeId: string,
   reviewNotes?: string
-): Promise<BackendManualReviewTask> {
+): Promise<ApiResponse<BackendManualReviewTask>> {
   try {
     // OpenAPI: POST /api/v1/manual-review/tasks/{task_id}/approve
     // ManualReviewApproval 스키마: employee_id (검토자의 employee_id), create_new_version, notes
@@ -215,12 +234,12 @@ export async function approveManualReviewTask(
       requestBody.review_notes = reviewNotes;
     }
 
-    const response = await axiosClient.post<BackendManualReviewTask>(
+    const response = await axiosClient.post<ApiResponse<BackendManualReviewTask>>(
       `/api/v1/manual-review/tasks/${taskId}/approve`,
       requestBody
     );
 
-    return response.data;
+    return response.data as ApiResponse<BackendManualReviewTask>;
   } catch (error) {
     console.error('Failed to approve manual review task:', error);
     throw error;
@@ -236,18 +255,18 @@ export async function approveManualReviewTask(
 export async function rejectManualReviewTask(
   taskId: string,
   reviewNotes: string
-): Promise<BackendManualReviewTask> {
+): Promise<ApiResponse<BackendManualReviewTask>> {
   try {
     // OpenAPI: POST /api/v1/manual-review/tasks/{task_id}/reject
     // ManualReviewRejection 스키마: review_notes만 필요
-    const response = await axiosClient.post<BackendManualReviewTask>(
+    const response = await axiosClient.post<ApiResponse<BackendManualReviewTask>>(
       `/api/v1/manual-review/tasks/${taskId}/reject`,
       {
         review_notes: reviewNotes,
       }
     );
 
-    return response.data;
+    return response.data as ApiResponse<BackendManualReviewTask>;
   } catch (error) {
     console.error('Failed to reject manual review task:', error);
     throw error;
@@ -261,16 +280,16 @@ export async function rejectManualReviewTask(
  */
 export async function startManualReviewTask(
   taskId: string
-): Promise<BackendManualReviewTask> {
+): Promise<ApiResponse<BackendManualReviewTask>> {
   try {
     // OpenAPI: PUT /api/v1/manual-review/tasks/{task_id}
     // FR-6: 검토 태스크 시작 (TODO → IN_PROGRESS)
-    const response = await axiosClient.put<BackendManualReviewTask>(
+    const response = await axiosClient.put<ApiResponse<BackendManualReviewTask>>(
       `/api/v1/manual-review/tasks/${taskId}`,
       {}
     );
 
-    return response.data;
+    return response.data as ApiResponse<BackendManualReviewTask>;
   } catch (error) {
     console.error('Failed to start manual review task:', error);
     throw error;
