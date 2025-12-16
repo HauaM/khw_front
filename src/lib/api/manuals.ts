@@ -104,16 +104,6 @@ export const createManualDraft = (payload: ManualDraftCreatePayload) =>
 export const updateManualDraft = (draftId: string, payload: ManualDraftUpdateRequest) =>
   api.put<ManualDraftResponse>(`/api/v1/manuals/${draftId}`, payload);
 
-/**
- * 메뉴얼 초안 검토 요청 (충돌 검사)
- * OpenAPI: POST /api/v1/manuals/draft/{manual_id}/conflict-check
- * FR-6: 신규 초안과 기존 메뉴얼 자동 비교
- *
- * @param manualId - 메뉴얼 초안 ID
- * @returns ManualReviewTaskResponse 또는 null
- */
-export const requestManualReview = (manualId: string) =>
-  api.post<ManualReviewTaskResponse | null>(`/api/v1/manuals/draft/${manualId}/conflict-check`, {});
 
 /**
  * 메뉴얼 벡터 검색
