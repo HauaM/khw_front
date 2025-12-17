@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ApprovedManualHeader from '@/components/manuals/ApprovedManualHeader';
 import ApprovedManualCardList from '@/components/manuals/ApprovedManualCardList';
@@ -11,6 +11,7 @@ const DEFAULT_BUSINESS_TYPE = 'INTERNET_BANKING';
 const DEFAULT_ERROR_CODE = 'E001';
 const HIGHLIGHT_DURATION = 3000;
 const SUGGESTION_LIMIT = 5;
+const FALLBACK_MANUAL_ID = '3c4a6bbf-6d3a-4f6c-92cb-7e1e7ab2f0f9';
 
 const ApprovedManualCardsPage: React.FC = () => {
   const { manualId: routeManualId } = useParams<{ manualId?: string }>();
@@ -24,18 +25,12 @@ const ApprovedManualCardsPage: React.FC = () => {
   const [selectedConsultationId, setSelectedConsultationId] = useState<string | null>(null);
 
   const queryManualId = searchParams.get('manual_id');
-  const manualIdTarget = useMemo(() => {
-    const trimmed = queryManualId?.trim();
-    if (trimmed) {
-      return trimmed;
-    }
-    return routeManualId || null;
-  }, [queryManualId, routeManualId]);
+  const trimmedQueryManualId = queryManualId?.trim() || null;
+  const trimmedRouteManualId = routeManualId?.trim() || null;
+  const manualIdTarget = trimmedQueryManualId || trimmedRouteManualId || null;
+  const manualIdForRequest = manualIdTarget || FALLBACK_MANUAL_ID;
 
-  const { data: manuals, isLoading, error } = useApprovedManualCards(
-    DEFAULT_BUSINESS_TYPE,
-    DEFAULT_ERROR_CODE
-  );
+  const { data: manuals, isLoading, error } = useApprovedManualCards(manualIdForRequest);
 
   const { data: consultationDetail, isLoading: isConsultationLoading, error: consultationError } =
     useConsultationDetailForManual(selectedConsultationId, Boolean(selectedConsultationId));
