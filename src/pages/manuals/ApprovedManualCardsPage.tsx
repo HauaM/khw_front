@@ -68,12 +68,18 @@ const ApprovedManualCardsPage: React.FC = () => {
     [manuals, showToast]
   );
 
-  const handleKeywordSearch = useCallback(
+  const handleSearch = useCallback(
     (query: string) => {
       const trimmed = query.trim();
 
       if (!trimmed) {
         showToast('검색어를 입력해주세요.', 'warning');
+        return;
+      }
+
+      const manualById = manuals.find((manual) => manual.id === trimmed);
+      if (manualById) {
+        scrollToManual(manualById.id);
         return;
       }
 
@@ -128,7 +134,7 @@ const ApprovedManualCardsPage: React.FC = () => {
           <span className="font-semibold text-gray-900">{DEFAULT_ERROR_CODE}</span>
         </p>
       </header>
-      <ApprovedManualHeader onSearchManualId={(id) => scrollToManual(id)} onKeywordSearch={handleKeywordSearch} />
+      <ApprovedManualHeader onSearch={handleSearch} />
 
       {isLoading && manuals.length === 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
