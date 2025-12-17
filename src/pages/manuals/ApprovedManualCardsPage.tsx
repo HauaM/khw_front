@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ApprovedManualHeader from '@/components/manuals/ApprovedManualHeader';
 import ApprovedManualCardList from '@/components/manuals/ApprovedManualCardList';
@@ -29,27 +29,12 @@ const ApprovedManualCardsPage: React.FC = () => {
   const manualIdTarget = trimmedQueryManualId || trimmedRouteManualId || null;
   const manualIdForRequest = manualIdTarget || FALLBACK_MANUAL_ID;
 
-  const [filterQuery, setFilterQuery] = useState('');
   const { data: manuals, isLoading, error } = useApprovedManualCards(manualIdForRequest);
-
-  const filteredManuals = useMemo(() => {
-    const normalized = filterQuery.trim().toLowerCase();
-    if (!normalized) {
-      return manuals;
-    }
-    return manuals.filter((manual) => {
-      const topicMatches = manual.topic.toLowerCase().includes(normalized);
-      const keywordMatches = manual.keywords.some((keyword) =>
-        keyword.toLowerCase().includes(normalized)
-      );
-      return topicMatches || keywordMatches;
-    });
-  }, [manuals, filterQuery]);
 
 
 
   const scrollToManual = useCallback(
-    (manualId?: string | null, options?: { keepFilter?: boolean }) => {
+    (manualId?: string | null) => {
       const targetId = manualId?.trim();
       if (!targetId) {
         showToast('Manual ID를 입력해주세요.', 'warning');
@@ -67,10 +52,6 @@ const ApprovedManualCardsPage: React.FC = () => {
       }
 
       setHighlightedManualId(targetId);
-
-      if (!options?.keepFilter) {
-        setFilterQuery('');
-      }
 
       if (highlightTimerRef.current) {
         window.clearTimeout(highlightTimerRef.current);
@@ -90,7 +71,6 @@ const ApprovedManualCardsPage: React.FC = () => {
   const handleKeywordSearch = useCallback(
     (query: string) => {
       const trimmed = query.trim();
-      setFilterQuery(trimmed);
 
       if (!trimmed) {
         showToast('검색어를 입력해주세요.', 'warning');
@@ -111,7 +91,7 @@ const ApprovedManualCardsPage: React.FC = () => {
         return;
       }
 
-      scrollToManual(matchedManual.id, { keepFilter: true });
+      scrollToManual(matchedManual.id);
     },
     [manuals, scrollToManual, showToast]
   );
@@ -168,19 +148,13 @@ const ApprovedManualCardsPage: React.FC = () => {
         </div>
       )}
 
-      {filteredManuals.length > 0 && (
+      {manuals.length > 0 && (
         <ApprovedManualCardList
-          manuals={filteredManuals}
+          manuals={manuals}
           highlightedManualId={highlightedManualId}
           onViewConsultation={handleOpenConsultation}
           cardRefs={cardRefs}
         />
-      )}
-
-      {!isLoading && !error && manuals.length > 0 && filteredManuals.length === 0 && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
-          필터 조건에 맞는 메뉴얼이 없습니다.
-        </div>
       )}
 
       <ConsultationDetailModal
