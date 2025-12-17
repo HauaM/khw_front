@@ -2,10 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ApprovedManualHeader from '@/components/manuals/ApprovedManualHeader';
 import ApprovedManualCardList from '@/components/manuals/ApprovedManualCardList';
-import ConsultationModal from '@/components/consultations/ConsultationModal';
 import { useApprovedManualCards } from '@/hooks/useApprovedManualCards';
-import { useConsultationDetailForManual } from '@/hooks/useConsultationDetailForManual';
 import { useToast } from '@/hooks/useToast';
+import ConsultationDetailModal from '@/components/modals/ConsultationDetailModal';
 
 const DEFAULT_BUSINESS_TYPE = 'INTERNET_BANKING';
 const DEFAULT_ERROR_CODE = 'E001';
@@ -31,9 +30,6 @@ const ApprovedManualCardsPage: React.FC = () => {
   const manualIdForRequest = manualIdTarget || FALLBACK_MANUAL_ID;
 
   const { data: manuals, isLoading, error } = useApprovedManualCards(manualIdForRequest);
-
-  const { data: consultationDetail, isLoading: isConsultationLoading, error: consultationError } =
-    useConsultationDetailForManual(selectedConsultationId, Boolean(selectedConsultationId));
 
   const scrollToManual = useCallback(
     (manualId?: string | null) => {
@@ -131,12 +127,11 @@ const ApprovedManualCardsPage: React.FC = () => {
         />
       )}
 
-      <ConsultationModal
+      <ConsultationDetailModal
+        consultationId={selectedConsultationId ?? ''}
         isOpen={Boolean(selectedConsultationId)}
-        consultation={consultationDetail}
-        isLoading={isConsultationLoading}
-        error={consultationError}
         onClose={handleCloseConsultation}
+        isNew={false}
       />
     </div>
   );
