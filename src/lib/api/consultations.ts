@@ -55,6 +55,7 @@ export interface ConsultationResponse {
   error_code?: string | null;
   metadata_fields?: Record<string, string>;
   manual_entry_id?: string | null;
+  consultation_date?: string | null;
 }
 
 /**
@@ -70,3 +71,15 @@ export const createConsultation = (payload: ConsultationCreatePayload) =>
  */
 export const getConsultationById = (id: string) =>
   api.get<ApiResponse<Consultation>>(`/api/v1/consultations/${id}`);
+
+/**
+ * 상담 원본 상세 정보 조회 (승인된 메뉴얼 모달용)
+ * GET /api/v1/consultations/{consultation_id}
+ *
+ * @param consultationId - 상담 ID (UUID)
+ * @returns ConsultationDetail
+ */
+export const getConsultationDetail = (consultationId: string) =>
+  api.get<ApiResponse<ConsultationResponse>>(`/api/v1/consultations/${consultationId}`);
+
+export type { ConsultationDetail } from '@/types/consultations';

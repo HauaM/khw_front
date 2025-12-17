@@ -37,9 +37,8 @@ export const useManualDetail = (manualId: string): UseManualDetailResult => {
 
       try {
         // API 호출: GET /api/v1/manuals/{manual_id}
-        // api.get() already extracts .data from the response, so we get the object directly
-        const manualData = await getManualDetail(manualId);
-        setData(manualData);
+        const response = await getManualDetail(manualId);
+        setData(response.data);
       } catch (err) {
         setIsError(true);
         setError(err instanceof Error ? err : new Error('Failed to load manual'));

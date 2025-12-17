@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ToastContext, ToastMessage } from '@/contexts/ToastContext';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface ToastState {
   type: ToastType;
@@ -56,6 +56,7 @@ const SingleToast: React.FC<SingleToastProps> = ({
     success: { border: 'border-l-green-600', text: 'text-green-600', icon: 'checkmark' },
     error: { border: 'border-l-red-600', text: 'text-red-600', icon: 'error' },
     info: { border: 'border-l-blue-600', text: 'text-blue-600', icon: 'info' },
+    warning: { border: 'border-l-amber-600', text: 'text-amber-600', icon: 'warning' },
   };
 
   const config = typeConfig[displayType];
@@ -84,6 +85,13 @@ const SingleToast: React.FC<SingleToastProps> = ({
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
+            </>
+          )}
+          {config.icon === 'warning' && (
+            <>
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05l-8.47-14.14a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
             </>
           )}
         </svg>

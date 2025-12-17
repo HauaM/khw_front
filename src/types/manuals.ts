@@ -186,3 +186,23 @@ export interface ManualVersionDetail {
  * 키워드와 가이드라인의 추가/삭제/수정 여부를 나타냅니다.
  */
 export type ChangeFlag = '' | 'ADDED' | 'REMOVED' | 'MODIFIED';
+
+/**
+ * 승인된 메뉴얼 카드 항목
+ * "승인된 메뉴얼" 화면에서 표시되는 카드 데이터 모델
+ */
+export interface ApprovedManualCardItem {
+  id: string; // manual_id
+  keywords: string[];
+  topic: string;
+  background: string;
+  guideline: string; // "\n" 기준으로 단계 분리
+  business_type: string;
+  error_code: string;
+  source_consultation_id: string;
+  version_id: string;
+  status: ManualDraftStatus;
+  business_type_name?: string;
+  created_at: string;
+  updated_at: string;
+}

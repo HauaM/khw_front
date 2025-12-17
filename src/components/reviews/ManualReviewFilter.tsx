@@ -51,7 +51,7 @@ const ManualReviewFilter: React.FC<ManualReviewFilterProps> = ({
   const handleBusinessTypeChange = (code: string) => {
     onChangeFilters({
       ...filters,
-      businessType: (code || '전체') as '전체' | string,
+      businessType: (code || '전체') as any,
     });
   };
 

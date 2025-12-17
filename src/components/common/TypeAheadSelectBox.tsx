@@ -9,7 +9,8 @@ export interface TypeAheadOption {
 export interface TypeAheadSelectBoxProps {
   options: TypeAheadOption[];
   selectedCode?: string;
-  onChange: (code: string, label: string) => void;
+  value?: string; // 외부에서 직접 값 설정 시 사용
+  onChange: (code: string, label?: string) => void;
   onAddNew?: (searchTerm: string) => void;
   placeholder?: string;
   error?: string;

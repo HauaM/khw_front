@@ -29,8 +29,8 @@ const ManualReviewTaskDetailPage: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await fetchManualReviewDetail(taskId);
-        setDetail(data);
+        const detail = await fetchManualReviewDetail(taskId);
+        setDetail(detail);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load task detail';
         setError(errorMessage);

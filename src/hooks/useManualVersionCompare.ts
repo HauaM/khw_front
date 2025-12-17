@@ -100,17 +100,17 @@ export const useManualVersionCompare = (
       try {
         // API: GET /api/v1/manuals/{manualId}/versions/{version}
         // 병렬 로딩 (Promise.all)
-        const [oldDetail, newDetail] = await Promise.all([
+        const [oldResponse, newResponse] = await Promise.all([
           getManualVersionDetail(manualId, oldVersion),
           getManualVersionDetail(manualId, newVersion),
         ]);
 
-        if (!oldDetail || !newDetail) {
+        if (!oldResponse.data || !newResponse.data) {
           throw new Error('버전 데이터를 찾을 수 없습니다');
         }
 
-        setOldData(oldDetail);
-        setNewData(newDetail);
+        setOldData(oldResponse.data);
+        setNewData(newResponse.data);
       } catch (err) {
         setIsError(true);
         setError(err instanceof Error ? err : new Error('버전 데이터를 불러올 수 없습니다'));

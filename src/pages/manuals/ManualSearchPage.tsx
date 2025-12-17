@@ -57,7 +57,8 @@ const ManualSearchPage: React.FC = () => {
 
   // 테이블 행 클릭
   const handleRowClick = (manualId: string) => {
-    navigate(`/manuals/${manualId}`);
+    // 승인된 메뉴얼 페이지로 이동 (manual_id 파라미터 전달)
+    navigate(`/manuals/approved?manual_id=${manualId}`);
   };
 
   return (

@@ -10,6 +10,7 @@ import {
   ManualVersionInfo,
   ManualVersionDetail,
   ManualDraftStatus,
+  ApprovedManualCardItem,
 } from '@/types/manuals';
 import { BackendManualReviewTask } from '@/types/reviews';
 
@@ -419,3 +420,17 @@ export const getManualDraftList = (filters: ManualDraftListFilters) => {
  */
 export const deleteManualDraft = (manualId: string) =>
   api.delete(`/api/v1/manuals/${manualId}`);
+
+/**
+ * 승인된 메뉴얼 그룹 조회
+ * GET /api/v1/manuals/{manual_id}/approved-group
+ *
+ * 지정된 메뉴얼과 같은 business_type + error_code를 가진 APPROVED 메뉴얼 목록 조회
+ *
+ * @param manualId - 메뉴얼 ID (UUID) - 이 메뉴얼과 같은 그룹의 승인된 메뉴얼들을 조회
+ * @returns 승인된 메뉴얼 목록
+ */
+export const getApprovedManualGroup = (manualId: string) =>
+  api.get<ApiResponse<ApprovedManualCardItem[]>>(`/api/v1/manuals/${manualId}/approved-group`);
+
+export type { ApprovedManualCardItem } from '@/types/manuals';

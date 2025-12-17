@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BusinessType, ConsultationSearchParams } from '@/types/consultations';
+import { ConsultationSearchParams } from '@/types/consultations';
 import { useCommonCodes } from '@/hooks/useCommonCodes';
 import TypeAheadSelectBox from '@/components/common/TypeAheadSelectBox';
 
@@ -42,15 +42,15 @@ const ConsultationSearchForm: React.FC<ConsultationSearchFormProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormState((prev) => ({ ...prev, [name]: value }));
+    setFormState((prev) => ({ ...prev, [name as keyof ConsultationSearchParams]: value }));
   };
 
   const handleBusinessTypeChange = (code: string) => {
-    setFormState((prev) => ({ ...prev, businessType: code }));
+    setFormState((prev) => ({ ...prev, businessType: code } as ConsultationSearchParams));
   };
 
   const handleErrorCodeChange = (code: string) => {
-    setFormState((prev) => ({ ...prev, errorCode: code }));
+    setFormState((prev) => ({ ...prev, errorCode: code } as ConsultationSearchParams));
   };
 
   const handleReset = () => {

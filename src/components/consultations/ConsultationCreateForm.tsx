@@ -197,7 +197,11 @@ const ConsultationCreateForm: React.FC = () => {
 
       const response = await createConsultation(payload);
 
-      setSavedConsultationId(response.id);
+      if (!response.data) {
+        throw new Error('상담 저장 실패: 응답 데이터 없음');
+      }
+
+      setSavedConsultationId(response.data.id);
       showToast('상담 내용이 성공적으로 저장되었습니다.', 'success');
       setTimeout(() => setIsModalOpen(true), 800);
     } catch (error) {
@@ -228,17 +232,21 @@ const ConsultationCreateForm: React.FC = () => {
     setIsCreatingManualDraft(true);
 
     try {
-      const draftResponse = await createManualDraft({
+      const response = await createManualDraft({
         consultation_id: savedConsultationId,
         enforce_hallucination_check: true,
       });
 
-      const convertedDraft = convertApiResponseToManualDraft(draftResponse);
+      if (!response.data) {
+        throw new Error('메뉴얼 초안 생성 실패: 응답 데이터 없음');
+      }
+
+      const convertedDraft = convertApiResponseToManualDraft(response.data);
 
       setIsModalOpen(false);
       showToast('메뉴얼 초안 작성 페이지로 이동합니다.', 'success');
       setTimeout(() => {
-        navigate(`/manuals/draft/${draftResponse.id}`, {
+        navigate(`/manuals/draft/${response.data.id}`, {
           state: { draft: convertedDraft },
         });
       }, 400);

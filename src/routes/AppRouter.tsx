@@ -12,6 +12,7 @@ import ManualDetailPage from '@/pages/manuals/ManualDetailPage';
 import ManualEditPage from '@/pages/manuals/ManualEditPage';
 import ManualVersionComparePage from '@/pages/manuals/ManualVersionComparePage';
 import ManualDraftListPage from '@/pages/manuals/ManualDraftListPage';
+import ApprovedManualCardsPage from '@/pages/manuals/ApprovedManualCardsPage';
 import ReviewTaskListPage from '@/pages/reviews/ReviewTaskListPage';
 import ManualReviewDetailPage from '@/pages/reviews/ManualReviewDetailPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
@@ -34,6 +35,8 @@ const AppRouter: React.FC = () => {
             <Route path=":id" element={<ConsultationDetailPage />} />
           </Route>
           <Route path="manuals">
+            <Route path="approved/:manualId" element={<ApprovedManualCardsPage />} />
+            <Route path="approved" element={<ApprovedManualCardsPage />} />
             <Route path="search" element={<ManualSearchPage />} />
             <Route path="history" element={<ManualHistoryPage />} />
             <Route path="drafts" element={<ManualDraftListPage />} />

@@ -41,3 +41,22 @@ export interface ConsultationSearchParams {
   page?: number;
   itemsPerPage?: number;
 }
+
+/**
+ * 상담 원본 상세 정보
+ * 승인된 메뉴얼의 "상담 원본 보기" 모달에서 사용
+ */
+export interface ConsultationDetail {
+  id: string;
+  summary: string;
+  inquiry: string;
+  action: string;
+  created_at: string;
+  updated_at?: string;
+  consultation_date?: string;
+  branch_code?: string;
+  employee_id?: string;
+  business_type?: BusinessType | null;
+  error_code?: string | null;
+  metadata_fields?: Record<string, string>;
+}

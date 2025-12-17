@@ -11,6 +11,40 @@ import {
   PaginationInfo,
 } from '@/types/consultations';
 
+interface ApiConsultation {
+  id: string;
+  branch_code: string;
+  employee_id?: string;
+  employee_name?: string;
+  screen_id?: string;
+  transaction_name?: string;
+  business_type: string | null;
+  error_code: string | null;
+  inquiry_text: string;
+  summary?: string;
+  action_taken?: string;
+  created_at: string;
+}
+
+interface ConsultationSearchApiResultItem {
+  consultation: ApiConsultation;
+  score?: number;
+}
+
+interface ConsultationSearchApiResultData {
+  results?: ConsultationSearchApiResultItem[];
+  total_found?: number;
+  query?: string;
+}
+
+interface ConsultationSearchApiResponse {
+  success: boolean;
+  data?: ConsultationSearchApiResultData | null;
+  error?: {
+    message?: string;
+  } | null;
+}
+
 const BRANCH_MAP: Record<string, string> = {
   '001': '본점영업부',
   '002': '강남지점',
@@ -123,36 +157,17 @@ const ConsultationSearchPage: React.FC = () => {
           throw new Error(`검색 실패: ${res.status} ${errorText}`);
         }
 
-        const text = await res.text();
-        let data: {
-          results: Array<{
-            consultation: {
-              id: string;
-              branch_code: string;
-              employee_id?: string;
-              employee_name?: string;
-              screen_id?: string;
-              transaction_name?: string;
-              business_type: string | null;
-              error_code: string | null;
-              inquiry_text: string;
-              summary?: string;
-              action_taken?: string;
-              created_at: string;
-            };
-            score: number; // 0~1
-          }>;
-          total_found: number;
-          query: string;
-        };
-
-        try {
-          data = JSON.parse(text);
-        } catch (parseErr) {
-          throw new Error('API 응답이 JSON이 아닙니다. 프록시/베이스 URL 설정을 확인하세요.');
+        const payload: ConsultationSearchApiResponse = await res.json();
+        if (!payload.success) {
+          throw new Error(payload.error?.message ?? '상담 검색에 실패했습니다.');
         }
 
-        const mapped: Consultation[] = data.results.map((item) => ({
+        const apiData = payload.data;
+        if (!apiData) {
+          throw new Error('검색 결과가 없습니다. 다시 시도해주세요.');
+        }
+
+        const mapped: Consultation[] = (apiData.results ?? []).map((item) => ({
           id: item.consultation.id,
           branchCode: item.consultation.branch_code,
           branchName: resolveBranchName(item.consultation.branch_code),
@@ -169,6 +184,7 @@ const ConsultationSearchPage: React.FC = () => {
           createdAt: item.consultation.created_at,
         }));
 
+        const totalFound = apiData.total_found ?? mapped.length;
         const newSessionId = `search_${Date.now()}`;
         const sessionData = {
           results: mapped,
@@ -176,7 +192,7 @@ const ConsultationSearchPage: React.FC = () => {
           pagination: {
             currentPage: 1,
             totalPages: 1,
-            totalItems: data.total_found ?? mapped.length,
+            totalItems: totalFound,
             itemsPerPage: mapped.length,
           },
         };
@@ -186,7 +202,7 @@ const ConsultationSearchPage: React.FC = () => {
         setPagination({
           currentPage: 1,
           totalPages: 1,
-          totalItems: data.total_found ?? mapped.length,
+          totalItems: totalFound,
           itemsPerPage: mapped.length,
         });
         setStatus(mapped.length ? 'success' : 'empty');

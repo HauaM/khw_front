@@ -48,7 +48,7 @@ const ManualDraftListPage: React.FC = () => {
       });
 
       setDrafts(response.data.map(mapTaskToRow));
-      setTotalCount(response.total);
+      setTotalCount(response.data.length);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '초안 목록을 불러올 수 없습니다.';
       setError(errorMessage);

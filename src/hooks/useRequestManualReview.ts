@@ -29,8 +29,11 @@ export const useRequestManualReview = (): UseRequestManualReviewResult => {
     try {
       const response = await requestManualReview(manualId);
 
-      setData(response.data);
-      return response.data;
+      if (response.data) {
+        setData(response.data);
+        return response.data;
+      }
+      throw new Error('검토 요청에 실패했습니다.');
     } catch (err) {
       setIsError(true);
       const error = err instanceof Error ? err : new Error('검토 요청에 실패했습니다.');

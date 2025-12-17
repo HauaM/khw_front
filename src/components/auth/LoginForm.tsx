@@ -61,14 +61,24 @@ const LoginForm: React.FC<LoginFormProps> = ({ initialEmployeeId = '', onShowToa
       const password = values.password;
 
       const tokenResponse = await authApi.login({ username: employeeId, password });
-      setAuthToken(tokenResponse.access_token);
 
-      const me = await authApi.me();
+      if (!tokenResponse.data) {
+        throw new Error('로그인 실패: 토큰을 받지 못했습니다.');
+      }
+
+      setAuthToken(tokenResponse.data.access_token);
+
+      const meResponse = await authApi.me();
+
+      if (!meResponse.data) {
+        throw new Error('사용자 정보를 받지 못했습니다.');
+      }
+
       const user: AuthUser = {
-        employee_id: me.employee_id,
-        name: me.name,
-        department: me.department,
-        role: me.role,
+        employee_id: meResponse.data.employee_id,
+        name: meResponse.data.name,
+        department: meResponse.data.department,
+        role: meResponse.data.role,
       };
 
       localStorage.setItem('user_info', JSON.stringify(user));

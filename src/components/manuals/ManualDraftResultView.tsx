@@ -33,7 +33,7 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConsultationModal, setShowConsultationModal] = useState(false);
-  const [reviewTaskId, setReviewTaskId] = useState<string | null>(null);
+  const [fetchedReviewTaskId, setFetchedReviewTaskId] = useState<string | null>(null);
   const [isFetchingReviewTask, setIsFetchingReviewTask] = useState(false);
 
   // 훅 초기화
@@ -111,17 +111,23 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   // 검토 요청 클릭
   const handleRequestReview = async () => {
     setIsFetchingReviewTask(true);
-    setReviewTaskId(null);
+    setFetchedReviewTaskId(null);
 
     try {
       const response = await fetchManualReviewTasksByManualId(draft.id);
-      if (!response || response.length === 0) {
+      if (!response.data) {
         showToast('이 메뉴얼의 검토 태스크를 찾을 수 없습니다.', 'error');
         return;
       }
 
-      const todoTask = response.find((task) => task.status === 'TODO') || response[0];
-      setReviewTaskId(todoTask.id);
+      const tasks: Array<{ id: string; status: string }> = Array.isArray(response.data) ? response.data : [];
+      if (tasks.length === 0) {
+        showToast('이 메뉴얼의 검토 태스크를 찾을 수 없습니다.', 'error');
+        return;
+      }
+
+      const todoTask = tasks.find((task) => task.status === 'TODO') || tasks[0];
+      setFetchedReviewTaskId(todoTask.id);
       setShowConfirmModal(true);
     } catch (error) {
       console.error('Error fetching review tasks:', error);
@@ -135,14 +141,14 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({ draft, on
   const handleConfirmReview = async () => {
     setShowConfirmModal(false);
 
-    if (!reviewTaskId) {
+    if (!fetchedReviewTaskId) {
       showToast('검토 태스크가 설정되지 않았습니다. 다시 시도해주세요.', 'error');
       return;
     }
 
     try {
-      await startReviewTask(reviewTaskId);
-      setReviewTaskId(null);
+      await startReviewTask(fetchedReviewTaskId);
+      setFetchedReviewTaskId(null);
 
       showToast(
         '검토 요청이 완료되었습니다. 검토자에게 알림이 전송되었습니다.',

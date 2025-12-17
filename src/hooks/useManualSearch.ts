@@ -33,9 +33,11 @@ export const useManualSearch = (): UseManualSearchResult => {
 
     try {
       // 실제 API 호출
-      const results = await searchManuals(params);
+      const response = await searchManuals(params);
 
-      setData(results);
+      console.log('Manual search response:', response);
+
+      setData(response.data || []);
       setIsSearched(true);
     } catch (err) {
       const errorMessage =

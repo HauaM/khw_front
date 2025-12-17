@@ -31,9 +31,9 @@ const useConsultationDetail = (consultationId?: string): UseConsultationDetailRe
     setError(null);
 
     getConsultationById(consultationId)
-      .then((data) => {
+      .then((response) => {
         if (cancelled) return;
-        setData(data);
+        setData(response.data);
         setError(null);
       })
       .catch((err: Error) => {

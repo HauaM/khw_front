@@ -8,33 +8,47 @@ import { api } from '@/lib/api/axiosClient';
 import { AxiosError } from 'axios';
 import { ApiResponse } from '@/types/api';
 
+interface BackendErrorDetail {
+  msg?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
+interface BackendErrorResponse {
+  detail?: string | BackendErrorDetail[];
+  message?: string;
+}
+
 /**
  * 백엔드 에러 응답에서 메시지 추출
  */
-export function getErrorMessage(error: unknown): string {
+export function getErrorMessage(
+  error: AxiosError | Error | string | null | undefined
+): string {
   if (error instanceof AxiosError) {
-    const errorData = error.response?.data as any;
+    const errorData = error.response?.data as BackendErrorResponse | undefined;
 
-    // 백엔드 에러 응답 형식: { detail: "에러 메시지" }
     if (errorData?.detail) {
       if (typeof errorData.detail === 'string') {
         return errorData.detail;
       }
-      // FastAPI 유효성 검사 에러: { detail: [{ msg: "에러 메시지" }] }
+
       if (Array.isArray(errorData.detail) && errorData.detail.length > 0) {
         return errorData.detail
-          .map((err: any) => err.msg || err.message || JSON.stringify(err))
+          .map((detail) => detail.msg ?? detail.message ?? JSON.stringify(detail))
           .join(', ');
       }
     }
 
-    // { message: "에러 메시지" }
     if (errorData?.message) {
       return errorData.message;
     }
 
-    // HTTP 상태 코드별 기본 메시지
     return error.message || `API 오류 (상태: ${error.response?.status})`;
+  }
+
+  if (typeof error === 'string') {
+    return error;
   }
 
   if (error instanceof Error) {
@@ -134,6 +148,23 @@ interface CommonCodeItemListResponse {
   total_pages: number;
 }
 
+interface CommonCodeItemsResponse {
+  group_code: string;
+  items: CommonCodeItemResponseV2[];
+}
+
+interface CommonCodeItemResponseV2 {
+  id?: string;
+  group_id?: string;
+  code_key: string;
+  code_value: string;
+  sort_order?: number;
+  is_active?: boolean;
+  attributes?: Record<string, any> | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 /**
  * API 응답을 프론트엔드 형식으로 변환
  */
@@ -163,6 +194,25 @@ function transformItem(data: CommonCodeItemResponse): CommonCodeItem {
   };
 }
 
+function buildGroupRequestBody(payload: CommonCodeGroupPayload) {
+  return {
+    group_code: payload.groupCode,
+    group_name: payload.groupName,
+    description: payload.description,
+    is_active: payload.isActive,
+  };
+}
+
+function buildItemRequestBody(payload: CommonCodeItemPayload) {
+  return {
+    code_key: payload.codeKey,
+    code_value: payload.codeValue,
+    sort_order: payload.sortOrder,
+    is_active: payload.isActive,
+    attributes: payload.attributes,
+  };
+}
+
 /**
  * 모든 공통코드 그룹 조회 (페이징)
  * API: GET /api/v1/admin/common-codes/groups
@@ -178,15 +228,13 @@ export async function fetchCommonCodeGroups(
     }
   );
 
-  const apiResponse = response.data as ApiResponse<CommonCodeGroupListResponse>;
-
-  if (!apiResponse.success) {
-    return apiResponse as ApiResponse<CommonCodeGroup[]>;
+  if (!response.success) {
+    return response as ApiResponse<CommonCodeGroup[]>;
   }
 
   return {
-    ...apiResponse,
-    data: apiResponse.data.items.map(transformGroup),
+    ...response,
+    data: response.data.items.map(transformGroup),
   };
 }
 
@@ -199,15 +247,10 @@ export async function createCommonCodeGroup(
 ): Promise<ApiResponse<CommonCodeGroup>> {
   const response = await api.post<ApiResponse<CommonCodeGroup>>(
     '/api/v1/admin/common-codes/groups',
-    {
-      group_code: payload.groupCode,
-      group_name: payload.groupName,
-      description: payload.description,
-      is_active: payload.isActive,
-    }
+    buildGroupRequestBody(payload)
   );
 
-  return response.data as ApiResponse<CommonCodeGroup>;
+  return response;
 }
 
 /**
@@ -220,15 +263,10 @@ export async function updateCommonCodeGroup(
 ): Promise<ApiResponse<CommonCodeGroup>> {
   const response = await api.put<ApiResponse<CommonCodeGroup>>(
     `/api/v1/admin/common-codes/groups/${groupId}`,
-    {
-      group_code: payload.groupCode,
-      group_name: payload.groupName,
-      description: payload.description,
-      is_active: payload.isActive,
-    }
+    buildGroupRequestBody(payload)
   );
 
-  return response.data as ApiResponse<CommonCodeGroup>;
+  return response;
 }
 
 /**
@@ -240,7 +278,7 @@ export async function deleteCommonCodeGroup(groupId: string): Promise<ApiRespons
     `/api/v1/admin/common-codes/groups/${groupId}`
   );
 
-  return response.data as ApiResponse<null>;
+  return response;
 }
 
 /**
@@ -249,56 +287,38 @@ export async function deleteCommonCodeGroup(groupId: string): Promise<ApiRespons
  * 사용처: 상담등록, TypeAheadSelectBox 등 일반 사용자 화면
  */
 export async function fetchCommonCodeItems(
-  groupCode: string,
-  page: number = 1,
-  pageSize: number = 100
+  groupCode: string
 ): Promise<ApiResponse<CommonCodeItem[]>> {
-  const response = await api.get<ApiResponse<CommonCodeItemListResponse>>(
-    `/api/v1/common-codes/${groupCode}`,
-    {
-      params: { page, page_size: pageSize },
-    }
+  const response = await api.get<ApiResponse<CommonCodeItemsResponse>>(
+    `/api/v1/common-codes/${groupCode}`
   );
 
-  const apiResponse = response.data as ApiResponse<CommonCodeItemListResponse>;
-
-  if (!apiResponse.success) {
-    return apiResponse as ApiResponse<CommonCodeItem[]>;
+  if (!response.success) {
+    // ✅ 실패 응답은 그대로 반환 (meta/error/feedback 보존)
+    return response as ApiResponse<CommonCodeItem[]>;
   }
 
-  // response.data.items에서 항목 추출
-  const rawItems = apiResponse.data?.items || [];
-
-  if (!Array.isArray(rawItems)) {
-    console.error('Invalid API response structure:', apiResponse);
-    return {
-      ...apiResponse,
-      data: [],
-    };
-  }
-
-  // API 응답을 CommonCodeItem으로 변환
-  const commonCodeItems = rawItems
-    .map((item: any, index: number) => {
-      const transformed = transformItem({
-        id: item.id || `${groupCode}-${index}`,
-        group_id: item.group_id || '',
-        code_key: item.code_key || '',
-        code_value: item.code_value || '',
-        sort_order: typeof item.sort_order === 'number' ? item.sort_order : index,
-        is_active: item.is_active !== false, // 기본값: true (명시적으로 false가 아니면 활성화)
-        attributes: item.attributes || undefined,
-        created_at: item.created_at || new Date().toISOString(),
-        updated_at: item.updated_at || new Date().toISOString(),
-      });
-      return transformed;
+  const rawItems = response.data.items || [];
+  const commonCodeItems = rawItems.map((item, index) => {
+    const transformed = transformItem({
+      id: item.id || `${groupCode}-${item.code_key}-${index}`,
+      group_id: item.group_id || groupCode,
+      code_key: item.code_key || '',
+      code_value: item.code_value || '',
+      sort_order: typeof item.sort_order === 'number' ? item.sort_order : index,
+      is_active: item.is_active !== false,
+      attributes: item.attributes || undefined,
+      created_at: item.created_at || new Date().toISOString(),
+      updated_at: item.updated_at || new Date().toISOString(),
     });
+    return transformed;
+  });
 
-  // API의 sort_order를 기준으로 정렬
   return {
-    ...apiResponse,
+    ...response,
     data: commonCodeItems.sort((a, b) => a.sortOrder - b.sortOrder),
   };
+
 }
 
 /**
@@ -318,15 +338,13 @@ export async function fetchCommonCodeItemsForAdmin(
     }
   );
 
-  const apiResponse = response.data as ApiResponse<CommonCodeItemListResponse>;
-
-  if (!apiResponse.success) {
-    return apiResponse as ApiResponse<CommonCodeItem[]>;
+  if (!response.success) {
+    return response as ApiResponse<CommonCodeItem[]>;
   }
 
   return {
-    ...apiResponse,
-    data: apiResponse.data.items
+    ...response,
+    data: response.data.items
       .map(transformItem)
       .sort((a, b) => a.sortOrder - b.sortOrder),
   };
@@ -342,16 +360,10 @@ export async function createCommonCodeItem(
 ): Promise<ApiResponse<CommonCodeItem>> {
   const response = await api.post<ApiResponse<CommonCodeItem>>(
     `/api/v1/admin/common-codes/groups/${groupId}/items`,
-    {
-      code_key: payload.codeKey,
-      code_value: payload.codeValue,
-      sort_order: payload.sortOrder,
-      is_active: payload.isActive,
-      attributes: payload.attributes,
-    }
+    buildItemRequestBody(payload)
   );
 
-  return response.data as ApiResponse<CommonCodeItem>;
+  return response;
 }
 
 /**
@@ -364,16 +376,10 @@ export async function updateCommonCodeItem(
 ): Promise<ApiResponse<CommonCodeItem>> {
   const response = await api.put<ApiResponse<CommonCodeItem>>(
     `/api/v1/admin/common-codes/items/${itemId}`,
-    {
-      code_key: payload.codeKey,
-      code_value: payload.codeValue,
-      sort_order: payload.sortOrder,
-      is_active: payload.isActive,
-      attributes: payload.attributes,
-    }
+    buildItemRequestBody(payload)
   );
 
-  return response.data as ApiResponse<CommonCodeItem>;
+  return response;
 }
 
 /**
@@ -385,5 +391,5 @@ export async function deactivateCommonCodeItem(itemId: string): Promise<ApiRespo
     `/api/v1/admin/common-codes/items/${itemId}`
   );
 
-  return response.data as ApiResponse<null>;
+  return response;
 }

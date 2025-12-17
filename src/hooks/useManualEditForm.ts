@@ -79,13 +79,16 @@ export const useManualEditForm = (manualId: string) => {
     setIsLoading(true);
     try {
       // API 호출: GET /api/v1/manuals/{manual_id}
-      // api.get()은 이미 response.data를 반환함
-      const detail = await getManualDetail(manualId);
+      const response = await getManualDetail(manualId);
+
+      if (!response.data) {
+        throw new Error('메뉴얼 조회 실패: 응답 데이터 없음');
+      }
 
       // guideline 문자열을 배열로 변환
-      const parsedGuidelines = parseGuidelinesFromString(detail.guideline);
+      const parsedGuidelines = parseGuidelinesFromString(response.data.guideline);
 
-      setFormData(detail);
+      setFormData(response.data);
       setGuidelines(parsedGuidelines);
       setErrors({});
     } catch (error) {

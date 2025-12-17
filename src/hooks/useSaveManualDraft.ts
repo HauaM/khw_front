@@ -33,7 +33,12 @@ export const useSaveManualDraft = (): UseSaveManualDraftResult => {
     try {
       // 실제 API 호출: PUT /api/v1/manuals/{draftId}
       const response = await updateManualDraft(draftId, payload);
-      const result = convertApiResponseToManualDraft(response);
+
+      if (!response.data) {
+        throw new Error('초안 저장 실패: 응답 데이터 없음');
+      }
+
+      const result = convertApiResponseToManualDraft(response.data);
 
       setData(result);
       return result;

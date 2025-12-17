@@ -8,8 +8,6 @@ import ConsultationMetadataTable from '@/components/consultations/ConsultationMe
 import Spinner from '@/components/common/Spinner';
 import Toast, { useToast } from '@/components/common/Toast';
 import useConsultationDetail from '@/hooks/useConsultationDetail';
-import useCreateManualDraft from '@/hooks/useCreateManualDraft';
-import { convertApiResponseToManualDraft } from '@/lib/api/manuals';
 
 interface LocationState {
   consultation?: SearchConsultation;
@@ -43,48 +41,21 @@ const ConsultationDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { consultation: stateConsultation, searchSessionId: stateSearchSessionId } = (location.state || {}) as LocationState;
+  const { consultation: stateConsultation } = (location.state || {}) as LocationState;
 
   // state에서 받은 데이터가 있으면 변환해서 사용, 없으면 API 호출
   const convertedStateData = convertSearchResultToApiFormat(stateConsultation);
   const { data: apiData, isLoading, isError, error } = useConsultationDetail(convertedStateData ? undefined : id);
   const data = convertedStateData || apiData;
 
-  const { toasts, showToast, removeToast } = useToast();
-
-  const { mutate: createDraft, isLoading: isCreating } = useCreateManualDraft({
-    onSuccess: (draftResponse) => {
-      showToast('메뉴얼 초안이 생성되었습니다. 검토 페이지로 이동합니다.', 'success');
-      const convertedDraft = convertApiResponseToManualDraft(draftResponse);
-      setTimeout(() => {
-        navigate(`/manuals/draft/${draftResponse.id}`, {
-          state: { draft: convertedDraft },
-        });
-      }, 1500);
-    },
-    onError: (err) => {
-      const message =
-        err?.message || '메뉴얼 초안 생성 중 오류가 발생했습니다.';
-      showToast(message, 'error');
-    },
-  });
+  const { toasts, removeToast } = useToast();
 
   const handleBack = () => {
-    if (stateSearchSessionId) {
-      // 검색 상태가 있으면 복원하면서 돌아가기
-      navigate('/consultations/search', {
-        state: { restoreSessionId: stateSearchSessionId },
-      });
-    } else if (window.history.length > 1) {
+    if (window.history.length > 1) {
       navigate(-1);
     } else {
       navigate('/consultations/search');
     }
-  };
-
-  const handleCreateDraft = () => {
-    if (!data || isCreating) return;
-    void createDraft(data);
   };
 
   return (

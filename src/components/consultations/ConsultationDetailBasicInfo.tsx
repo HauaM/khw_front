@@ -105,10 +105,10 @@ const ConsultationDetailBasicInfo: React.FC<ConsultationDetailBasicInfoProps> = 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <DetailField label="ID" value={consultation.id} />
         <DetailField label="등록일시" value={formatDateTime(consultation.created_at)} />
-        <DetailField label="요청영업점" value={`${consultation.branch_code} (${consultation.branch_name})`} />
+        <DetailField label="요청영업점" value={`${consultation.branch_name} (${consultation.branch_code})`} />
         <DetailField
           label="요청직원"
-          value={consultation.employee_name && consultation.employee_id ? `${consultation.employee_name}(${consultation.employee_id})` : '-'}
+          value={ `${consultation.employee_name}(${consultation.employee_id})`}
         />
         <DetailField label="화면번호" value={consultation.screen_id || '-'} />
         <DetailField label="거래명" value={consultation.transaction_name || '-'} />

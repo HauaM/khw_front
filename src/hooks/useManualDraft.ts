@@ -39,7 +39,12 @@ export const useManualDraft = (draftId: string): UseManualDraftResult => {
 
     try {
       const response = await getManualDetail(draftId);
-      setData(convertApiResponseToManualDraft(response));
+
+      if (!response.data) {
+        throw new Error('초안 조회 실패: 응답 데이터 없음');
+      }
+
+      setData(convertApiResponseToManualDraft(response.data));
     } catch (err) {
       setIsError(true);
       const error = err instanceof Error ? err : new Error('초안 조회에 실패했습니다.');

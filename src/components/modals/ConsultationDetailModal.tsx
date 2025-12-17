@@ -69,7 +69,6 @@ const ConsultationDetailModal: React.FC<ConsultationDetailModalProps> = ({
   const { toasts, showToast, removeToast } = useToast();
   const [consultation, setConsultation] = useState<SearchConsultation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // 상담 데이터 조회
   useEffect(() => {
@@ -79,14 +78,17 @@ const ConsultationDetailModal: React.FC<ConsultationDetailModalProps> = ({
 
     const fetchConsultation = async () => {
       setIsLoading(true);
-      setError(null);
       try {
-        const apiData = await getConsultationById(consultationId);
-        const searchData = convertApiToSearchFormat(apiData);
+        const response = await getConsultationById(consultationId);
+
+        if (!response.data) {
+          throw new Error('상담 정보를 불러올 수 없습니다.');
+        }
+
+        const searchData = convertApiToSearchFormat(response.data);
         setConsultation(searchData);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : '상담 정보를 불러올 수 없습니다.';
-        setError(errorMessage);
         showToast(errorMessage, 'error');
       } finally {
         setIsLoading(false);
@@ -99,7 +101,6 @@ const ConsultationDetailModal: React.FC<ConsultationDetailModalProps> = ({
   // 모달 닫을 때 상태 초기화
   const handleClose = () => {
     setConsultation(null);
-    setError(null);
     onClose();
   };
 

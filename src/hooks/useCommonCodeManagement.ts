@@ -148,8 +148,8 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
       (async () => {
         try {
           setIsLoadingItems(true);
-          const items = await fetchCommonCodeItemsForAdmin(selectedGroupId);
-          setCodeItems(items);
+          const response = await fetchCommonCodeItemsForAdmin(selectedGroupId);
+          setCodeItems(response.data || []);
         } catch (error) {
           console.error('Failed to load code items:', error);
           showToast('코드 항목 조회에 실패했습니다.', 'error');
@@ -163,8 +163,8 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
   const loadGroups = useCallback(async () => {
     try {
       setIsLoadingGroups(true);
-      const fetchedGroups = await fetchCommonCodeGroups();
-      setGroups(fetchedGroups);
+      const response = await fetchCommonCodeGroups();
+      setGroups(response.data || []);
     } catch (error) {
       console.error('Failed to load groups:', error);
       const errorMessage = getErrorMessage(error);
@@ -178,8 +178,8 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
     async (groupId: string) => {
       try {
         setIsLoadingItems(true);
-        const items = await fetchCommonCodeItemsForAdmin(groupId);
-        setCodeItems(items);
+        const response = await fetchCommonCodeItemsForAdmin(groupId);
+        setCodeItems(response.data || []);
       } catch (error) {
         console.error('Failed to load code items:', error);
         const errorMessage = getErrorMessage(error);
@@ -374,7 +374,7 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
       try {
         setIsSaving(true);
         await deactivateCommonCodeItem(itemId);
-        showToast('코드가 비활성화되었습니다.', 'success');
+        showToast('코드가 삭제되었습니다.', 'success');
         if (selectedGroupId) {
           await loadCodeItems(selectedGroupId);
         }
@@ -382,7 +382,7 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
       } catch (error) {
         console.error('Failed to deactivate item:', error);
         const errorMessage = getErrorMessage(error);
-        showToast(`코드 비활성화 실패: ${errorMessage}`, 'error');
+        showToast(`코드 삭제 실패: ${errorMessage}`, 'error');
       } finally {
         setIsSaving(false);
       }

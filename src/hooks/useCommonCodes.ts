@@ -38,7 +38,7 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchCommonCodeItems(groupCode);
+    const response = await fetchCommonCodeItems(groupCode);
       if (response.data) {
         const converted = response.data
           .filter((item) => item.isActive)

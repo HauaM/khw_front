@@ -151,7 +151,7 @@ export function useManualReviewTasks(
           limit: 100, // 프론트에서 추가 필터링하므로 큰 값으로 설정
         });
 
-        setData(response.data);
+        setData(response.data || []);
       } catch (err) {
         console.warn(
           'Failed to fetch from API, using mock data:',

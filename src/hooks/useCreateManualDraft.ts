@@ -28,10 +28,14 @@ const useCreateManualDraft = (options?: UseCreateManualDraftOptions) => {
 
       try {
         // OpenAPI 기반 실제 API 호출
-        const draft = await createManualDraft(requestBody);
+        const response = await createManualDraft(requestBody);
 
-        options?.onSuccess?.(draft);
-        return draft;
+        if (!response.data) {
+          throw new Error('메뉴얼 초안 생성 실패: 응답 데이터 없음');
+        }
+
+        options?.onSuccess?.(response.data);
+        return response.data;
       } catch (err) {
         const normalizedError =
           err instanceof Error ? err : new Error('메뉴얼 초안 생성 중 오류가 발생했습니다.');
