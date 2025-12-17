@@ -10,6 +10,7 @@ import {
   ManualVersionInfo,
   ManualVersionDetail,
   ManualDraftStatus,
+  ManualCardItem,
   ApprovedManualCardItem,
 } from '@/types/manuals';
 import { BackendManualReviewTask } from '@/types/reviews';
@@ -432,5 +433,149 @@ export const deleteManualDraft = (manualId: string) =>
  */
 export const getApprovedManualGroup = (manualId: string) =>
   api.get<ApiResponse<ApprovedManualCardItem[]>>(`/api/v1/manuals/${manualId}/approved-group`);
+
+interface GetApprovedManualsParams {
+  business_type?: string | null;
+  error_code?: string | null;
+}
+
+const MOCK_APPROVED_MANUALS: ManualCardItem[] = [
+  {
+    id: '3c4a6bbf-6d3a-4f6c-92cb-7e1e7ab2f0f9',
+    keywords: ['로그인', '인증'],
+    topic: '로그인 실패 시 대응',
+    background: '인증 서버 장애로 N건 이상 발생',
+    guideline: '1. 사용자 인증 정보 확인\n2. 서버 상태 점검\n3. 장애 접수 및 처리\n4. 고객 안내',
+    business_type: 'INTERNET_BANKING',
+    error_code: 'E001',
+    source_consultation_id: 'd9af8c29-3b07-4b71-9ef1-5b2c7a7890f4',
+    version_id: '23b7a2d1-1d38-4f28-b5f3-2d9c5d7d4fce',
+    status: 'APPROVED',
+    business_type_name: '인터넷뱅킹',
+    created_at: '2025-12-10T08:00:00Z',
+    updated_at: '2025-12-11T09:12:00Z',
+  },
+  {
+    id: '5eecac0d-6cb3-4b5a-9e2b-6a5d32fd3447',
+    keywords: ['인증', '보안'],
+    topic: '로그인 오류 대응',
+    background: '더 많은 사용자 문의',
+    guideline: '1. 계정 상태 확인\n2. 보안 인증 재설정\n3. 임시 비밀번호 발급',
+    business_type: 'INTERNET_BANKING',
+    error_code: 'E001',
+    source_consultation_id: 'f1e0828b-96c2-4955-9ee2-13c1d1f5c0e5',
+    version_id: '5f1d8fde-13c3-4b10-95a4-9e432d41f4fc',
+    status: 'APPROVED',
+    business_type_name: '인터넷뱅킹',
+    created_at: '2025-12-09T07:32:00Z',
+    updated_at: '2025-12-09T08:00:00Z',
+  },
+  {
+    id: 'a1b2c3d4-5e6f-7g8h-9i0j-k1l2m3n4o5p6',
+    keywords: ['계좌', '이체'],
+    topic: '계좌 이체 실패 처리',
+    background: '시스템 점검 시간 중 이체 시도 증가',
+    guideline: '1. 점검 시간 확인\n2. 고객 안내\n3. 이체 재시도 안내\n4. 필요시 수동 처리',
+    business_type: 'INTERNET_BANKING',
+    error_code: 'E002',
+    source_consultation_id: 'a9b8c7d6-e5f4-3210-9876-fedcba098765',
+    version_id: 'v1v2v3v4-w5w6-x7x8-y9y0-z1z2z3z4z5z6',
+    status: 'APPROVED',
+    business_type_name: '인터넷뱅킹',
+    created_at: '2025-12-08T10:15:00Z',
+    updated_at: '2025-12-08T11:30:00Z',
+  },
+  {
+    id: 'q2w3e4r5-t6y7-u8i9-o0p1-a2s3d4f5g6h7',
+    keywords: ['비밀번호', '찾기'],
+    topic: '비밀번호 찾기 오류',
+    background: 'SMS 인증 지연으로 인한 문의 증가',
+    guideline: '1. SMS 발송 이력 확인\n2. 통신사 장애 확인\n3. 대체 인증 수단 안내\n4. 영업점 방문 안내',
+    business_type: 'INTERNET_BANKING',
+    error_code: 'E003',
+    source_consultation_id: 'z9y8x7w6-v5u4-t3s2-r1q0-p9o8n7m6l5k4',
+    version_id: 'k4l5m6n7-o8p9-q0r1-s2t3-u4v5w6x7y8z9',
+    status: 'APPROVED',
+    business_type_name: '인터넷뱅킹',
+    created_at: '2025-12-07T14:20:00Z',
+    updated_at: '2025-12-07T15:45:00Z',
+  },
+  {
+    id: 'j8k9l0m1-n2o3-p4q5-r6s7-t8u9v0w1x2y3',
+    keywords: ['공인인증서', '갱신'],
+    topic: '공인인증서 갱신 오류',
+    background: '만료 임박 인증서 갱신 시도 증가',
+    guideline: '1. 인증서 만료일 확인\n2. 브라우저 호환성 점검\n3. 보안프로그램 설치 확인\n4. 재발급 안내',
+    business_type: 'INTERNET_BANKING',
+    error_code: 'E004',
+    source_consultation_id: 'h7g6f5e4-d3c2-b1a0-9876-543210fedcba',
+    version_id: 'm1n2o3p4-q5r6-s7t8-u9v0-w1x2y3z4a5b6',
+    status: 'APPROVED',
+    business_type_name: '인터넷뱅킹',
+    created_at: '2025-12-06T09:30:00Z',
+    updated_at: '2025-12-06T10:00:00Z',
+  },
+  {
+    id: 'c7d8e9f0-g1h2-i3j4-k5l6-m7n8o9p0q1r2',
+    keywords: ['잔액', '조회'],
+    topic: '잔액 조회 불가 처리',
+    background: 'DB 동기화 지연으로 인한 일시적 오류',
+    guideline: '1. 시스템 상태 확인\n2. 캐시 삭제 안내\n3. 재로그인 요청\n4. 지속 시 고객센터 연결',
+    business_type: 'INTERNET_BANKING',
+    error_code: 'E005',
+    source_consultation_id: 'r2q1p0o9-n8m7-l6k5-j4i3-h2g1f0e9d8c7',
+    version_id: 's3t4u5v6-w7x8-y9z0-a1b2-c3d4e5f6g7h8',
+    status: 'APPROVED',
+    business_type_name: '인터넷뱅킹',
+    created_at: '2025-12-05T16:45:00Z',
+    updated_at: '2025-12-05T17:20:00Z',
+  },
+  {
+    id: 'i9j0k1l2-m3n4-o5p6-q7r8-s9t0u1v2w3x4',
+    keywords: ['모바일', '앱'],
+    topic: '모바일 앱 로그인 오류',
+    background: '앱 업데이트 후 일부 기기에서 발생',
+    guideline: '1. 앱 버전 확인\n2. 재설치 안내\n3. OS 버전 확인\n4. 웹 뱅킹 대체 이용 안내',
+    business_type: 'MOBILE_BANKING',
+    error_code: 'E006',
+    source_consultation_id: 'x4w3v2u1-t0s9-r8q7-p6o5-n4m3l2k1j0i9',
+    version_id: 'y5z6a7b8-c9d0-e1f2-g3h4-i5j6k7l8m9n0',
+    status: 'APPROVED',
+    business_type_name: '모바일뱅킹',
+    created_at: '2025-12-04T11:00:00Z',
+    updated_at: '2025-12-04T12:15:00Z',
+  },
+  {
+    id: 'o0p1q2r3-s4t5-u6v7-w8x9-y0z1a2b3c4d5',
+    keywords: ['송금', '한도'],
+    topic: '송금 한도 초과 처리',
+    background: '일일 한도 초과로 인한 문의',
+    guideline: '1. 현재 한도 확인\n2. 한도 상향 절차 안내\n3. 분할 송금 제안\n4. 영업점 방문 안내',
+    business_type: 'INTERNET_BANKING',
+    error_code: 'E007',
+    source_consultation_id: 'd5c4b3a2-z1y0-x9w8-v7u6-t5s4r3q2p1o0',
+    version_id: 'e6f7g8h9-i0j1-k2l3-m4n5-o6p7q8r9s0t1',
+    status: 'APPROVED',
+    business_type_name: '인터넷뱅킹',
+    created_at: '2025-12-03T13:25:00Z',
+    updated_at: '2025-12-03T14:50:00Z',
+  },
+];
+
+export const getApprovedManuals = async ({
+  business_type,
+  error_code,
+}: GetApprovedManualsParams): Promise<ManualCardItem[]> => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return MOCK_APPROVED_MANUALS.filter((manual) => {
+    if (business_type && manual.business_type !== business_type) {
+      return false;
+    }
+    if (error_code && manual.error_code !== error_code) {
+      return false;
+    }
+    return true;
+  });
+};
 
 export type { ApprovedManualCardItem } from '@/types/manuals';

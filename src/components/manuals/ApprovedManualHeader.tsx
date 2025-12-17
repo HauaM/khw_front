@@ -6,11 +6,6 @@ interface ApprovedManualHeaderProps {
   onSearchManualId: (manualId: string) => void;
 }
 
-/**
- * 승인된 메뉴얼 목록 화면의 헤더
- * - 제목 및 부제 (업무 구분 / 에러코드)
- * - manual_id 입력창 + "이동" 버튼
- */
 const ApprovedManualHeader: React.FC<ApprovedManualHeaderProps> = ({
   businessType,
   errorCode,
@@ -18,46 +13,47 @@ const ApprovedManualHeader: React.FC<ApprovedManualHeaderProps> = ({
 }) => {
   const [manualIdInput, setManualIdInput] = useState('');
 
-  const handleSearchClick = () => {
-    const trimmed = manualIdInput.trim();
-    if (trimmed) {
-      onSearchManualId(trimmed);
-      setManualIdInput('');
-    }
+  const handleSubmit = () => {
+    const trimmedId = manualIdInput.trim();
+    onSearchManualId(trimmedId);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearchClick();
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleSubmit();
     }
   };
 
   return (
-    <div className="flex items-start justify-between gap-4">
-      {/* 좌측: 제목 및 부제 */}
-      <div className="flex-1">
+    <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="space-y-1">
         <h1 className="text-2xl font-bold text-gray-900">승인된 메뉴얼</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          업무구분: <span className="font-semibold">{businessType}</span> /
-          에러코드: <span className="font-semibold">{errorCode}</span>
+        <p className="text-sm text-gray-600">
+          업무구분: <span className="font-semibold text-gray-900">{businessType}</span> / 에러코드:{' '}
+          <span className="font-semibold text-gray-900">{errorCode}</span>
         </p>
       </div>
 
-      {/* 우측: 입력창 + 버튼 */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          id="manualIdInput"
-          placeholder="Manual ID 입력"
-          value={manualIdInput}
-          onChange={(e) => setManualIdInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-          style={{ minWidth: '280px' }}
-        />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="flex-1">
+          <label htmlFor="manualIdInput" className="text-xs font-semibold text-gray-700">
+            Manual ID로 이동
+          </label>
+          <input
+            id="manualIdInput"
+            type="text"
+            placeholder="Manual ID를 입력하세요"
+            value={manualIdInput}
+            onChange={(event) => setManualIdInput(event.target.value)}
+            onKeyDown={handleKeyDown}
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          />
+        </div>
         <button
-          onClick={handleSearchClick}
-          className="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 transition"
+          type="button"
+          onClick={handleSubmit}
+          className="min-w-[120px] rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1"
         >
           이동
         </button>

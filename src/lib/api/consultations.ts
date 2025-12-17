@@ -79,7 +79,40 @@ export const getConsultationById = (id: string) =>
  * @param consultationId - 상담 ID (UUID)
  * @returns ConsultationDetail
  */
-export const getConsultationDetail = (consultationId: string) =>
-  api.get<ApiResponse<ConsultationResponse>>(`/api/v1/consultations/${consultationId}`);
+const MOCK_CONSULTATION_DETAIL_BASE: Omit<ConsultationResponse, 'id'> = {
+  created_at: '2025-12-09T15:30:00Z',
+  updated_at: '2025-12-09T16:00:00Z',
+  summary: '로그인 오류로 인한 고객 문의',
+  inquiry_text: '인터넷뱅킹 로그인 시 E001 오류가 발생합니다. 비밀번호는 정확한데 계속 실패합니다.',
+  action_taken: '1. 고객 계정 상태 확인 완료\n2. 서버 장애 이력 확인\n3. 임시 조치 완료 및 고객 안내',
+  branch_code: '0001',
+  employee_id: 'EMP-0001',
+  screen_id: null,
+  transaction_name: null,
+  business_type: 'INTERNET',
+  error_code: 'E001',
+  metadata_fields: {},
+  manual_entry_id: null,
+  consultation_date: '2025-12-09T15:30:00Z',
+};
+
+const createMockConsultationResponse = (consultationId: string): ApiResponse<ConsultationResponse> => ({
+  success: true,
+  data: {
+    ...MOCK_CONSULTATION_DETAIL_BASE,
+    id: consultationId,
+  },
+  error: null,
+  meta: {
+    requestId: `mock-consultation-${consultationId}`,
+    timestamp: new Date().toISOString(),
+  },
+  feedback: [],
+});
+
+export const getConsultationDetail = async (consultationId: string) => {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  return createMockConsultationResponse(consultationId);
+};
 
 export type { ConsultationDetail } from '@/types/consultations';

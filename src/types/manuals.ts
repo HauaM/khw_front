@@ -2,6 +2,21 @@
 export type ManualDraftStatus = 'DRAFT' | 'APPROVED' | 'DEPRECATED';
 
 /**
+ * 승인된 메뉴얼 카드에서 사용되는 상태와 업무 구분 타입
+ * html reference에 맞춰 mock 데이터를 만듭니다.
+ */
+export type ManualStatus = 'APPROVED' | 'DEPRECATED' | string;
+
+export type BusinessType =
+  | 'INTERNET_BANKING'
+  | 'MOBILE_BANKING'
+  | 'ACCOUNT'
+  | 'LOAN'
+  | 'CARD'
+  | 'SECURITY'
+  | string;
+
+/**
  * 메뉴얼 초안 데이터 모델
  * OpenAPI: ManualDraftResponse를 기반으로 함
  *
@@ -191,18 +206,20 @@ export type ChangeFlag = '' | 'ADDED' | 'REMOVED' | 'MODIFIED';
  * 승인된 메뉴얼 카드 항목
  * "승인된 메뉴얼" 화면에서 표시되는 카드 데이터 모델
  */
-export interface ApprovedManualCardItem {
+export interface ManualCardItem {
   id: string; // manual_id
   keywords: string[];
   topic: string;
   background: string;
   guideline: string; // "\n" 기준으로 단계 분리
-  business_type: string;
+  business_type: BusinessType;
   error_code: string;
   source_consultation_id: string;
   version_id: string;
-  status: ManualDraftStatus;
+  status: ManualStatus;
   business_type_name?: string;
   created_at: string;
   updated_at: string;
 }
+
+export type ApprovedManualCardItem = ManualCardItem;
