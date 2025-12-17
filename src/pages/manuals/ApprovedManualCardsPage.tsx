@@ -49,14 +49,12 @@ const ApprovedManualCardsPage: React.FC = () => {
 
 
   const scrollToManual = useCallback(
-    (manualId?: string | null) => {
+    (manualId?: string | null, options?: { keepFilter?: boolean }) => {
       const targetId = manualId?.trim();
       if (!targetId) {
         showToast('Manual ID를 입력해주세요.', 'warning');
         return;
       }
-
-      setFilterQuery('');
 
       const targetElement = cardRefs.current[targetId];
       if (!targetElement) {
@@ -69,6 +67,10 @@ const ApprovedManualCardsPage: React.FC = () => {
       }
 
       setHighlightedManualId(targetId);
+
+      if (!options?.keepFilter) {
+        setFilterQuery('');
+      }
 
       if (highlightTimerRef.current) {
         window.clearTimeout(highlightTimerRef.current);
@@ -83,6 +85,35 @@ const ApprovedManualCardsPage: React.FC = () => {
       }, HIGHLIGHT_DURATION);
     },
     [manuals, showToast]
+  );
+
+  const handleKeywordSearch = useCallback(
+    (query: string) => {
+      const trimmed = query.trim();
+      setFilterQuery(trimmed);
+
+      if (!trimmed) {
+        showToast('검색어를 입력해주세요.', 'warning');
+        return;
+      }
+
+      const normalized = trimmed.toLowerCase();
+      const matchedManual = manuals.find((manual) => {
+        const topicMatches = manual.topic.toLowerCase().includes(normalized);
+        const keywordMatches = manual.keywords.some((keyword) =>
+          keyword.toLowerCase().includes(normalized)
+        );
+        return topicMatches || keywordMatches;
+      });
+
+      if (!matchedManual) {
+        showToast('조건에 맞는 Manual을 찾을 수 없습니다.', 'info');
+        return;
+      }
+
+      scrollToManual(matchedManual.id, { keepFilter: true });
+    },
+    [manuals, scrollToManual, showToast]
   );
 
   const handleOpenConsultation = useCallback((consultationId: string) => {
@@ -117,7 +148,7 @@ const ApprovedManualCardsPage: React.FC = () => {
           <span className="font-semibold text-gray-900">{DEFAULT_ERROR_CODE}</span>
         </p>
       </header>
-      <ApprovedManualHeader onSearchManualId={scrollToManual} onFilterChange={setFilterQuery} />
+      <ApprovedManualHeader onSearchManualId={(id) => scrollToManual(id)} onKeywordSearch={handleKeywordSearch} />
 
       {isLoading && manuals.length === 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
