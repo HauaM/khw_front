@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ApprovedManualHeader from '@/components/manuals/ApprovedManualHeader';
 import ApprovedManualCardList from '@/components/manuals/ApprovedManualCardList';
@@ -21,8 +21,6 @@ const ApprovedManualCardsPage: React.FC = () => {
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didAutoScrollRef = useRef(false);
   const [highlightedManualId, setHighlightedManualId] = useState<string | null>(null);
-  const [lastSearchTerm, setLastSearchTerm] = useState('');
-  const [lastSearchIndex, setLastSearchIndex] = useState(-1);
   const [selectedConsultationId, setSelectedConsultationId] = useState<string | null>(null);
 
   const queryManualId = searchParams.get('manual_id');
@@ -32,6 +30,20 @@ const ApprovedManualCardsPage: React.FC = () => {
   const manualIdForRequest = manualIdTarget || FALLBACK_MANUAL_ID;
 
   const { data: manuals, isLoading, error } = useApprovedManualCards(manualIdForRequest);
+  const [filterTerm, setFilterTerm] = useState('');
+  const filteredManuals = useMemo(() => {
+    if (!filterTerm) return manuals;
+    const normalized = filterTerm.toLowerCase();
+    return manuals.filter((manual) => {
+      const topicMatches = manual.topic.toLowerCase().includes(normalized);
+      const keywordMatches = manual.keywords.some((keyword) =>
+        keyword.toLowerCase().includes(normalized)
+      );
+      const idMatches = manual.id === filterTerm;
+      return topicMatches || keywordMatches || idMatches;
+    });
+  }, [manuals, filterTerm]);
+  const listToRender = filterTerm ? filteredManuals : manuals;
 
 
 
@@ -79,54 +91,34 @@ const ApprovedManualCardsPage: React.FC = () => {
         return;
       }
 
-      const manualById = manuals.find((manual) => manual.id === trimmed);
-      if (manualById) {
-        scrollToManual(manualById.id);
-        setLastSearchTerm('');
-        setLastSearchIndex(-1);
-        return;
-      }
+      setFilterTerm(trimmed);
 
       const normalized = trimmed.toLowerCase();
-      if (normalized !== lastSearchTerm) {
-        setLastSearchIndex(-1);
-      }
-      const matchedManual = manuals.find((manual) => {
+      const matchedManuals = manuals.filter((manual) => {
         const topicMatches = manual.topic.toLowerCase().includes(normalized);
         const keywordMatches = manual.keywords.some((keyword) =>
           keyword.toLowerCase().includes(normalized)
         );
-        return topicMatches || keywordMatches;
+        const idMatches = manual.id === trimmed;
+        return topicMatches || keywordMatches || idMatches;
       });
 
-      if (!matchedManual) {
+      if (!matchedManuals.length) {
         showToast('조건에 맞는 Manual을 찾을 수 없습니다.', 'info');
         return;
       }
 
-      setLastSearchTerm(normalized);
-      const startIndex =
-        lastSearchTerm === normalized && lastSearchIndex !== -1
-          ? lastSearchIndex + 1
-          : 0;
-      const cycleIndex = [...manuals.slice(startIndex), ...manuals.slice(0, startIndex)]
-        .findIndex((manual) => {
-          const topicMatches = manual.topic.toLowerCase().includes(normalized);
-          const keywordMatches = manual.keywords.some((keyword) =>
-            keyword.toLowerCase().includes(normalized)
-          );
-          return topicMatches || keywordMatches;
-        });
-      if (cycleIndex === -1) {
-        showToast('조건에 맞는 Manual을 찾을 수 없습니다.', 'info');
-        return;
-      }
-      const actualIndex = (startIndex + cycleIndex) % manuals.length;
-      setLastSearchIndex(actualIndex);
-      scrollToManual(manuals[actualIndex].id);
+      const firstMatch = matchedManuals[0];
+      setHighlightedManualId(firstMatch.id);
+      scrollToManual(firstMatch.id);
     },
     [manuals, scrollToManual, showToast]
   );
+
+  const handleClearFilter = () => {
+    setFilterTerm('');
+    setHighlightedManualId(null);
+  };
 
   const handleOpenConsultation = useCallback((consultationId: string) => {
     setSelectedConsultationId(consultationId);
@@ -160,7 +152,7 @@ const ApprovedManualCardsPage: React.FC = () => {
           <span className="font-semibold text-gray-900">{DEFAULT_ERROR_CODE}</span>
         </p>
       </header>
-      <ApprovedManualHeader onSearch={handleSearch} />
+      <ApprovedManualHeader onSearch={handleSearch} onClear={handleClearFilter} />
 
       {isLoading && manuals.length === 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
@@ -180,11 +172,17 @@ const ApprovedManualCardsPage: React.FC = () => {
         </div>
       )}
 
-      {manuals.length > 0 && (
-        <ApprovedManualCardList
-          manuals={manuals}
-          highlightedManualId={highlightedManualId}
-          onViewConsultation={handleOpenConsultation}
+      {filterTerm && !isLoading && !error && listToRender.length === 0 && (
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center text-sm text-yellow-600 shadow-sm">
+          검색 조건에 맞는 메뉴얼이 없습니다.
+        </div>
+      )}
+
+          {listToRender.length > 0 && (
+            <ApprovedManualCardList
+              manuals={listToRender}
+              highlightedManualId={highlightedManualId}
+              onViewConsultation={handleOpenConsultation}
           cardRefs={cardRefs}
         />
       )}
