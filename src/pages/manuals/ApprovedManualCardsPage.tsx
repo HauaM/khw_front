@@ -126,19 +126,18 @@ const ApprovedManualCardsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-full w-full flex-col">
-      <header className="space-y-1 pb-4">
+    <div className="flex h-full w-full flex-col overflow-hidden">
+      <header className="space-y-1 px-6 py-6">
         <h1 className="text-3xl font-semibold text-gray-900">메뉴얼 상세 조회</h1>
         <p className="text-sm text-gray-600">
           업무구분: <span className="font-semibold text-gray-900">{DEFAULT_BUSINESS_TYPE}</span> / 에러코드:{' '}
           <span className="font-semibold text-gray-900">{DEFAULT_ERROR_CODE}</span>
         </p>
       </header>
-      <div className="flex-1 flex flex-col overflow-hidden rounded-xl border border-transparent">
-        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur pb-3">
+      <div className="flex flex-1 flex-col overflow-hidden px-6 pb-6">
+        <div className="sticky top-0 z-20 bg-white/95 pb-3 pt-2">
           <ApprovedManualHeader onSearch={handleSearch} />
         </div>
-
         <div className="flex-1 overflow-auto pt-6">
           {isLoading && manuals.length === 0 && (
             <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
@@ -158,7 +157,7 @@ const ApprovedManualCardsPage: React.FC = () => {
             </div>
           )}
 
-          <div className="space-y-4 px-0 pb-6">
+          <div className="space-y-4 pb-6">
             {manuals.length > 0 && (
               <ApprovedManualCardList
                 manuals={manuals}
