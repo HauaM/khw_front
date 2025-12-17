@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ApprovedManualHeader from '@/components/manuals/ApprovedManualHeader';
 import ApprovedManualCardList from '@/components/manuals/ApprovedManualCardList';
@@ -29,7 +29,24 @@ const ApprovedManualCardsPage: React.FC = () => {
   const manualIdTarget = trimmedQueryManualId || trimmedRouteManualId || null;
   const manualIdForRequest = manualIdTarget || FALLBACK_MANUAL_ID;
 
+  const [filterQuery, setFilterQuery] = useState('');
   const { data: manuals, isLoading, error } = useApprovedManualCards(manualIdForRequest);
+
+  const filteredManuals = useMemo(() => {
+    const normalized = filterQuery.trim().toLowerCase();
+    if (!normalized) {
+      return manuals;
+    }
+    return manuals.filter((manual) => {
+      const topicMatches = manual.topic.toLowerCase().includes(normalized);
+      const keywordMatches = manual.keywords.some((keyword) =>
+        keyword.toLowerCase().includes(normalized)
+      );
+      return topicMatches || keywordMatches;
+    });
+  }, [manuals, filterQuery]);
+
+
 
   const scrollToManual = useCallback(
     (manualId?: string | null) => {
@@ -38,6 +55,8 @@ const ApprovedManualCardsPage: React.FC = () => {
         showToast('Manual ID를 입력해주세요.', 'warning');
         return;
       }
+
+      setFilterQuery('');
 
       const targetElement = cardRefs.current[targetId];
       if (!targetElement) {
@@ -92,13 +111,13 @@ const ApprovedManualCardsPage: React.FC = () => {
   return (
     <div className="flex h-full w-full flex-col gap-6 overflow-auto">
       <header className="space-y-1">
-        <h1 className="text-3xl font-semibold text-gray-900">메뉴얼 상세</h1>
+        <h1 className="text-3xl font-semibold text-gray-900">메뉴얼 상세 조회</h1>
         <p className="text-sm text-gray-600">
           업무구분: <span className="font-semibold text-gray-900">{DEFAULT_BUSINESS_TYPE}</span> / 에러코드:{' '}
           <span className="font-semibold text-gray-900">{DEFAULT_ERROR_CODE}</span>
         </p>
       </header>
-      <ApprovedManualHeader onSearchManualId={scrollToManual} />
+      <ApprovedManualHeader onSearchManualId={scrollToManual} onFilterChange={setFilterQuery} />
 
       {isLoading && manuals.length === 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
@@ -118,13 +137,19 @@ const ApprovedManualCardsPage: React.FC = () => {
         </div>
       )}
 
-      {manuals.length > 0 && (
+      {filteredManuals.length > 0 && (
         <ApprovedManualCardList
-          manuals={manuals}
+          manuals={filteredManuals}
           highlightedManualId={highlightedManualId}
           onViewConsultation={handleOpenConsultation}
           cardRefs={cardRefs}
         />
+      )}
+
+      {!isLoading && !error && manuals.length > 0 && filteredManuals.length === 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
+          필터 조건에 맞는 메뉴얼이 없습니다.
+        </div>
       )}
 
       <ConsultationDetailModal
