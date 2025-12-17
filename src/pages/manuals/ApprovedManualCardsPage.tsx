@@ -134,7 +134,9 @@ const ApprovedManualCardsPage: React.FC = () => {
           <span className="font-semibold text-gray-900">{DEFAULT_ERROR_CODE}</span>
         </p>
       </header>
-      <ApprovedManualHeader onSearch={handleSearch} />
+      <div className="sticky top-6 z-10 bg-transparent">
+        <ApprovedManualHeader onSearch={handleSearch} />
+      </div>
 
       {isLoading && manuals.length === 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
