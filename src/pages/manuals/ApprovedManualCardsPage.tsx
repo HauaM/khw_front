@@ -126,51 +126,42 @@ const ApprovedManualCardsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden">
-      <header className="space-y-1 px-6 pt-6">
+    <div className="flex h-full w-full flex-col gap-6 overflow-auto">
+      <header className="space-y-1">
         <h1 className="text-3xl font-semibold text-gray-900">메뉴얼 상세 조회</h1>
         <p className="text-sm text-gray-600">
           업무구분: <span className="font-semibold text-gray-900">{DEFAULT_BUSINESS_TYPE}</span> / 에러코드:{' '}
           <span className="font-semibold text-gray-900">{DEFAULT_ERROR_CODE}</span>
         </p>
       </header>
+      <ApprovedManualHeader onSearch={handleSearch} />
 
-      <div className="flex flex-1 flex-col overflow-hidden px-6 pb-6">
-        <div className="sticky top-0 z-20 bg-white/90 pb-3">
-          <ApprovedManualHeader onSearch={handleSearch} />
+      {isLoading && manuals.length === 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
+          승인된 메뉴얼을 불러오는 중입니다...
         </div>
+      )}
 
-        <div className="flex-1 overflow-auto pt-4">
-          {isLoading && manuals.length === 0 && (
-            <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
-              승인된 메뉴얼을 불러오는 중입니다...
-            </div>
-          )}
-
-          {error && (
-            <div className="mt-6 rounded-lg border border-error bg-error-light p-6 text-sm text-red-700">
-              승인된 메뉴얼을 불러오는 중 오류가 발생했습니다. {error.message}
-            </div>
-          )}
-
-          {!isLoading && !error && manuals.length === 0 && (
-            <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
-              승인된 메뉴얼이 없습니다.
-            </div>
-          )}
-
-          <div className="space-y-4">
-            {manuals.length > 0 && (
-              <ApprovedManualCardList
-                manuals={manuals}
-                highlightedManualId={highlightedManualId}
-                onViewConsultation={handleOpenConsultation}
-                cardRefs={cardRefs}
-              />
-            )}
-          </div>
+      {error && (
+        <div className="rounded-lg border border-error bg-error-light p-6 text-sm text-red-700">
+          승인된 메뉴얼을 불러오는 중 오류가 발생했습니다. {error.message}
         </div>
-      </div>
+      )}
+
+      {!isLoading && !error && manuals.length === 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 shadow-sm">
+          승인된 메뉴얼이 없습니다.
+        </div>
+      )}
+
+      {manuals.length > 0 && (
+        <ApprovedManualCardList
+          manuals={manuals}
+          highlightedManualId={highlightedManualId}
+          onViewConsultation={handleOpenConsultation}
+          cardRefs={cardRefs}
+        />
+      )}
 
       <ConsultationDetailModal
         consultationId={selectedConsultationId ?? ''}
