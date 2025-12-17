@@ -18,10 +18,14 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
   useEffect(() => {
     (async () => {
       try {
-        const groups = await fetchCommonCodeGroups();
-        const group = groups.find((g) => g.groupCode === groupCode);
-        if (group) {
-          setGroupId(group.id);
+        const response = await fetchCommonCodeGroups();
+        console.log('response', response);
+        if (response.data) {
+          console.log('Fetched common code groups:', response.data);
+          const group = response.data.find((g) => g.groupCode === groupCode);
+          if (group) {
+            setGroupId(group.id);
+          }
         }
       } catch (err) {
         console.error('Failed to fetch groups:', err);
@@ -34,17 +38,19 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
     setIsLoading(true);
     setError(null);
     try {
-      const items = await fetchCommonCodeItems(groupCode);
-      const converted = items
-        .filter((item) => item.isActive)
-        .map((item) => ({
-          code: item.codeKey,
-          label: item.codeValue,
-          description: typeof item.attributes === 'object'
-            ? (item.attributes as Record<string, any>)?.description
-            : undefined,
-        }));
-      setOptions(converted);
+      const response = await fetchCommonCodeItems(groupCode);
+      if (response.data) {
+        const converted = response.data
+          .filter((item) => item.isActive)
+          .map((item) => ({
+            code: item.codeKey,
+            label: item.codeValue,
+            description: typeof item.attributes === 'object'
+              ? (item.attributes as Record<string, any>)?.description
+              : undefined,
+          }));
+        setOptions(converted);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : '공통코드 로드 실패';
       setError(message);
@@ -75,13 +81,17 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
           attributes: description ? { description } : undefined,
         };
 
-        const newItem = await createCommonCodeItem(groupId, payload);
+        const response = await createCommonCodeItem(groupId, payload);
+
+        if (!response.data) {
+          throw new Error('코드 추가 실패: 응답 데이터 없음');
+        }
 
         const newOption: CommonCodeOption = {
-          code: newItem.codeKey,
-          label: newItem.codeValue,
-          description: typeof newItem.attributes === 'object'
-            ? (newItem.attributes as Record<string, any>)?.description
+          code: response.data.codeKey,
+          label: response.data.codeValue,
+          description: typeof response.data.attributes === 'object'
+            ? (response.data.attributes as Record<string, any>)?.description
             : undefined,
         };
 
