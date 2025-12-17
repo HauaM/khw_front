@@ -20,8 +20,8 @@ const ApprovedManualHeader: React.FC<ApprovedManualHeaderProps> = ({ onSearchMan
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+    <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
         <div className="flex-1">
           <label htmlFor="manualIdInput" className="text-xs font-semibold text-gray-700">
             Manual ID로 이동
