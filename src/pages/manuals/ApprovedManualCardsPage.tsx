@@ -94,9 +94,9 @@ const ApprovedManualCardsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-full w-full flex-col gap-6 overflow-auto px-6 py-6">
+    <div className="flex h-full w-full flex-col gap-6 overflow-auto">
       <header className="space-y-1">
-        <h1 className="text-3xl font-semibold text-gray-900">승인된 메뉴얼</h1>
+        <h1 className="text-3xl font-semibold text-gray-900">메뉴얼 상세</h1>
         <p className="text-sm text-gray-600">
           업무구분: <span className="font-semibold text-gray-900">{DEFAULT_BUSINESS_TYPE}</span> / 에러코드:{' '}
           <span className="font-semibold text-gray-900">{DEFAULT_ERROR_CODE}</span>
