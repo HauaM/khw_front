@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 
 interface ApprovedManualHeaderProps {
-  businessType: string;
-  errorCode: string;
   onSearchManualId: (manualId: string) => void;
 }
 
-const ApprovedManualHeader: React.FC<ApprovedManualHeaderProps> = ({
-  businessType,
-  errorCode,
-  onSearchManualId,
-}) => {
+const ApprovedManualHeader: React.FC<ApprovedManualHeaderProps> = ({ onSearchManualId }) => {
   const [manualIdInput, setManualIdInput] = useState('');
 
   const handleSubmit = () => {
@@ -27,14 +21,6 @@ const ApprovedManualHeader: React.FC<ApprovedManualHeaderProps> = ({
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-gray-900">승인된 메뉴얼</h1>
-        <p className="text-sm text-gray-600">
-          업무구분: <span className="font-semibold text-gray-900">{businessType}</span> / 에러코드:{' '}
-          <span className="font-semibold text-gray-900">{errorCode}</span>
-        </p>
-      </div>
-
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
           <label htmlFor="manualIdInput" className="text-xs font-semibold text-gray-700">
