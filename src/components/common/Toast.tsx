@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ToastContext, ToastMessage } from '@/contexts/ToastContext';
+import { ToastContext, ToastMessage, ToastContent } from '@/contexts/ToastContext';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -33,6 +33,8 @@ const SingleToast: React.FC<SingleToastProps> = ({
 
   const displayMessage = toast?.message || message || '';
   const displayType = (toast?.type || type) as ToastType;
+
+  const displayCode = toast?.code;
 
   useEffect(() => {
     setVisible(isOpen);
@@ -96,7 +98,10 @@ const SingleToast: React.FC<SingleToastProps> = ({
           )}
         </svg>
       </span>
-      <div className="flex-1 text-sm text-gray-900">{displayMessage}</div>
+      <div className="flex-1 text-sm text-gray-900">
+        {displayCode && <div className="text-xs text-gray-400">{displayCode}</div>}
+        <div>{displayMessage}</div>
+      </div>
       <button
         type="button"
         onClick={() => {
@@ -143,11 +148,12 @@ export const useToast = () => {
   const context = React.useContext(ToastContext);
   if (!context) {
     // Context가 없으면 더미 구현 반환 (로컬 상태)
-    const [toasts, setToasts] = useState<Array<{ id: number; message: string; type: ToastType }>>([]);
+    const [toasts, setToasts] = useState<Array<{ id: number; message: string; type: ToastType; code?: string }>>([]);
 
-    const showToast = (message: string, type: ToastType = 'success') => {
+    const showToast = (content: string | ToastContent, type: ToastType = 'success') => {
       const id = Date.now();
-      setToasts((prev) => [...prev, { id, message, type }]);
+      const payload = typeof content === 'string' ? { message: content } : content;
+      setToasts((prev) => [...prev, { id, type, ...payload }]);
       setTimeout(() => {
         removeToast(id);
       }, 3000);

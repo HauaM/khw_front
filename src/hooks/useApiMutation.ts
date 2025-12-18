@@ -96,16 +96,18 @@ export function useApiMutation<TData, _TVariables = void>(
           const customMessage = errorMessages[error.code];
           errorMessage = customMessage || getUserFriendlyErrorMessage(error);
 
+          const toastContent = { message: error.hint || errorMessage, code: error.code };
+
           if (error.feedbacks && error.feedbacks.length > 0) {
             setTimeout(() => {
               showFeedbacks(error.feedbacks, 200);
             }, 100);
           }
+          toast.error(toastContent);
         } else {
           errorMessage = errorMessages['NETWORK_ERROR'] || '요청 처리 중 오류가 발생했습니다.';
+          toast.error(errorMessage);
         }
-
-        toast.error(errorMessage);
       }
 
       if (onApiError) {

@@ -4,7 +4,7 @@ import ConsultationSearchForm from '@/components/search/ConsultationSearchForm';
 import ConsultationResultTable from '@/components/table/ConsultationResultTable';
 import ConsultationDetailModal from '@/components/modals/ConsultationDetailModal';
 import Spinner from '@/components/common/Spinner';
-import Toast, { useToast } from '@/components/common/Toast';
+import { useToast } from '@/components/common/Toast';
 import {
   Consultation,
   ConsultationSearchParams,
@@ -61,7 +61,7 @@ const ConsultationSearchPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [queryParams, setQueryParams] = useSearchParams();
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
   const [status, setStatus] = useState<PageStatus>('idle');
   const [results, setResults] = useState<Consultation[]>([]);
   const [searchParams, setSearchParams] = useState<ConsultationSearchParams | null>(null);
@@ -117,6 +117,11 @@ const ConsultationSearchPage: React.FC = () => {
   }, [location.state]);
 
   const handleSearch = (params: ConsultationSearchParams) => {
+    if (!params.query || params.query.trim().length === 0) {
+      showToast({ message: '검색어를 입력해 주세요.', code: 'VALIDATION.ERROR' }, 'error');
+      return;
+    }
+
     if (params.startDate && params.endDate && params.startDate > params.endDate) {
       showToast('시작일이 종료일보다 늦습니다. 기간을 다시 확인해주세요.', 'error');
       return;
@@ -131,6 +136,18 @@ const ConsultationSearchPage: React.FC = () => {
     setStatus('loading');
 
     const search = async () => {
+      let errorToastShown = false;
+
+      const showApiErrorToast = (payload: any) => {
+        if (payload && payload.error) {
+          const code = payload.error.code;
+          const hint = payload.error.hint;
+          const message = payload.error.message || '상담 검색에 실패했습니다.';
+          showToast({ message: hint || message, code }, 'error');
+          errorToastShown = true;
+        }
+      };
+
       try {
         const base = import.meta.env.VITE_API_BASE_URL || window.location.origin;
         const url = new URL('/api/v1/consultations/search', base);
@@ -153,12 +170,23 @@ const ConsultationSearchPage: React.FC = () => {
         });
 
         if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`검색 실패: ${res.status} ${errorText}`);
+          // 실패 응답을 API 공통 규격에 맞춰 파싱 시도
+          try {
+            const payload = (await res.json()) as ConsultationSearchApiResponse;
+            if (payload && payload.success === false) {
+              showApiErrorToast(payload);
+              throw new Error(payload.error?.message || `검색 실패: ${res.status}`);
+            }
+          } catch (parseErr) {
+            // JSON이 아니거나 파싱 실패 시 본문 텍스트로 fallback
+            const errorText = await res.text();
+            throw new Error(`검색 실패: ${res.status} ${errorText}`);
+          }
         }
 
         const payload: ConsultationSearchApiResponse = await res.json();
         if (!payload.success) {
+          showApiErrorToast(payload);
           throw new Error(payload.error?.message ?? '상담 검색에 실패했습니다.');
         }
 
@@ -208,12 +236,14 @@ const ConsultationSearchPage: React.FC = () => {
         setStatus(mapped.length ? 'success' : 'empty');
       } catch (error) {
         console.error(error);
-        showToast(
-          error instanceof Error
-            ? error.message
-            : '검색 중 오류가 발생했습니다.',
-          'error'
-        );
+        if (!errorToastShown) {
+          showToast(
+            error instanceof Error
+              ? { message: error.message }
+              : { message: '검색 중 오류가 발생했습니다.' },
+            'error'
+          );
+        }
         setResults([]);
         setPagination({ currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: DEFAULT_TOP_K });
         setStatus('empty');
@@ -291,15 +321,6 @@ const ConsultationSearchPage: React.FC = () => {
           />
         )}
       </section>
-
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
 
       {selectedConsultation && (
         <ConsultationDetailModal

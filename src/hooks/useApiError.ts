@@ -75,7 +75,8 @@ export function useApiError(options: ErrorHandlerOptions = {}) {
       if (autoShow) {
         const customMessage = errorMessages[errorInfo.code];
         const displayMessage = customMessage || errorInfo.hint || errorInfo.message;
-        toast.error(displayMessage);
+        const toastContent = { message: displayMessage, code: errorInfo.code };
+        toast.error(toastContent);
       }
 
       return errorInfo;

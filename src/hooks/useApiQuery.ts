@@ -85,8 +85,9 @@ export function useApiQuery<_T>(
         if (autoShowError && error instanceof ApiResponseError) {
           const customMessage = errorMessages[error.code];
           const errorMessage = customMessage || getUserFriendlyErrorMessage(error);
+          const toastContent = { message: error.hint || errorMessage, code: error.code };
           setTimeout(() => {
-            toast.error(errorMessage);
+            toast.error(toastContent);
           }, 100);
 
           if (error.feedbacks && error.feedbacks.length > 0) {
