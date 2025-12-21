@@ -1,5 +1,6 @@
 // User Table Component
 import React from 'react';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import type { UserResponse } from '@/types/users';
 
 interface UserTableProps {
@@ -125,24 +126,26 @@ const UserTable: React.FC<UserTableProps> = ({
                     </span>
                   </td>
                   <td className="px-3 py-2 text-sm text-gray-900 border-t border-gray-200 text-center">
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center gap-1">
                       <button
                         onClick={() => onEdit(user.id)}
-                        className="px-2 py-1 text-xs font-semibold bg-white text-primary-500 border border-primary-500 rounded hover:bg-primary-50 transition"
+                        title="사용자 수정"
+                        className="w-8 h-8 flex items-center justify-center rounded text-blue-600 hover:bg-blue-50"
                       >
-                        수정
+                        <PencilIcon className="w-4 h-4" />
                       </button>
                       <button
                         type="button"
                         onClick={() => onDelete?.(user.id)}
                         disabled={deleteDisabled}
-                        className={`px-2 py-1 text-xs font-semibold rounded transition ${
+                        title="사용자 삭제"
+                        className={`w-8 h-8 flex items-center justify-center rounded ${
                           deleteDisabled
-                            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                            : 'bg-red-600 text-white hover:bg-red-700'
+                            ? 'text-gray-300 cursor-not-allowed'
+                            : 'text-red-600 hover:bg-red-50'
                         }`}
                       >
-                        삭제
+                        <TrashIcon className="w-4 h-4" />
                       </button>
                     </div>
                   </td>

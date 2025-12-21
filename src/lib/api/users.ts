@@ -29,3 +29,10 @@ export const createUser = (payload: UserCreatePayload) =>
  */
 export const updateUser = (userId: number, payload: UserUpdatePayload) =>
   api.put<ApiResponse<UserResponse>>(`/api/v1/users/${userId}`, payload);
+
+/**
+ * 사용자 삭제
+ * DELETE /api/v1/users/{user_id}
+ */
+export const deleteUser = (userId: number) =>
+  api.delete(`/api/v1/users/${userId}`);

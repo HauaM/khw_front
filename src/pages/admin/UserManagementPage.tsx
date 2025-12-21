@@ -3,13 +3,16 @@ import React, { useMemo, useRef, useState } from 'react';
 import { useUsers } from '@/hooks/useUsers';
 import { useToast } from '@/contexts/ToastContext';
 import { useApiQuery } from '@/hooks/useApiQuery';
+import { useApiMutation } from '@/hooks/useApiMutation';
 import { getDepartments } from '@/lib/api/departments';
+import { deleteUser } from '@/lib/api/users';
 import type { UserResponse } from '@/types/users';
 import type { TypeAheadOption } from '@/components/common/TypeAheadSelectBox';
 import UserSearchPanel from '@/components/admin/UserSearchPanel';
 import UserTable from '@/components/admin/UserTable';
 import UserRegistrationModal from '@/components/admin/UserRegistrationModal';
 import UserEditModal from '@/components/admin/UserEditModal';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 
 const UserManagementPage: React.FC = () => {
   const toast = useToast();
@@ -17,6 +20,7 @@ const UserManagementPage: React.FC = () => {
   // State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserResponse | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
 
   // Hooks
   const {
@@ -60,6 +64,15 @@ const UserManagementPage: React.FC = () => {
   const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
   const highlightedIdRef = useRef<string | null>(null);
 
+  // 삭제 Mutation
+  const deleteMutation = useApiMutation(deleteUser, {
+    successMessage: '사용자가 삭제되었습니다.',
+    autoShowFeedback: true,
+    onApiSuccess: async () => {
+      refetch();
+    },
+  });
+
   // 수정 버튼
   const handleEdit = (userId: number) => {
     const target = users.find((user) => user.id === userId) || null;
@@ -74,9 +87,20 @@ const UserManagementPage: React.FC = () => {
     setEditingUser(null);
   };
 
-  // 삭제 버튼 (API 미지원)
-  const handleDeleteClick = () => {
-    toast.info('삭제 API가 제공되지 않아 현재 비활성화되어 있습니다.');
+  // 삭제 버튼
+  const handleDeleteClick = (userId: number) => {
+    setDeletingUserId(userId);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deletingUserId !== null) {
+      deleteMutation.mutate(deletingUserId);
+      setDeletingUserId(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeletingUserId(null);
   };
 
   // 신규 등록 성공
@@ -118,9 +142,6 @@ const UserManagementPage: React.FC = () => {
                 <h2 className="text-base font-semibold text-gray-900">
                   조회 결과 <span className="text-primary-500">({total}건)</span>
                 </h2>
-                <p className="text-xs text-gray-500">
-                  삭제 API 미지원으로 삭제 기능은 비활성화됩니다.
-                </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -142,7 +163,6 @@ const UserManagementPage: React.FC = () => {
                 onDelete={handleDeleteClick}
                 rowRefs={rowRefs}
                 highlightedId={highlightedIdRef.current}
-                deleteDisabled
               />
             )}
           </div>
@@ -165,6 +185,18 @@ const UserManagementPage: React.FC = () => {
           onSuccess={handleEditSuccess}
           departmentOptions={formDepartmentOptions}
           isDepartmentLoading={departmentQuery.isLoading}
+        />
+
+        {/* 삭제 확인 다이얼로그 */}
+        <ConfirmDialog
+          isOpen={deletingUserId !== null}
+          title="사용자 삭제"
+          message="선택한 사용자를 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다."
+          confirmText="삭제"
+          cancelText="취소"
+          variant="danger"
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
         />
       </div>
     </div>
