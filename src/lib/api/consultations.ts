@@ -115,4 +115,52 @@ export const getConsultationDetail = async (consultationId: string) => {
   return createMockConsultationResponse(consultationId);
 };
 
+/**
+ * 관련 메뉴얼 조회 요청 payload
+ */
+export interface SimilarConsultationSearchPayload {
+  inquiry_text: string;
+  action_taken?: string;
+  business_type?: BusinessType | null;
+  error_code?: string | null;
+  top_k?: number;
+}
+
+/**
+ * 관련 메뉴얼 조회 결과 항목
+ */
+export interface SimilarConsultationResult {
+  rank: number;
+  score: number;
+  consultation_id: string;
+  inquiry_text: string;
+  action_taken: string;
+  business_type: BusinessType | null;
+  error_code: string | null;
+  created_at: string;
+  metadata_fields?: Record<string, string>;
+  manual_id?: string;
+  subject?: string;
+  keywords?: string[];
+  original_consultation_id?: string | null;
+}
+
+/**
+ * 관련 메뉴얼 조회 응답
+ */
+export interface SimilarConsultationResponse {
+  results: SimilarConsultationResult[];
+  total_count: number;
+}
+
+/**
+ * 관련 메뉴얼 Top-K 조회 API
+ * TODO: API Connect - POST /api/v1/consultations/similar
+ *
+ * @param payload - 검색 조건 (inquiry_text 필수, action_taken/business_type/error_code 옵션)
+ * @returns ApiResponse<SimilarConsultationResponse>
+ */
+export const searchSimilarConsultations = (payload: SimilarConsultationSearchPayload) =>
+  api.post<ApiResponse<SimilarConsultationResponse>>('/api/v1/consultations/similar', payload);
+
 export type { ConsultationDetail } from '@/types/consultations';

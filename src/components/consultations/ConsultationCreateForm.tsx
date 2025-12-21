@@ -42,9 +42,21 @@ const initialValues: ConsultationFormValues = {
   metadata_fields: {},
 };
 
-const ConsultationCreateForm: React.FC = () => {
+interface ConsultationCreateFormProps {
+  formData?: ConsultationFormValues;
+  setFormData?: React.Dispatch<React.SetStateAction<ConsultationFormValues>>;
+}
+
+const ConsultationCreateForm: React.FC<ConsultationCreateFormProps> = ({
+  formData: externalFormData,
+  setFormData: externalSetFormData,
+}) => {
   const navigate = useNavigate();
-  const [values, setValues] = useState<ConsultationFormValues>(initialValues);
+  const [internalValues, setInternalValues] = useState<ConsultationFormValues>(initialValues);
+
+  // formData props가 있으면 외부 상태 사용, 없으면 내부 상태 사용
+  const values = externalFormData || internalValues;
+  const setValues = externalSetFormData || setInternalValues;
   const [errors, setErrors] = useState<Partial<Record<keyof ConsultationFormValues, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -108,7 +120,11 @@ const ConsultationCreateForm: React.FC = () => {
   };
 
   const resetForm = () => {
-    setValues(initialValues);
+    if (externalSetFormData) {
+      externalSetFormData(initialValues);
+    } else {
+      setInternalValues(initialValues);
+    }
     setErrors({});
     setIsSubmitting(false);
     setSavedConsultationId(null);

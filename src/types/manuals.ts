@@ -91,29 +91,40 @@ export interface ManualSearchParams {
 }
 
 /**
- * 메뉴얼 검색 결과 항목
- * OpenAPI: ManualSearchResult schema
- * {
- *   "manual": ManualEntryResponse,
- *   "similarity_score": number
- * }
+ * 메뉴얼 검색 API 응답 (raw)
+ * 실제 응답: ApiResponse<{ manual, similarity_score }[]>
+ */
+export interface ManualSearchResultApi {
+  manual: ManualSearchManualApi;
+  similarity_score: number; // 0.0 ~ 1.0
+}
+
+export interface ManualSearchManualApi {
+  id: string; // uuid
+  keywords: string[];
+  topic: string;
+  background: string;
+  guideline: string;
+  business_type?: string | null;
+  business_type_name?: string | null;
+  error_code?: string | null;
+  source_consultation_id: string; // uuid
+  version_id?: string | null; // uuid
+  status: ManualDraftStatus;
+  created_at: string; // ISO datetime
+  updated_at: string; // ISO datetime
+}
+
+/**
+ * 메뉴얼 검색 결과 (프론트 정규화)
  */
 export interface ManualSearchResult {
-  manual: {
-    id: string; // uuid
-    keywords: string[];
-    topic: string;
-    background: string;
-    guideline: string;
-    business_type_name?: string | null;
-    error_code?: string | null;
-    source_consultation_id: string; // uuid
-    version_id?: string | null; // uuid
-    status: ManualDraftStatus;
-    created_at: string; // ISO datetime
-    updated_at: string; // ISO datetime
-  };
+  manual: ManualSearchManual;
   similarity_score: number; // 0.0 ~ 1.0
+}
+
+export interface ManualSearchManual extends ManualSearchManualApi {
+  business_type_name?: string | null;
 }
 
 /**

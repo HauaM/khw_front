@@ -1509,7 +1509,7 @@
           "manuals"
         ],
         "summary": "Search manuals by similarity",
-        "description": "메뉴얼 검색 (벡터 유사도 기반)\n\nFR-8: 메뉴얼 검색 기능\n\n**쿼리 파라미터:**\n- query: 검색어 (필수, 예: \"로그인 오류\")\n- top_k: 상위 결과 개수 (기본값: 10)\n- status: 상태 필터 (APPROVED, DRAFT, DEPRECATED, 선택사항)\n- business_type: 업무 구분 필터 (선택사항)\n- error_code: 에러 코드 필터 (선택사항)\n\n**응답 (200 OK):**\n```json\n{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"uuid-1\",\n      \"business_type\": \"인터넷뱅킹\",\n      \"error_code\": \"E001\",\n      \"topic\": \"로그인 실패\",\n      \"keywords\": [\"로그인\", \"인증\", \"실패\"],\n      \"background\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\",\n      \"guidelines\": [{\"title\": \"비밀번호 초기화\", \"description\": \"...\"}],\n      \"status\": \"APPROVED\",\n      \"version\": \"v1.6\",\n      \"similarity_score\": 0.92\n    }\n  ],\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**동작:**\n1. 쿼리를 벡터화하여 VectorStore에서 semantic search\n2. 상위 top_k개 결과 반환\n3. 메타데이터 필터 (status, business_type, error_code) 적용\n4. 유사도 임계값(threshold) 이상의 결과만 필터링\n5. 유사도 점수(0-1) 포함하여 반환\n\n**프론트엔드 필터:**\n- status=APPROVED: 운영 중인 메뉴얼만\n- status=DRAFT: 검토 중인 초안만\n- 미지정: 전체 조회\n\n**예시:**\n```\nGET /manuals/search?query=로그인&top_k=5&status=APPROVED\n```",
+        "description": "메뉴얼 검색 (벡터 유사도 기반)\n\nFR-8: 메뉴얼 검색 기능\n\n**쿼리 파라미터:**\n- query: 검색어 (필수, 예: \"로그인 오류\")\n- top_k: 상위 결과 개수 (기본값: 10)\n- status: 상태 필터 (APPROVED, DRAFT, DEPRECATED, 선택사항)\n- business_type: 업무 구분 필터 (선택사항)\n- error_code: 에러 코드 필터 (선택사항)\n\n**응답 (200 OK):**\n```json\n    {\n\"success\": true,\n\"data\": [\n    {\n    \"manual\": {\n        \"created_at\": \"2025-12-19T00:54:56.876912Z\",\n        \"updated_at\": \"2025-12-19T07:17:46.249852Z\",\n        \"id\": \"de9d2d35-c4ea-4a7d-b66c-55e79471cb83\",\n        \"keywords\": [\n        \"카드\",\n        \"한도 초과\",\n        \"거래\"\n        ],\n        \"topic\": \"카드 결제 승인 시 한도 초과 메시지 발생\",\n        \"background\": \"고객 카드 한도 확인 후 일시적으로 한도 상향 안내 및 승인 재요청\",\n        \"guideline\": \"승인 재요청 후 정상 처리\",\n        \"business_type\": \"TEST\",\n        \"error_code\": \"TEST\",\n        \"source_consultation_id\": \"6efdcd37-961b-48cf-8c0f-babf4dfe93bc\",\n        \"version_id\": \"1f2493e4-e635-48de-b5e0-092189175a65\",\n        \"status\": \"APPROVED\",\n        \"business_type_name\": \"테스트\"\n    },\n    \"similarity_score\": 0.5590785880416913\n    },\n    {\n    \"manual\": {\n        \"created_at\": \"2025-12-19T08:23:46.425809Z\",\n        \"updated_at\": \"2025-12-21T10:47:14.657491Z\",\n        \"id\": \"e8ce4568-caa1-4d20-807b-9ff079d268c7\",\n        \"keywords\": [\n        \"카드\",\n        \"비밀번호\",\n        \"오류\"\n        ],\n        \"topic\": \"카드 비밀번호 오류로 결제 승인 실패\",\n        \"background\": \"비밀번호 3회 오류로 잠김 상태 확인, 본인 인증 후 비밀번호 초기화 진행, 결제 정상 처리\",\n        \"guideline\": \"비밀번호 오류 시 잠김 상태 확인 후 본인 인증 및 초기화 진행\",\n        \"business_type\": \"TEST\",\n        \"error_code\": \"TEST\",\n        \"source_consultation_id\": \"6d36e5e2-e61e-4ced-a0ac-f56aff3d78e7\",\n        \"version_id\": \"9fd68c89-7edd-4221-b7ee-dd63e2f2a5d0\",\n        \"status\": \"APPROVED\",\n        \"business_type_name\": \"테스트\"\n    },\n    \"similarity_score\": 0.5474678795543835\n    }\n],\n\"error\": null,\n\"meta\": {\n    \"requestId\": \"6d26ba6c-544d-4973-b9b4-e87ca81b0bd9\",\n    \"timestamp\": \"2025-12-21T10:47:32.188446Z\"\n},\n\"feedback\": []\n}\n```\n\n**동작:**\n1. 쿼리를 벡터화하여 VectorStore에서 semantic search\n2. 상위 top_k개 결과 반환\n3. 메타데이터 필터 (status, business_type, error_code) 적용\n4. 유사도 임계값(threshold) 이상의 결과만 필터링\n5. 유사도 점수(0-1) 포함하여 반환\n\n**프론트엔드 필터:**\n- status=APPROVED: 운영 중인 메뉴얼만\n- status=DRAFT: 검토 중인 초안만\n- 미지정: 전체 조회\n\n**예시:**\n```\nGET /manuals/search?query=로그인&top_k=5&status=APPROVED\n```",
         "operationId": "search_manuals_api_v1_manuals_search_get",
         "security": [
           {
@@ -1606,19 +1606,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ManualSearchResult"
-                  },
-                  "title": "Response Search Manuals Api V1 Manuals Search Get"
+                  "$ref": "#/components/schemas/ResponseEnvelope_list_ManualSearchResult__"
                 },
                 "example": {
                   "success": true,
                   "data": [
                     {
-                      "id": "uuid-1",
-                      "topic": "로그인 실패",
-                      "similarity_score": 0.92
+                      "manual": {
+                        "id": "de9d2d35-c4ea-4a7d-b66c-55e79471cb83",
+                        "created_at": "2025-12-19T00:54:56.876912Z",
+                        "updated_at": "2025-12-19T07:17:46.249852Z",
+                        "keywords": [
+                          "카드",
+                          "한도 초과",
+                          "거래"
+                        ],
+                        "topic": "카드 결제 승인 시 한도 초과 메시지 발생",
+                        "background": "고객 카드 한도 확인 후 일시적으로 한도 상향 안내 및 승인 재요청",
+                        "guideline": "승인 재요청 후 정상 처리",
+                        "business_type": "TEST",
+                        "error_code": "TEST",
+                        "source_consultation_id": "6efdcd37-961b-48cf-8c0f-babf4dfe93bc",
+                        "version_id": "1f2493e4-e635-48de-b5e0-092189175a65",
+                        "status": "APPROVED",
+                        "business_type_name": "테스트"
+                      },
+                      "similarity_score": 0.56
                     }
                   ],
                   "meta": {
@@ -6123,7 +6136,10 @@
           },
           "similarity_score": {
             "type": "number",
-            "title": "Similarity Score"
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Similarity Score",
+            "description": "유사도 점수 (0~1)"
           }
         },
         "type": "object",
@@ -6294,6 +6310,137 @@
         ],
         "title": "ManualVersionResponse",
         "description": "Manual version response for version list (v2.1 개선)\n\n기존 /{manual_id}/versions와 새로운 /versions 쿼리 엔드포인트에서\n모두 사용 가능하도록 구조화\n\nRFP Reference: GET /api/v1/manuals/{manual_id}/versions, GET /api/v1/manuals/versions"
+      },
+      "ResponseEnvelope_list_ManualSearchResult__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ManualSearchResult"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResponseError"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          },
+          "feedback": {
+            "items": {
+              "$ref": "#/components/schemas/ResponseFeedback"
+            },
+            "type": "array",
+            "title": "Feedback"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "meta"
+        ],
+        "title": "ResponseEnvelope[list[ManualSearchResult]]"
+      },
+      "ResponseError": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ResponseError"
+      },
+      "ResponseFeedback": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "level",
+          "message"
+        ],
+        "title": "ResponseFeedback"
+      },
+      "ResponseMeta": {
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "title": "Requestid"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requestId",
+          "timestamp"
+        ],
+        "title": "ResponseMeta"
       },
       "TaskStatus": {
         "type": "string",

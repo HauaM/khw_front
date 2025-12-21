@@ -1,10 +1,11 @@
-import { ApiResponse } from '@/types/api';
+import { ApiErrorResponse, ApiResponse, isApiSuccess } from '@/types/api';
 import { api } from './axiosClient';
 import {
   ManualDraft,
   ManualDraftUpdateRequest,
   ManualDraftResponse,
   ManualSearchParams,
+  ManualSearchResultApi,
   ManualSearchResult,
   ManualDetail,
   ManualVersionInfo,
@@ -14,6 +15,7 @@ import {
   ApprovedManualCardItem,
 } from '@/types/manuals';
 import { BackendManualReviewTask } from '@/types/reviews';
+import { ApiResponseError } from '@/lib/api/responseHandler';
 
 // Re-export types for convenience
 export type { ManualDraft, ManualDraftResponse, ManualDetail, ManualDraftStatus };
@@ -130,20 +132,21 @@ export const fetchManualReviewTasksByManualId = (manualId: string) =>
  * 요청 예시:
  * GET /api/v1/manuals/search?query=인터넷뱅킹&business_type=인터넷뱅킹&top_k=10&similarity_threshold=0.7
  *
- * 응답 형식:
- * [
- *   {
- *     "manual": {
- *       "id": "uuid",
- *       "keywords": ["string"],
- *       "topic": "string",
- *       ...
- *     },
- *     "similarity_score": 0.95
- *   }
- * ]
+ * 응답 형식 (ApiResponse 래핑):
+ * {
+ *   "success": true,
+ *   "data": [
+ *     {
+ *       "manual": { ... },
+ *       "similarity_score": 0.95
+ *     }
+ *   ],
+ *   "error": null,
+ *   "meta": { ... },
+ *   "feedback": []
+ * }
  */
-export const searchManuals = (params: ManualSearchParams) => {
+export const searchManuals = async (params: ManualSearchParams): Promise<ManualSearchResult[]> => {
   // Query string으로 변환 (null/undefined 값은 제외)
   const queryParams = new URLSearchParams();
 
@@ -170,7 +173,24 @@ export const searchManuals = (params: ManualSearchParams) => {
   }
 
   const queryString = queryParams.toString();
-  return api.get<ApiResponse<ManualSearchResult[]>>(`/api/v1/manuals/search${queryString ? `?${queryString}` : ''}`);
+  const response = await api.get<ApiResponse<ManualSearchResultApi[]>>(
+    `/api/v1/manuals/search${queryString ? `?${queryString}` : ''}`
+  );
+  if (!isApiSuccess(response)) {
+    throw new ApiResponseError(response as ApiErrorResponse);
+  }
+
+  const rawResults = response.data || [];
+
+  return rawResults.map((item) => ({
+    similarity_score: item.similarity_score,
+    manual: {
+      ...item.manual,
+      business_type_name: item.manual.business_type_name ?? item.manual.business_type ?? null,
+      error_code: item.manual.error_code ?? null,
+      version_id: item.manual.version_id ?? null,
+    },
+  }));
 };
 
 /**
