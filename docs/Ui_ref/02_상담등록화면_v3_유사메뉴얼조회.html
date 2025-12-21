@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="ko" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상담 등록 - 광주은행</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    /* Tailwind Config 커스텀 토큰 */
+    :root {
+      --color-primary-50: #E5F1FF;
+      --color-primary-500: #005BAC;
+      --color-primary-600: #004A8D;
+      --color-brand-light: #F0F7FF;
+      --color-brand-focus: #005BAC;
+      --color-success: #10B981;
+      --color-success-light: #D1FAE5;
+      --color-error: #EF4444;
+      --color-error-dark: #DC2626;
+      --color-error-light: #FEE2E2;
+      --color-info: #3B82F6;
+      --color-info-light: #DBEAFE;
+      --color-warning: #F59E0B;
+      --color-warning-light: #FEF3C7;
+    }
+
+    .diff-highlight {
+      background-color: #F0F7FF;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#E5F1FF',
+              500: '#005BAC',
+              600: '#004A8D'
+            },
+            brand: {
+              light: '#F0F7FF',
+              focus: '#005BAC'
+            },
+            success: {
+              DEFAULT: '#10B981',
+              light: '#D1FAE5'
+            },
+            error: {
+              DEFAULT: '#EF4444',
+              dark: '#DC2626',
+              light: '#FEE2E2'
+            },
+            info: {
+              DEFAULT: '#3B82F6',
+              light: '#DBEAFE'
+            },
+            warning: {
+              DEFAULT: '#F59E0B',
+              light: '#FEF3C7'
+            },
+            text: {
+              primary: '#212121',
+              secondary: '#757575'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-gray-50 font-sans">
+  <div id="root" class="h-full"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useRef } = React;
+
+    // ============================================
+    // 유틸리티 함수
+    // ============================================
+    const cn = (...classes) => classes.filter(Boolean).join(' ');
+
+    // 디바운스 훅
+    const useDebounce = (value, delay) => {
+      const [debouncedValue, setDebouncedValue] = useState(value);
+
+      useEffect(() => {
+        const handler = setTimeout(() => {
+          setDebouncedValue(value);
+        }, delay);
+
+        return () => clearTimeout(handler);
+      }, [value, delay]);
+
+      return debouncedValue;
+    };
+
+    // 간단한 텍스트 Diff (단어 단위)
+    const simpleDiff = (text1 = '', text2 = '') => {
+      const words1 = text1.split(/\s+/);
+      const words2 = text2.split(/\s+/);
+      
+      const maxLen = Math.max(words1.length, words2.length);
+      const result = [];
+      
+      for (let i = 0; i < maxLen; i++) {
+        const word1 = words1[i] || '';
+        const word2 = words2[i] || '';
+        
+        if (word1 === word2) {
+          result.push({ type: 'equal', text: word1 });
+        } else {
+          if (word1) result.push({ type: 'left', text: word1 });
+          if (word2) result.push({ type: 'right', text: word2 });
+        }
+      }
+      
+      return result;
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Button
+    // ============================================
+    const Button = ({ variant = 'primary', size = 'md', children, className, ...props }) => {
+      const baseClass = "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed";
+      
+      const variantClass = {
+        primary: "bg-primary-500 text-white hover:bg-primary-600",
+        secondary: "bg-white text-primary-500 border border-primary-500 hover:bg-primary-50",
+        danger: "bg-error text-white hover:bg-error-dark",
+        ghost: "bg-transparent text-gray-600 hover:bg-gray-100"
+      }[variant];
+
+      const sizeClass = {
+        sm: "px-3 py-1.5 text-xs",
+        md: "px-4 py-2 text-sm",
+        lg: "px-6 py-3 text-base"
+      }[size];
+
+      return (
+        <button className={cn(baseClass, variantClass, sizeClass, className)} {...props}>
+          {children}
+        </button>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Input
+    // ============================================
+    const Input = ({ label, error, required, ...props }) => {
+      return (
+        <div className="space-y-1">
+          {label && (
+            <label className="text-xs font-semibold text-gray-700">
+              {label} {required && <span className="text-error">*</span>}
+            </label>
+          )}
+          <input
+            className={cn(
+              "h-9 w-full rounded-md border bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400",
+              "focus:outline-none focus:ring-2 focus:ring-brand-focus/20 focus:border-brand-focus",
+              error ? "border-error focus:ring-error/20 focus:border-error" : "border-gray-300"
+            )}
+            {...props}
+          />
+          {error && (
+            <p className="text-xs text-error mt-1">{error}</p>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Textarea
+    // ============================================
+    const Textarea = ({ label, error, required, rows = 4, ...props }) => {
+      return (
+        <div className="space-y-1">
+          {label && (
+            <label className="text-xs font-semibold text-gray-700">
+              {label} {required && <span className="text-error">*</span>}
+            </label>
+          )}
+          <textarea
+            rows={rows}
+            className={cn(
+              "w-full rounded-md border bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400",
+              "focus:outline-none focus:ring-2 focus:ring-brand-focus/20 focus:border-brand-focus",
+              error ? "border-error focus:ring-error/20 focus:border-error" : "border-gray-300"
+            )}
+            {...props}
+          />
+          {error && (
+            <p className="text-xs text-error mt-1">{error}</p>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Select
+    // ============================================
+    const Select = ({ label, error, required, options = [], ...props }) => {
+      return (
+        <div className="space-y-1">
+          {label && (
+            <label className="text-xs font-semibold text-gray-700">
+              {label} {required && <span className="text-error">*</span>}
+            </label>
+          )}
+          <select
+            className={cn(
+              "h-9 w-full rounded-md border bg-white px-3 text-sm text-gray-900",
+              "focus:outline-none focus:ring-2 focus:ring-brand-focus/20 focus:border-brand-focus",
+              error ? "border-error focus:ring-error/20 focus:border-error" : "border-gray-300"
+            )}
+            {...props}
+          >
+            {options.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          {error && (
+            <p className="text-xs text-error mt-1">{error}</p>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Badge
+    // ============================================
+    const Badge = ({ children, variant = 'neutral' }) => {
+      const variantClass = {
+        neutral: "bg-gray-100 text-gray-600",
+        success: "bg-success-light text-success",
+        error: "bg-error-light text-error",
+        info: "bg-info-light text-info",
+        warning: "bg-warning-light text-warning"
+      }[variant];
+
+      return (
+        <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold", variantClass)}>
+          {children}
+        </span>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Card
+    // ============================================
+    const Card = ({ title, actions, children, className }) => {
+      return (
+        <div className={cn("bg-white border border-gray-200 rounded-lg shadow-sm", className)}>
+          {title && (
+            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+              <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+              {actions && <div className="flex items-center gap-2">{actions}</div>}
+            </div>
+          )}
+          <div className="p-4">
+            {children}
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Modal
+    // ============================================
+    const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
+      if (!isOpen) return null;
+
+      const sizeClass = {
+        sm: 'max-w-md',
+        md: 'max-w-lg',
+        lg: 'max-w-2xl',
+        xl: 'max-w-4xl'
+      }[size];
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className={cn("bg-white rounded-lg shadow-lg w-full mx-4", sizeClass)}>
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <div className="px-6 py-4">
+              {children}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Toast
+    // ============================================
+    const Toast = ({ message, variant = 'error', onClose }) => {
+      useEffect(() => {
+        const timer = setTimeout(onClose, 3000);
+        return () => clearTimeout(timer);
+      }, [onClose]);
+
+      const variantClass = {
+        success: "bg-success-light text-success border-success",
+        error: "bg-error-light text-error border-error",
+        info: "bg-info-light text-info border-info"
+      }[variant];
+
+      return (
+        <div className={cn("fixed top-4 right-4 z-50 rounded-lg border-l-4 px-4 py-3 shadow-lg", variantClass)}>
+          <p className="text-sm font-semibold">{message}</p>
+        </div>
+      );
+    };
+
+    // ============================================
+    // 컴포넌트: TextCompareView
+    // ============================================
+    const TextCompareView = ({ leftText, rightText, leftLabel = "기존 데이터", rightLabel = "현재 입력" }) => {
+      return (
+        <div className="grid grid-cols-2 gap-4">
+          {/* 왼쪽: 기존 데이터 */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-gray-700">{leftLabel}</h4>
+            <div className="bg-gray-50 border border-gray-200 rounded-md p-3 text-sm text-gray-900 min-h-24">
+              {leftText || <span className="text-gray-400">데이터 ���음</span>}
+            </div>
+          </div>
+
+          {/* 오른쪽: 현재 입력 */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-gray-700">{rightLabel}</h4>
+            <div className="bg-brand-light border border-primary-500 rounded-md p-3 text-sm text-gray-900 min-h-24">
+              {rightText || <span className="text-gray-400">입력 대기 중</span>}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // 컴포넌트: SimilarResultDetail (Top-1 상세)
+    // ============================================
+    const SimilarResultDetail = ({ result, currentData }) => {
+      if (!result) {
+        return (
+          <div className="text-center py-8 text-gray-400 text-sm">
+            조회된 유사 메뉴얼이 없습니다
+          </div>
+        );
+      }
+
+      return (
+        <div className="space-y-4">
+          {/* 메뉴얼 기본 정보 */}
+          <div className="bg-brand-light border border-primary-500 rounded-md p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Badge variant="info">Top-{result.rank}</Badge>
+                <span className="text-xs text-gray-600">유사도: {result.score}%</span>
+              </div>
+              <span className="text-xs text-gray-600">{result.manual_id}</span>
+            </div>
+            <h4 className="text-sm font-bold text-gray-900">{result.subject}</h4>
+            
+            {/* 원본 상담 ID */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600">원본 상담 ID:</span>
+              <span className="text-xs font-semibold text-gray-900">{result.original_consultation_id || '-'}</span>
+              {result.original_consultation_id && (
+                <button
+                  onClick={() => {
+                    // TODO: 원본 상담 상세로 이동
+                    console.log('원본 상담 상세 이동:', result.original_consultation_id);
+                  }}
+                  className="inline-flex items-center justify-center text-primary-500 hover:text-primary-600 transition"
+                  title="원본 상담 보기"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            
+            {/* 키워드 */}
+            <div className="flex items-center gap-1 flex-wrap">
+              {result.keywords && result.keywords.map((keyword, idx) => (
+                <span key={idx} className="bg-white border border-gray-200 rounded px-2 py-0.5 text-xs text-gray-700">
+                  {keyword}
+                </span>
+              ))}
+            </div>
+
+            {/* 업무구분 / 에러코드 */}
+            <div className="flex items-center gap-3 text-xs text-gray-600 border-t border-gray-200 pt-2">
+              <span>업무구분: <span className="font-semibold">{result.business_type || '-'}</span></span>
+              <span>에러코드: <span className="font-semibold">{result.error_code || '-'}</span></span>
+            </div>
+          </div>
+
+          {/* 배경 */}
+          <div className="space-y-1">
+            <h5 className="text-xs font-semibold text-gray-700">배경</h5>
+            <div className="bg-gray-50 border border-gray-200 rounded-md p-3 text-sm text-gray-900">
+              {result.background || '-'}
+            </div>
+          </div>
+
+          {/* 조치내역 */}
+          <div className="space-y-1">
+            <h5 className="text-xs font-semibold text-gray-700">조치내역</h5>
+            <div className="bg-gray-50 border border-gray-200 rounded-md p-3 text-sm text-gray-900 whitespace-pre-line">
+              {result.action_taken || '-'}
+            </div>
+          </div>
+
+
+        </div>
+      );
+    };
+
+    // ============================================
+    // 컴포넌트: SimilarResultList (Top-2, Top-3)
+    // ============================================
+    const SimilarResultList = ({ results, onSelect, selectedIndex }) => {
+      if (!results || results.length === 0) return null;
+
+      return (
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold text-gray-900">다른 유사 메뉴얼</h4>
+          {results.map((result, index) => (
+            <div
+              key={index}
+              onClick={() => onSelect(result)}
+              className={cn(
+                "border rounded-md p-3 cursor-pointer transition",
+                selectedIndex === result.rank - 1
+                  ? "border-primary-500 bg-brand-light"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+              )}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <Badge variant="neutral">Top-{result.rank}</Badge>
+                <span className="text-xs text-gray-600">유사도: {result.score}%</span>
+              </div>
+              <p className="text-sm font-semibold text-gray-900 mb-1">{result.subject}</p>
+              <div className="flex items-center gap-1 flex-wrap mb-2">
+                {result.keywords && result.keywords.slice(0, 3).map((keyword, idx) => (
+                  <span key={idx} className="bg-gray-100 rounded px-1.5 py-0.5 text-xs text-gray-600">
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+              <div className="flex items-center gap-3 text-xs text-gray-600">
+                <span>업무: {result.business_type || '-'}</span>
+                <span>에러: {result.error_code || '-'}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    // ============================================
+    // 컴포넌트: SimilarComparePanel (오른쪽 패널)
+    // ============================================
+    const SimilarComparePanel = ({ currentData, onSearch }) => {
+      const [results, setResults] = useState([]);
+      const [selectedIndex, setSelectedIndex] = useState(0);
+      const [status, setStatus] = useState('idle'); // idle, loading, success, error, insufficient
+      const [autoSearchEnabled, setAutoSearchEnabled] = useState(true);
+
+      // 디바운스된 inquiry_text
+      const debouncedInquiry = useDebounce(currentData.inquiry_text, 500);
+
+      // 자동 조회 (inquiry_text 20자 이상 + 디바운스)
+      useEffect(() => {
+        if (!autoSearchEnabled) return;
+        
+        if (debouncedInquiry && debouncedInquiry.length >= 20) {
+          handleSearch();
+        } else if (debouncedInquiry && debouncedInquiry.length < 20) {
+          setStatus('insufficient');
+          setResults([]);
+        }
+      }, [debouncedInquiry, autoSearchEnabled]);
+
+      const handleSearch = async () => {
+        if (!currentData.inquiry_text || currentData.inquiry_text.length < 20) {
+          setStatus('insufficient');
+          return;
+        }
+
+        setStatus('loading');
+
+        // TODO: API Connect - POST /api/v1/consultations/similar (topK=3)
+        try {
+          // const response = await fetch('/api/v1/consultations/similar', {
+          //   method: 'POST',
+          //   headers: { 'Content-Type': 'application/json' },
+          //   body: JSON.stringify({
+          //     inquiry_text: currentData.inquiry_text,
+          //     action_taken: currentData.action_taken,
+          //     business_type: currentData.business_type,
+          //     error_code: currentData.error_code,
+          //     top_k: 3
+          //   })
+          // });
+          // const data = await response.json();
+          // setResults(data.results);
+
+          // 목업 데이터
+          setTimeout(() => {
+            const mockResults = [
+              {
+                rank: 1,
+                score: 92,
+                manual_id: 'MAN-2024-001',
+                subject: '인터넷뱅킹 로그인 오류 (비밀번호 잠김)',
+                original_consultation_id: 'CONS-2024-0512',
+                business_type: '예금',
+                error_code: 'E001',
+                keywords: ['로그인', '비밀번호', '잠김', '초기화'],
+                background: '고객이 비밀번호를 5회 이상 잘못 입력하여 계정이 자동으로 잠긴 상태입니다. 보안 정책상 5회 오류 시 자동 잠금이 적용됩니다.',
+                action_taken: '1. 고객 신원 확인 (주민등록번호 뒷자리, 계좌번호)\n2. 비밀번호 초기화 처리\n3. 임시 비밀번호 SMS 발송\n4. 재로그인 안내 완료'
+              },
+              {
+                rank: 2,
+                score: 85,
+                manual_id: 'MAN-2024-002',
+                subject: '모바일 앱 로그인 장애',
+                original_consultation_id: 'CONS-2024-0498',
+                business_type: '대출',
+                error_code: 'E002',
+                keywords: ['모바일', '앱', '오류', '캐시'],
+                background: '모바일 앱 버전이 오래되었거나 캐시 데이터가 손상되어 로그인 처리가 실패하는 경우입니다.',
+                action_taken: '1. 앱 버전 확인 (최신 버전 2.1.5)\n2. 앱 캐시 삭제 안내\n3. 앱 재설치 안내\n4. 재로그인 시도 확인'
+              },
+              {
+                rank: 3,
+                score: 78,
+                manual_id: 'MAN-2024-003',
+                subject: '인터넷뱅킹 접속 불가 (시스템 점검)',
+                original_consultation_id: 'CONS-2024-0476',
+                business_type: '외환',
+                error_code: 'E003',
+                keywords: ['접속불가', '시스템점검', '서버'],
+                background: '정기 시스템 점검 중이거나 긴급 서버 점검으로 인해 일시적으로 서비스 접속이 불가능한 상황입니다.',
+                action_taken: '1. 현재 시스템 점검 여부 확인\n2. 점검 종료 예정 시간 안내 (30분 후)\n3. 점검 완료 후 재접속 안내'
+              }
+            ];
+            setResults(mockResults);
+            setStatus('success');
+            setSelectedIndex(0);
+          }, 800);
+        } catch (error) {
+          console.error('유사 메뉴얼 조회 실패:', error);
+          setStatus('error');
+          setResults([]);
+        }
+      };
+
+      const getStatusBadge = () => {
+        switch (status) {
+          case 'loading':
+            return <Badge variant="info">조회 중...</Badge>;
+          case 'success':
+            return <Badge variant="success">Top-3 발견</Badge>;
+          case 'error':
+            return <Badge variant="error">조회 실패</Badge>;
+          case 'insufficient':
+            return <Badge variant="warning">입력값 부족 (문의내용 5자 이상 필요)</Badge>;
+          default:
+            return <Badge variant="neutral">대기 중</Badge>;
+        }
+      };
+
+      return (
+        <Card
+          title="유사 메뉴얼 비교"
+          actions={
+            <div className="flex items-center gap-2">
+              {getStatusBadge()}
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleSearch}
+                disabled={status === 'loading'}
+              >
+                수동 조회
+              </Button>
+            </div>
+          }
+          className="h-full"
+        >
+          <div className="space-y-4">
+            {/* 자동 조회 토글 */}
+            <div className="flex items-center gap-2 text-xs text-gray-600">
+              <input
+                type="checkbox"
+                checked={autoSearchEnabled}
+                onChange={(e) => setAutoSearchEnabled(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <label>자동 조회 활��화 (5자 이상 입력 시)</label>
+            </div>
+
+            {/* 상태별 표�� */}
+            {status === 'insufficient' && (
+              <div className="bg-warning-light border border-warning rounded-md p-3 text-sm text-gray-900">
+                <p className="font-semibold mb-1">조회 조건 부족</p>
+                <p className="text-xs">문의내용을 5자 이상 입력해주세요.</p>
+              </div>
+            )}
+
+            {status === 'loading' && (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+                <p className="text-sm text-gray-600 mt-2">유사 메뉴얼 조회 중...</p>
+              </div>
+            )}
+
+            {status === 'error' && (
+              <div className="bg-error-light border border-error rounded-md p-3 text-sm text-gray-900">
+                <p className="font-semibold mb-1">조회 실패</p>
+                <p className="text-xs">잠시 후 다시 시도해주세요.</p>
+              </div>
+            )}
+
+            {status === 'success' && results.length === 0 && (
+              <div className="bg-gray-50 border border-gray-200 rounded-md p-4 text-center text-sm text-gray-600">
+                유사한 메뉴얼이 없습니다.
+              </div>
+            )}
+
+            {status === 'success' && results.length > 0 && (
+              <>
+                {/* Top-1 상세 */}
+                <SimilarResultDetail
+                  result={results[selectedIndex]}
+                  currentData={currentData}
+                />
+
+                {/* Top-2, Top-3 리스트 */}
+                {results.length > 1 && (
+                  <div className="border-t border-gray-200 pt-4">
+                    <SimilarResultList
+                      results={results.filter((_, idx) => idx !== selectedIndex)}
+                      onSelect={(result) => setSelectedIndex(result.rank - 1)}
+                      selectedIndex={selectedIndex}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </Card>
+      );
+    };
+
+    // ============================================
+    // 컴포��트: ConsultationCreateForm (왼쪽 패널)
+    // ============================================
+    const ConsultationCreateForm = ({ formData, setFormData, onSave }) => {
+      const [errors, setErrors] = useState({});
+
+      const businessTypeOptions = [
+        { value: '', label: '선택하세요' },
+        { value: '예금', label: '예금' },
+        { value: '대출', label: '대출' },
+        { value: '외환', label: '외환' },
+        { value: '카드', label: '카드' }
+      ];
+
+      const handleChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        if (errors[field]) {
+          setErrors(prev => ({ ...prev, [field]: '' }));
+        }
+      };
+
+      const handleMetadataAdd = () => {
+        setFormData(prev => ({
+          ...prev,
+          metadata_fields: [...prev.metadata_fields, { key: '', value: '' }]
+        }));
+      };
+
+      const handleMetadataRemove = (index) => {
+        setFormData(prev => ({
+          ...prev,
+          metadata_fields: prev.metadata_fields.filter((_, i) => i !== index)
+        }));
+      };
+
+      const handleMetadataChange = (index, field, value) => {
+        setFormData(prev => ({
+          ...prev,
+          metadata_fields: prev.metadata_fields.map((item, i) =>
+            i === index ? { ...item, [field]: value } : item
+          )
+        }));
+      };
+
+      const validate = () => {
+        const newErrors = {};
+
+        if (!formData.branch_code.trim()) newErrors.branch_code = '요청영업점을 입력하세요';
+        if (!formData.employee_id.trim()) newErrors.employee_id = '요청직원을 입력하세요';
+        if (!formData.screen_id.trim()) newErrors.screen_id = '화면번호를 입력하세요';
+        if (!formData.transaction_name.trim()) newErrors.transaction_name = '거래명을 입력하세요';
+        if (!formData.business_type) newErrors.business_type = '업무구분을 선택하세요';
+        if (!formData.inquiry_text.trim()) newErrors.inquiry_text = '문의내용을 입력하세요';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (validate()) {
+          onSave();
+        }
+      };
+
+      return (
+        <Card title="신규 상담 등록">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* 기본 정보 */}
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="요청영업점"
+                required
+                value={formData.branch_code}
+                onChange={(e) => handleChange('branch_code', e.target.value)}
+                error={errors.branch_code}
+                placeholder="영업점 코드"
+              />
+              <Input
+                label="요청직원"
+                required
+                value={formData.employee_id}
+                onChange={(e) => handleChange('employee_id', e.target.value)}
+                error={errors.employee_id}
+                placeholder="직원 ID"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="화면번호"
+                required
+                value={formData.screen_id}
+                onChange={(e) => handleChange('screen_id', e.target.value)}
+                error={errors.screen_id}
+                placeholder="화면 ID"
+              />
+              <Input
+                label="거래명"
+                required
+                value={formData.transaction_name}
+                onChange={(e) => handleChange('transaction_name', e.target.value)}
+                error={errors.transaction_name}
+                placeholder="거래명"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Select
+                label="업무구분"
+                required
+                value={formData.business_type}
+                onChange={(e) => handleChange('business_type', e.target.value)}
+                error={errors.business_type}
+                options={businessTypeOptions}
+              />
+              <Input
+                label="에러코드"
+                value={formData.error_code}
+                onChange={(e) => handleChange('error_code', e.target.value)}
+                placeholder="에러 코드 (선택)"
+              />
+            </div>
+
+            {/* ��담 내용 */}
+            <Textarea
+              label="문의내용"
+              required
+              rows={5}
+              value={formData.inquiry_text}
+              onChange={(e) => handleChange('inquiry_text', e.target.value)}
+              error={errors.inquiry_text}
+              placeholder="고객의 문의 내용을 상세히 입력하세요 (5자 이상 권장)"
+            />
+
+            <Textarea
+              label="조치내용"
+              rows={5}
+              value={formData.action_taken}
+              onChange={(e) => handleChange('action_taken', e.target.value)}
+              placeholder="��행한 조치 내용을 입력하세요 (선택)"
+            />
+
+            {/* 메타데이터 필드 (JSONB) */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-gray-700">추가 정보 (Key/Value)</label>
+                <Button type="button" size="sm" variant="secondary" onClick={handleMetadataAdd}>
+                  + 필드 추가
+                </Button>
+              </div>
+              {formData.metadata_fields.map((field, index) => (
+                <div key={index} className="grid grid-cols-12 gap-2">
+                  <input
+                    type="text"
+                    placeholder="Key"
+                    value={field.key}
+                    onChange={(e) => handleMetadataChange(index, 'key', e.target.value)}
+                    className="col-span-5 h-9 rounded-md border border-gray-300 bg-white px-3 text-sm"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Value"
+                    value={field.value}
+                    onChange={(e) => handleMetadataChange(index, 'value', e.target.value)}
+                    className="col-span-6 h-9 rounded-md border border-gray-300 bg-white px-3 text-sm"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="danger"
+                    onClick={() => handleMetadataRemove(index)}
+                    className="col-span-1"
+                  >
+                    ×
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            {/* 저장 ��튼 */}
+            <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-200">
+              <Button type="button" variant="secondary">
+                취소
+              </Button>
+              <Button type="submit" variant="primary">
+                저장
+              </Button>
+            </div>
+          </form>
+        </Card>
+      );
+    };
+
+    // ============================================
+    // 메인: 상담 등록 화면
+    // ============================================
+    const ConsultationCreatePage = () => {
+      const [formData, setFormData] = useState({
+        branch_code: '',
+        employee_id: '',
+        screen_id: '',
+        transaction_name: '',
+        business_type: '',
+        error_code: '',
+        inquiry_text: '',
+        action_taken: '',
+        metadata_fields: []
+      });
+
+      const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+      const [toast, setToast] = useState(null);
+
+      const handleSave = async () => {
+        // TODO: API Connect - POST /api/v1/consultations
+        try {
+          // const response = await fetch('/api/v1/consultations', {
+          //   method: 'POST',
+          //   headers: { 'Content-Type': 'application/json' },
+          //   body: JSON.stringify({
+          //     ...formData,
+          //     metadata_fields: formData.metadata_fields.reduce((acc, field) => {
+          //       if (field.key) acc[field.key] = field.value;
+          //       return acc;
+          //     }, {})
+          //   })
+          // });
+          // if (!response.ok) throw new Error('저장 실패');
+
+          console.log('저장 데이터:', formData);
+          setToast({ message: '상담 내역이 저장되었습니다', variant: 'success' });
+          setIsManualModalOpen(true);
+        } catch (error) {
+          console.error('저장 실패:', error);
+          setToast({ message: '저장에 실패했습니다', variant: 'error' });
+        }
+      };
+
+      const handleManualCreate = () => {
+        setIsManualModalOpen(false);
+        // 메뉴얼 생성 화면으로 이동 또는 로직 실행
+        setToast({ message: '메뉴얼 생성 화면으로 이동합니다', variant: 'info' });
+      };
+
+      return (
+        <div className="flex flex-col h-full bg-gray-50">
+          {/* Header */}
+          <header className="flex items-center justify-between bg-white border-b border-gray-200 px-6 h-14">
+            <h1 className="text-xl font-bold text-gray-900">상담 등록</h1>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-text-secondary">광주은행 상담시스템</span>
+            </div>
+          </header>
+
+          {/* Main Content: 6:4 레이���웃 */}
+          <main className="flex-1 overflow-auto px-6 py-6">
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 h-full">
+              {/* 왼쪽(6): 상담 등록 폼 */}
+              <div className="lg:col-span-6">
+                <ConsultationCreateForm
+                  formData={formData}
+                  setFormData={setFormData}
+                  onSave={handleSave}
+                />
+              </div>
+
+              {/* 오른쪽(4): 유사 데이터 비교 패널 */}
+              <div className="lg:col-span-4">
+                <SimilarComparePanel currentData={formData} />
+              </div>
+            </div>
+          </main>
+
+          {/* 메뉴얼 생성 확인 모달 */}
+          <Modal
+            isOpen={isManualModalOpen}
+            onClose={() => setIsManualModalOpen(false)}
+            title="메뉴얼 생성"
+            size="md"
+          >
+            <div className="space-y-4">
+              <p className="text-sm text-gray-900">
+                상담 내역이 저장되었습니다.<br />
+                이 내용을 바탕으로 메뉴얼을 생성하시겠습니까?
+              </p>
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="secondary" onClick={() => setIsManualModalOpen(false)}>
+                  나중에
+                </Button>
+                <Button variant="primary" onClick={handleManualCreate}>
+                  메뉴얼 생성
+                </Button>
+              </div>
+            </div>
+          </Modal>
+
+          {/* Toast */}
+          {toast && (
+            <Toast
+              message={toast.message}
+              variant={toast.variant}
+              onClose={() => setToast(null)}
+            />
+          )}
+        </div>
+      );
+    };
+
+    // React 렌더링
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<ConsultationCreatePage />);
+  </script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b1612149015ea2d',t:'MTc2NjMwNjM4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

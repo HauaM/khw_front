@@ -35,8 +35,7 @@ const ReviewTaskListPage: React.FC = () => {
   const filteredTasks = useMemo(() => {
     //let filtered = tasks;
     let filtered = tasks.filter((task) => task.status !== 'TODO');
-    console.log("filtered task: " + JSON.stringify(filtered));
-
+    
     // 상태 필터
     if (filters.status !== '전체') {
       filtered = filtered.filter((task) => task.status === filters.status);

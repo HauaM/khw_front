@@ -19,9 +19,7 @@ export const useCommonCodes = (groupCode: 'BUSINESS_TYPE' | 'ERROR_CODE') => {
     (async () => {
       try {
         const response = await fetchCommonCodeGroups();
-        console.log('response', response);
         if (response.data) {
-          console.log('Fetched common code groups:', response.data);
           const group = response.data.find((g) => g.groupCode === groupCode);
           if (group) {
             setGroupId(group.id);

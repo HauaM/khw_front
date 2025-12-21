@@ -3907,6 +3907,47 @@
         }
       }
     },
+    "/api/v1/admin/departments/{department_id}": {
+      "delete": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "부서 삭제",
+        "operationId": "delete_department_api_v1_admin_departments__department_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "department_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Department Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/users": {
       "get": {
         "tags": [
@@ -3999,47 +4040,6 @@
               ],
               "title": "Is Active"
             }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1,
-              "title": "Page"
-            }
-          },
-          {
-            "name": "page_size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 100,
-              "minimum": 1,
-              "default": 20,
-              "title": "Page Size"
-            }
-          },
-          {
-            "name": "sort_by",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/UserSortBy",
-              "default": "created_at"
-            }
-          },
-          {
-            "name": "sort_order",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/SortOrder",
-              "default": "desc"
-            }
           }
         ],
         "responses": {
@@ -4048,7 +4048,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserListResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  },
+                  "title": "Response List Users Api V1 Users Get"
                 }
               }
             }
@@ -4153,6 +4157,44 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "summary": "사용자 삭제",
+        "operationId": "delete_user_api_v1_users__user_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -6253,14 +6295,6 @@
         "title": "ManualVersionResponse",
         "description": "Manual version response for version list (v2.1 개선)\n\n기존 /{manual_id}/versions와 새로운 /versions 쿼리 엔드포인트에서\n모두 사용 가능하도록 구조화\n\nRFP Reference: GET /api/v1/manuals/{manual_id}/versions, GET /api/v1/manuals/versions"
       },
-      "SortOrder": {
-        "type": "string",
-        "enum": [
-          "asc",
-          "desc"
-        ],
-        "title": "SortOrder"
-      },
       "TaskStatus": {
         "type": "string",
         "enum": [
@@ -6561,46 +6595,6 @@
         ],
         "title": "UserDepartmentListResponse"
       },
-      "UserListResponse": {
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/UserResponse"
-            },
-            "type": "array",
-            "title": "Items"
-          },
-          "total": {
-            "type": "integer",
-            "minimum": 0,
-            "title": "Total"
-          },
-          "page": {
-            "type": "integer",
-            "minimum": 1,
-            "title": "Page"
-          },
-          "page_size": {
-            "type": "integer",
-            "minimum": 1,
-            "title": "Page Size"
-          },
-          "total_pages": {
-            "type": "integer",
-            "minimum": 0,
-            "title": "Total Pages"
-          }
-        },
-        "type": "object",
-        "required": [
-          "items",
-          "total",
-          "page",
-          "page_size",
-          "total_pages"
-        ],
-        "title": "UserListResponse"
-      },
       "UserResponse": {
         "properties": {
           "employee_id": {
@@ -6665,15 +6659,6 @@
         ],
         "title": "UserRole",
         "description": "시스템 사용자 역할"
-      },
-      "UserSortBy": {
-        "type": "string",
-        "enum": [
-          "employee_id",
-          "name",
-          "created_at"
-        ],
-        "title": "UserSortBy"
       },
       "ValidationError": {
         "properties": {
