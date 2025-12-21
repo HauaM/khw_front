@@ -1,6 +1,11 @@
 // User Management Hook
 import { useMemo, useState } from 'react';
-import type { UserListParams, UserListResponse, UserSearchFormParams } from '@/types/users';
+import type {
+  UserListParams,
+  UserListResponse,
+  UserResponse,
+  UserSearchFormParams,
+} from '@/types/users';
 import { getUsers } from '@/lib/api/users';
 import { useApiQuery } from '@/hooks/useApiQuery';
 
@@ -44,13 +49,17 @@ export const useUsers = (initialParams?: UserSearchFormParams) => {
 
   const apiParams = useMemo(() => buildUserListParams(searchParams), [searchParams]);
 
-  const query = useApiQuery<UserListResponse>(['users', apiParams], () => getUsers(apiParams), {
-    autoShowFeedback: false,
-    autoShowError: true,
-    queryOptions: {
-      keepPreviousData: true,
-    },
-  });
+  const query = useApiQuery<UserListResponse | UserResponse[]>(
+    ['users', apiParams],
+    () => getUsers(apiParams),
+    {
+      autoShowFeedback: false,
+      autoShowError: true,
+      queryOptions: {
+        keepPreviousData: true,
+      },
+    }
+  );
 
   const handleSearch = (params: UserSearchFormParams) => {
     setSearchParams((prev) => ({ ...prev, ...params }));
@@ -60,12 +69,17 @@ export const useUsers = (initialParams?: UserSearchFormParams) => {
     setSearchParams(defaultSearchParams);
   };
 
+  // API 응답이 배열로 직접 오는 경우와 페이지네이션 객체로 오는 경우 모두 처리
+  const isArrayResponse = Array.isArray(query.data);
+  const users = isArrayResponse ? query.data : query.data?.items || [];
+  const total = isArrayResponse ? users.length : query.data?.total || 0;
+
   return {
-    users: query.data?.items || [],
-    total: query.data?.total || 0,
-    page: query.data?.page || searchParams.page || 1,
-    pageSize: query.data?.page_size || searchParams.page_size || 20,
-    totalPages: query.data?.total_pages || 0,
+    users,
+    total,
+    page: isArrayResponse ? 1 : query.data?.page || searchParams.page || 1,
+    pageSize: isArrayResponse ? users.length : query.data?.page_size || searchParams.page_size || 20,
+    totalPages: isArrayResponse ? 1 : query.data?.total_pages || 0,
     isLoading: query.isLoading || query.isFetching,
     error: query.error instanceof Error ? query.error : null,
     searchParams,

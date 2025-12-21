@@ -62,24 +62,55 @@ const LoginForm: React.FC<LoginFormProps> = ({ initialEmployeeId = '', onShowToa
 
       const tokenResponse = await authApi.login({ username: employeeId, password });
 
-      if (!tokenResponse.data) {
+      if (!tokenResponse?.access_token) {
         throw new Error('로그인 실패: 토큰을 받지 못했습니다.');
       }
 
-      setAuthToken(tokenResponse.data.access_token);
+      setAuthToken(tokenResponse.access_token);
 
-      const meResponse = await authApi.me();
+      let user: AuthUser | null = null;
 
-      if (!meResponse.data) {
-        throw new Error('사용자 정보를 받지 못했습니다.');
+      try {
+        const meResponse = await authApi.me();
+        const meData = meResponse?.data;
+        if (meData?.employee_id) {
+          user = {
+            employee_id: meData.employee_id,
+            name: meData.name,
+            department: meData.departments?.[0]?.department_name ?? '',
+            role: meData.role,
+          };
+        }
+      } catch (meError) {
+        console.warn('Failed to fetch user profile, falling back to token payload.', meError);
       }
 
-      const user: AuthUser = {
-        employee_id: meResponse.data.employee_id,
-        name: meResponse.data.name,
-        department: meResponse.data.department,
-        role: meResponse.data.role,
-      };
+      if (!user) {
+        const tokenPayload = (() => {
+          try {
+            const base64Url = tokenResponse.access_token.split('.')[1];
+            if (!base64Url) return null;
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+              atob(base64)
+                .split('')
+                .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
+                .join('')
+            );
+            return JSON.parse(jsonPayload) as { employee_id?: string; role?: string; sub?: string };
+          } catch (error) {
+            console.error('Failed to parse token payload:', error);
+            return null;
+          }
+        })();
+
+        user = {
+          employee_id: tokenPayload?.employee_id || employeeId,
+          name: employeeId,
+          department: '',
+          role: (tokenPayload?.role as AuthUser['role']) || 'CONSULTANT',
+        };
+      }
 
       localStorage.setItem('user_info', JSON.stringify(user));
       onShowToast('로그인 성공! 대시보드로 이동합니다.', 'success');

@@ -30,10 +30,15 @@ export interface ApiUser {
   username: string;
   employee_id: string;
   name: string;
-  department: string;
   role: UserRole;
   is_active: boolean;
   id: number;
   created_at: string;
   updated_at: string;
+  departments?: Array<{
+    id: string;
+    department_code: string;
+    department_name: string;
+    is_active?: boolean;
+  }>;
 }
