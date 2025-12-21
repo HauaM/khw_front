@@ -96,8 +96,8 @@ const menuSections: MenuSection[] = [
   {
     title: '관리자',
     items: [
+      { label: '사용자 관리', path: '/admin/users', icon: <IconUsers /> },
       { label: '공통코드 관리', path: '/admin/common-codes', icon: <IconCode /> },
-      { label: '사용자/권한 관리', path: '/admin/users', icon: <IconUsers /> },
       { label: '시스템 설정', path: '/admin/settings', icon: <IconSettings /> },
     ],
   },

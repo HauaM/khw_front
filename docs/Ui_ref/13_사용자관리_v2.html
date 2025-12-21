@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="ko" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사용자 관리 - 광주은행</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    /* Tailwind Config 커스텀 토큰 */
+    :root {
+      --color-primary-50: #E5F1FF;
+      --color-primary-500: #005BAC;
+      --color-primary-600: #004A8D;
+      --color-brand-light: #F0F7FF;
+      --color-brand-focus: #005BAC;
+      --color-success: #10B981;
+      --color-success-light: #D1FAE5;
+      --color-error: #EF4444;
+      --color-error-dark: #DC2626;
+      --color-error-light: #FEE2E2;
+      --color-info: #3B82F6;
+      --color-info-light: #DBEAFE;
+      --color-warning: #F59E0B;
+      --color-warning-light: #FEF3C7;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#E5F1FF',
+              500: '#005BAC',
+              600: '#004A8D'
+            },
+            brand: {
+              light: '#F0F7FF',
+              focus: '#005BAC'
+            },
+            success: {
+              DEFAULT: '#10B981',
+              light: '#D1FAE5'
+            },
+            error: {
+              DEFAULT: '#EF4444',
+              dark: '#DC2626',
+              light: '#FEE2E2'
+            },
+            info: {
+              DEFAULT: '#3B82F6',
+              light: '#DBEAFE'
+            },
+            warning: {
+              DEFAULT: '#F59E0B',
+              light: '#FEF3C7'
+            },
+            text: {
+              primary: '#212121',
+              secondary: '#757575'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-gray-50 font-sans">
+  <div id="root" class="h-full"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ============================================
+    // 유틸리티 함수
+    // ============================================
+    const cn = (...classes) => classes.filter(Boolean).join(' ');
+
+    // ============================================
+    // 재사용 컴포넌트: Button
+    // ============================================
+    const Button = ({ variant = 'primary', children, className, ...props }) => {
+      const baseClass = "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed";
+      
+      const variantClass = {
+        primary: "bg-primary-500 text-white hover:bg-primary-600",
+        secondary: "bg-white text-primary-500 border border-primary-500 hover:bg-primary-50",
+        danger: "bg-error text-white hover:bg-error-dark"
+      }[variant];
+
+      return (
+        <button className={cn(baseClass, variantClass, className)} {...props}>
+          {children}
+        </button>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Input
+    // ============================================
+    const Input = ({ label, error, ...props }) => {
+      return (
+        <div className="space-y-1">
+          {label && (
+            <label className="text-xs font-semibold text-gray-700">
+              {label}
+            </label>
+          )}
+          <input
+            className={cn(
+              "h-9 w-full rounded-md border bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400",
+              "focus:outline-none focus:ring-2 focus:ring-brand-focus/20 focus:border-brand-focus",
+              error ? "border-error focus:ring-error/20 focus:border-error" : "border-gray-300"
+            )}
+            {...props}
+          />
+          {error && (
+            <p className="text-xs text-error mt-1">{error}</p>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Select
+    // ============================================
+    const Select = ({ label, error, options = [], ...props }) => {
+      return (
+        <div className="space-y-1">
+          {label && (
+            <label className="text-xs font-semibold text-gray-700">
+              {label}
+            </label>
+          )}
+          <select
+            className={cn(
+              "h-9 w-full rounded-md border bg-white px-3 text-sm text-gray-900",
+              "focus:outline-none focus:ring-2 focus:ring-brand-focus/20 focus:border-brand-focus",
+              error ? "border-error focus:ring-error/20 focus:border-error" : "border-gray-300"
+            )}
+            {...props}
+          >
+            {options.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          {error && (
+            <p className="text-xs text-error mt-1">{error}</p>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: TypeAheadSelect (간단 구현)
+    // ============================================
+    const TypeAheadSelect = ({ label, error, options = [], value, onChange, placeholder }) => {
+      const [isOpen, setIsOpen] = useState(false);
+      const [search, setSearch] = useState('');
+      
+      const filtered = options.filter(opt => 
+        opt.label.toLowerCase().includes(search.toLowerCase())
+      );
+
+      const selectedLabel = options.find(opt => opt.value === value)?.label || '';
+
+      return (
+        <div className="space-y-1 relative">
+          {label && (
+            <label className="text-xs font-semibold text-gray-700">
+              {label}
+            </label>
+          )}
+          <div className="relative">
+            <input
+              type="text"
+              value={isOpen ? search : selectedLabel}
+              onChange={(e) => setSearch(e.target.value)}
+              onFocus={() => setIsOpen(true)}
+              onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+              placeholder={placeholder}
+              className={cn(
+                "h-9 w-full rounded-md border bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400",
+                "focus:outline-none focus:ring-2 focus:ring-brand-focus/20 focus:border-brand-focus",
+                error ? "border-error focus:ring-error/20 focus:border-error" : "border-gray-300"
+              )}
+            />
+            {isOpen && filtered.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                {filtered.map(opt => (
+                  <div
+                    key={opt.value}
+                    onClick={() => {
+                      onChange(opt.value);
+                      setSearch('');
+                      setIsOpen(false);
+                    }}
+                    className="px-3 py-2 text-sm text-gray-900 hover:bg-gray-50 cursor-pointer"
+                  >
+                    {opt.label}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {error && (
+            <p className="text-xs text-error mt-1">{error}</p>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Toggle
+    // ============================================
+    const Toggle = ({ label, checked, onChange }) => {
+      return (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onChange(!checked)}
+            className={cn(
+              "relative inline-flex h-6 w-11 items-center rounded-full transition",
+              checked ? "bg-primary-500" : "bg-gray-300"
+            )}
+          >
+            <span
+              className={cn(
+                "inline-block h-4 w-4 transform rounded-full bg-white transition",
+                checked ? "translate-x-6" : "translate-x-1"
+              )}
+            />
+          </button>
+          {label && (
+            <label className="text-xs font-semibold text-gray-700">
+              {label}
+            </label>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Badge
+    // ============================================
+    const Badge = ({ children, variant = 'neutral' }) => {
+      const variantClass = {
+        neutral: "bg-gray-100 text-gray-600",
+        success: "bg-success-light text-success",
+        error: "bg-error-light text-error",
+        info: "bg-info-light text-info"
+      }[variant];
+
+      return (
+        <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold", variantClass)}>
+          {children}
+        </span>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Modal
+    // ============================================
+    const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
+      if (!isOpen) return null;
+
+      const sizeClass = {
+        sm: 'max-w-md',
+        md: 'max-w-lg',
+        lg: 'max-w-2xl',
+        xl: 'max-w-4xl'
+      }[size];
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className={cn("bg-white rounded-lg shadow-lg w-full mx-4", sizeClass)}>
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <div className="px-6 py-4 max-h-96 overflow-y-auto">
+              {children}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // 재사용 컴포넌트: Toast
+    // ============================================
+    const Toast = ({ message, variant = 'error', onClose }) => {
+      useEffect(() => {
+        const timer = setTimeout(onClose, 3000);
+        return () => clearTimeout(timer);
+      }, [onClose]);
+
+      const variantClass = {
+        success: "bg-success-light text-success border-success",
+        error: "bg-error-light text-error border-error",
+        info: "bg-info-light text-info border-info"
+      }[variant];
+
+      return (
+        <div className={cn("fixed top-4 right-4 z-50 rounded-lg border-l-4 px-4 py-3 shadow-lg", variantClass)}>
+          <p className="text-sm font-semibold">{message}</p>
+        </div>
+      );
+    };
+
+    // ============================================
+    // 사용자 등록 모달
+    // ============================================
+    const UserRegistrationModal = ({ isOpen, onClose, onSuccess }) => {
+      const [formData, setFormData] = useState({
+        employee_id: '',
+        name: '',
+        role: 'CONSULTANT',
+        is_active: true,
+        password: '',
+        password_confirm: '',
+        department_ids: ''
+      });
+
+      const [errors, setErrors] = useState({});
+
+      // 목업 부서 데이터
+      const departmentOptions = [
+        { value: 'dept_001', label: '영업본부' },
+        { value: 'dept_002', label: '경영지원본부' },
+        { value: 'dept_003', label: 'IT본부' },
+        { value: 'dept_004', label: '리스크관리본부' }
+      ];
+
+      const roleOptions = [
+        { value: 'ADMIN', label: '관리자' },
+        { value: 'CONSULTANT', label: '상담사' },
+        { value: 'REVIEWER', label: '검토자' }
+      ];
+
+      const validate = () => {
+        const newErrors = {};
+        
+        if (!formData.employee_id.trim()) newErrors.employee_id = '직번을 입력하세요';
+        if (!formData.name.trim()) newErrors.name = '사용자명을 입력하세요';
+        if (!formData.password) newErrors.password = '비밀번호를 입력하세요';
+        if (!formData.password_confirm) newErrors.password_confirm = '비밀번호 확인을 입력하세요';
+        if (formData.password && formData.password_confirm && formData.password !== formData.password_confirm) {
+          newErrors.password_confirm = '비밀번호가 일치하지 않습니다';
+        }
+        if (!formData.department_ids) newErrors.department_ids = '부서를 선택하세요';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!validate()) return;
+
+        // TODO: API Connect - POST /api/users
+        try {
+          // const response = await fetch('/api/users', {
+          //   method: 'POST',
+          //   headers: { 'Content-Type': 'application/json' },
+          //   body: JSON.stringify({
+          //     employee_id: formData.employee_id,
+          //     name: formData.name,
+          //     role: formData.role,
+          //     is_active: formData.is_active,
+          //     password: formData.password,
+          //     department_ids: [formData.department_ids]
+          //   })
+          // });
+          // if (!response.ok) throw new Error('저장 실패');
+          
+          onSuccess();
+          onClose();
+        } catch (error) {
+          console.error('사용자 등록 실패:', error);
+        }
+      };
+
+      const handleClose = () => {
+        setFormData({
+          employee_id: '',
+          name: '',
+          role: 'CONSULTANT',
+          is_active: true,
+          password: '',
+          password_confirm: '',
+          department_ids: ''
+        });
+        setErrors({});
+        onClose();
+      };
+
+      return (
+        <Modal isOpen={isOpen} onClose={handleClose} title="사용자 등록" size="lg">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="직번 *"
+                value={formData.employee_id}
+                onChange={(e) => setFormData({...formData, employee_id: e.target.value})}
+                error={errors.employee_id}
+                placeholder="직번을 입력하세요"
+              />
+              <Input
+                label="사용자 한글명 *"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                error={errors.name}
+                placeholder="이름을 입력하세요"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Select
+                label="역할 *"
+                value={formData.role}
+                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                options={roleOptions}
+              />
+              <TypeAheadSelect
+                label="부서 *"
+                value={formData.department_ids}
+                onChange={(value) => setFormData({...formData, department_ids: value})}
+                options={departmentOptions}
+                error={errors.department_ids}
+                placeholder="부서를 선택하세요"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="비밀번호 *"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                error={errors.password}
+                placeholder="비밀번호를 입력하세요"
+              />
+              <Input
+                label="비밀번호 확인 *"
+                type="password"
+                value={formData.password_confirm}
+                onChange={(e) => setFormData({...formData, password_confirm: e.target.value})}
+                error={errors.password_confirm}
+                placeholder="비밀번호를 다시 입력하세요"
+              />
+            </div>
+
+            <div>
+              <Toggle
+                label="사용 여부"
+                checked={formData.is_active}
+                onChange={(checked) => setFormData({...formData, is_active: checked})}
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-200">
+              <Button type="button" variant="secondary" onClick={handleClose}>
+                취소
+              </Button>
+              <Button type="submit" variant="primary">
+                저장
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      );
+    };
+
+    // ============================================
+    // 메인: 사용자 관리 화면
+    // ============================================
+    const UserManagementPage = () => {
+      const [searchParams, setSearchParams] = useState({
+        employee_id: '',
+        name: '',
+        role: '',
+        is_active: '',
+        department_name: ''
+      });
+
+      const [users, setUsers] = useState([]);
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [toast, setToast] = useState(null);
+
+      // 목업 부서 데이터
+      const departmentOptions = [
+        { value: '', label: '전체' },
+        { value: 'dept_001', label: '영업본부' },
+        { value: 'dept_002', label: '경영지원본부' },
+        { value: 'dept_003', label: 'IT본부' },
+        { value: 'dept_004', label: '리스크관리본부' }
+      ];
+
+      const roleOptions = [
+        { value: '', label: '전체' },
+        { value: 'ADMIN', label: '관리자' },
+        { value: 'CONSULTANT', label: '상담사' },
+        { value: 'REVIEWER', label: '검토자' }
+      ];
+
+      const activeOptions = [
+        { value: '', label: '전체' },
+        { value: 'true', label: '사용' },
+        { value: 'false', label: '미사용' }
+      ];
+
+      // 초기 데이터 로드
+      useEffect(() => {
+        fetchUsers();
+      }, []);
+
+      const fetchUsers = async () => {
+        // TODO: API Connect - GET /api/users
+        try {
+          // const response = await fetch('/api/users');
+          // const data = await response.json();
+          // setUsers(data);
+          
+          // 목업 데이터
+          setUsers([
+            { id: 1, employee_id: 'E001', name: '김철수', role: 'ADMIN', department_name: '영업본부', is_active: true },
+            { id: 2, employee_id: 'E002', name: '이영희', role: 'CONSULTANT', department_name: 'IT본부', is_active: true },
+            { id: 3, employee_id: 'E003', name: '박민수', role: 'REVIEWER', department_name: '경영지원본부', is_active: false }
+          ]);
+        } catch (error) {
+          console.error('사용자 조회 실패:', error);
+          setToast({ message: '사용자 조회에 실패했습니다', variant: 'error' });
+        }
+      };
+
+      const handleSearch = async (e) => {
+        e.preventDefault();
+        
+        // TODO: API Connect - GET /api/users?employee_id=...&name=...
+        try {
+          // const queryParams = new URLSearchParams(searchParams).toString();
+          // const response = await fetch(`/api/users?${queryParams}`);
+          // const data = await response.json();
+          // setUsers(data);
+          
+          console.log('검색 조건:', searchParams);
+          fetchUsers();
+        } catch (error) {
+          console.error('검색 실패:', error);
+          setToast({ message: '검색에 실패했습니다', variant: 'error' });
+        }
+      };
+
+      const handleDelete = async (userId) => {
+        // 인라인 확인 UI 구현 (브라우저 confirm 금지)
+        const confirmDelete = window.confirm('정말 삭제하시겠습니까?');
+        if (!confirmDelete) return;
+
+        // TODO: API Connect - DELETE /api/users/:id
+        try {
+          // const response = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+          // if (!response.ok) throw new Error('삭제 실패');
+          
+          setUsers(users.filter(u => u.id !== userId));
+          setToast({ message: '삭제되었습니다', variant: 'success' });
+        } catch (error) {
+          console.error('삭제 실패:', error);
+          setToast({ message: '삭제에 실패했습니다', variant: 'error' });
+        }
+      };
+
+      const getRoleBadge = (role) => {
+        const roleMap = {
+          ADMIN: { label: '관리자', variant: 'error' },
+          CONSULTANT: { label: '상담사', variant: 'info' },
+          REVIEWER: { label: '검토자', variant: 'neutral' }
+        };
+        const config = roleMap[role] || { label: role, variant: 'neutral' };
+        return <Badge variant={config.variant}>{config.label}</Badge>;
+      };
+
+      return (
+        <div className="flex flex-col h-full bg-gray-50">
+          {/* Header */}
+          <header className="flex items-center justify-between bg-white border-b border-gray-200 px-6 h-14">
+            <h1 className="text-xl font-bold text-gray-900">사용자 관리</h1>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-text-secondary">광주은행 관리시스템</span>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 overflow-auto px-6 py-6">
+            <div className="space-y-6">
+              {/* 검색 패널 */}
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                <h2 className="text-base font-semibold text-gray-900 mb-3">검색 조건</h2>
+                <form onSubmit={handleSearch}>
+                  <div className="grid grid-cols-5 gap-4 mb-4">
+                    <Input
+                      label="직번"
+                      value={searchParams.employee_id}
+                      onChange={(e) => setSearchParams({...searchParams, employee_id: e.target.value})}
+                      placeholder="직번"
+                    />
+                    <Input
+                      label="사용자 한글명"
+                      value={searchParams.name}
+                      onChange={(e) => setSearchParams({...searchParams, name: e.target.value})}
+                      placeholder="이름"
+                    />
+                    <Select
+                      label="역할"
+                      value={searchParams.role}
+                      onChange={(e) => setSearchParams({...searchParams, role: e.target.value})}
+                      options={roleOptions}
+                    />
+                    <Select
+                      label="사용 여부"
+                      value={searchParams.is_active}
+                      onChange={(e) => setSearchParams({...searchParams, is_active: e.target.value})}
+                      options={activeOptions}
+                    />
+                    <TypeAheadSelect
+                      label="부서명"
+                      value={searchParams.department_name}
+                      onChange={(value) => setSearchParams({...searchParams, department_name: value})}
+                      options={departmentOptions}
+                      placeholder="부서 선택"
+                    />
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button type="button" variant="secondary" onClick={() => setSearchParams({
+                      employee_id: '', name: '', role: '', is_active: '', department_name: ''
+                    })}>
+                      초기화
+                    </Button>
+                    <Button type="submit" variant="primary">
+                      조회
+                    </Button>
+                  </div>
+                </form>
+              </div>
+
+              {/* 조회 결과 패널 */}
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-base font-semibold text-gray-900">
+                    조회 결과 <span className="text-primary-500">({users.length}건)</span>
+                  </h2>
+                  <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+                    + 신규 등록
+                  </Button>
+                </div>
+
+                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                  <table className="w-full text-sm">
+                    <thead className="bg-brand-light">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-primary-600">직번</th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-primary-600">사용자 한글명</th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-primary-600">역할</th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-primary-600">부서명</th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-primary-600">사용 여부</th>
+                        <th className="px-3 py-2 text-center text-xs font-semibold text-primary-600">관리</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.length === 0 ? (
+                        <tr>
+                          <td colSpan="6" className="px-3 py-6 text-center text-sm text-text-secondary">
+                            조회된 데이터가 없습니다
+                          </td>
+                        </tr>
+                      ) : (
+                        users.map((user) => (
+                          <tr key={user.id} className="hover:bg-gray-50">
+                            <td className="px-3 py-2 text-sm text-gray-900 border-t border-gray-200">{user.employee_id}</td>
+                            <td className="px-3 py-2 text-sm text-gray-900 border-t border-gray-200">{user.name}</td>
+                            <td className="px-3 py-2 text-sm text-gray-900 border-t border-gray-200">
+                              {getRoleBadge(user.role)}
+                            </td>
+                            <td className="px-3 py-2 text-sm text-gray-900 border-t border-gray-200">{user.department_name}</td>
+                            <td className="px-3 py-2 text-sm text-gray-900 border-t border-gray-200">
+                              <Badge variant={user.is_active ? 'success' : 'neutral'}>
+                                {user.is_active ? '사용' : '미사용'}
+                              </Badge>
+                            </td>
+                            <td className="px-3 py-2 text-sm text-gray-900 border-t border-gray-200 text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <Button
+                                  variant="secondary"
+                                  className="px-2 py-1 text-xs"
+                                  onClick={() => console.log('수정:', user.id)}
+                                >
+                                  수정
+                                </Button>
+                                <Button
+                                  variant="danger"
+                                  className="px-2 py-1 text-xs"
+                                  onClick={() => handleDelete(user.id)}
+                                >
+                                  삭제
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          {/* 사용자 등록 모달 */}
+          <UserRegistrationModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={() => {
+              setToast({ message: '사용자가 등록되었습니다', variant: 'success' });
+              fetchUsers();
+            }}
+          />
+
+          {/* Toast */}
+          {toast && (
+            <Toast
+              message={toast.message}
+              variant={toast.variant}
+              onClose={() => setToast(null)}
+            />
+          )}
+        </div>
+      );
+    };
+
+    // React 렌더링
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<UserManagementPage />);
+  </script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b15bb82d592ea2d',t:'MTc2NjMwMjgzOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

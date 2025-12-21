@@ -11,6 +11,7 @@ export * from './api';
 export * from './auth';
 export * from './consultations';
 export * from './manuals';
+export * from './users';
 export {
   type ManualReviewStatus,
   type BackendManualReviewTask,

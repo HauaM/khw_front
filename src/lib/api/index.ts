@@ -26,3 +26,5 @@ export * from './consultations';
 export * from './manuals';
 export * from './manualReviewTasks';
 export * from './commonCodes';
+export * from './departments';
+export * from './users';

@@ -15,7 +15,7 @@ import ManualDraftListPage from '@/pages/manuals/ManualDraftListPage';
 import ApprovedManualCardsPage from '@/pages/manuals/ApprovedManualCardsPage';
 import ReviewTaskListPage from '@/pages/reviews/ReviewTaskListPage';
 import ManualReviewDetailPage from '@/pages/reviews/ManualReviewDetailPage';
-import AdminUsersPage from '@/pages/admin/AdminUsersPage';
+import UserManagementPage from '@/pages/admin/UserManagementPage';
 import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
 import CommonCodeManagementPage from '@/pages/admin/CommonCodeManagementPage';
 import AuthLayout from '@/components/common/AuthLayout';
@@ -51,7 +51,7 @@ const AppRouter: React.FC = () => {
             <Route path="tasks/:taskId" element={<ManualReviewDetailPage />} />
           </Route>
           <Route path="admin">
-            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="users" element={<UserManagementPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />
             <Route path="common-codes" element={<CommonCodeManagementPage />} />
           </Route>
