@@ -9,7 +9,6 @@ export interface TypeAheadOption {
 export interface TypeAheadSelectBoxProps {
   options: TypeAheadOption[];
   selectedCode?: string;
-  value?: string; // 외부에서 직접 값 설정 시 사용
   onChange: (code: string, label?: string) => void;
   onAddNew?: (searchTerm: string) => void;
   placeholder?: string;
@@ -47,11 +46,11 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
 
   // 필터링 로직
   useEffect(() => {
-    const term = searchTerm.toLowerCase();
+    const term = (searchTerm || '').toLowerCase();
     const filtered = options.filter(
       (item) =>
-        item.code.toLowerCase().includes(term) ||
-        item.label.toLowerCase().includes(term)
+        (item.code || '').toLowerCase().includes(term) ||
+        (item.label || '').toLowerCase().includes(term)
     );
     setFilteredOptions(filtered);
   }, [searchTerm, options]);

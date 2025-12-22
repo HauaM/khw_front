@@ -358,12 +358,19 @@ export async function createCommonCodeItem(
   groupId: string,
   payload: CommonCodeItemPayload
 ): Promise<ApiResponse<CommonCodeItem>> {
-  const response = await api.post<ApiResponse<CommonCodeItem>>(
+  const response = await api.post<ApiResponse<CommonCodeItemResponse>>(
     `/api/v1/admin/common-codes/groups/${groupId}/items`,
     buildItemRequestBody(payload)
   );
 
-  return response;
+  if (!response.success) {
+    return response as ApiResponse<CommonCodeItem>;
+  }
+
+  return {
+    ...response,
+    data: transformItem(response.data),
+  };
 }
 
 /**
@@ -374,12 +381,19 @@ export async function updateCommonCodeItem(
   itemId: string,
   payload: CommonCodeItemPayload
 ): Promise<ApiResponse<CommonCodeItem>> {
-  const response = await api.put<ApiResponse<CommonCodeItem>>(
+  const response = await api.put<ApiResponse<CommonCodeItemResponse>>(
     `/api/v1/admin/common-codes/items/${itemId}`,
     buildItemRequestBody(payload)
   );
 
-  return response;
+  if (!response.success) {
+    return response as ApiResponse<CommonCodeItem>;
+  }
+
+  return {
+    ...response,
+    data: transformItem(response.data),
+  };
 }
 
 /**

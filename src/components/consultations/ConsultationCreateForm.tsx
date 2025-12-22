@@ -287,12 +287,12 @@ const ConsultationCreateForm: React.FC<ConsultationCreateFormProps> = ({
   const handleAddCodeConfirm = async (label: string, code: string, description: string) => {
     try {
       if (addCodeType === 'BUSINESS_TYPE') {
-        await addNewBusinessType(label, code, description);
-        setValues((prev) => ({ ...prev, business_type: code as BusinessType }));
+        const newOption = await addNewBusinessType(label, code, description);
+        setValues((prev) => ({ ...prev, business_type: newOption.code as BusinessType }));
         showToast('새 업무구분이 추가되었습니다.', 'success');
       } else {
-        await addNewErrorCode(label, code, description);
-        setValues((prev) => ({ ...prev, error_code: code }));
+        const newOption = await addNewErrorCode(label, code, description);
+        setValues((prev) => ({ ...prev, error_code: newOption.code }));
         showToast('새 에러코드가 추가되었습니다.', 'success');
       }
       setAddCodeModalOpen(false);
@@ -394,10 +394,6 @@ const ConsultationCreateForm: React.FC<ConsultationCreateFormProps> = ({
                 <TypeAheadSelectBox
                   options={businessTypeOptions}
                   selectedCode={values.business_type}
-                  value={
-                    businessTypeOptions.find((opt) => opt.code === values.business_type)
-                      ?.label || ''
-                  }
                   onChange={(code) => {
                     setValues((prev) => ({ ...prev, business_type: code as BusinessType }));
                     if (errors.business_type) {
@@ -423,9 +419,6 @@ const ConsultationCreateForm: React.FC<ConsultationCreateFormProps> = ({
                 <TypeAheadSelectBox
                   options={errorCodeOptions}
                   selectedCode={values.error_code}
-                  value={
-                    errorCodeOptions.find((opt) => opt.code === values.error_code)?.label || ''
-                  }
                   onChange={(code) => {
                     setValues((prev) => ({ ...prev, error_code: code }));
                     if (errors.error_code) {
