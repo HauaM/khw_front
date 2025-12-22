@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import DepartmentSearchForm from '@/components/departments/DepartmentSearchForm';
 import DepartmentTable from '@/components/departments/DepartmentTable';
 import DepartmentModal from '@/components/departments/DepartmentModal';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import {
   useDepartments,
   useCreateDepartment,

@@ -3921,6 +3921,62 @@
       }
     },
     "/api/v1/admin/departments/{department_id}": {
+      "put": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "부서 정보 수정",
+        "operationId": "update_department_api_v1_admin_departments__department_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "department_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Department Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepartmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepartmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "tags": [
           "departments"
@@ -5295,6 +5351,33 @@
           "department_name"
         ],
         "title": "DepartmentResponse"
+      },
+      "DepartmentUpdate": {
+        "properties": {
+          "department_code": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Department Code"
+          },
+          "department_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Department Name"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "department_code",
+          "department_name"
+        ],
+        "title": "DepartmentUpdate"
       },
       "HTTPValidationError": {
         "properties": {
