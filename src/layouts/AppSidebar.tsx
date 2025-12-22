@@ -54,6 +54,22 @@ const IconCode = () => (
   </svg>
 );
 
+const IconBuilding = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+    <path d="M9 22v-4h6v4" />
+    <path d="M8 6h.01" />
+    <path d="M16 6h.01" />
+    <path d="M12 6h.01" />
+    <path d="M12 10h.01" />
+    <path d="M12 14h.01" />
+    <path d="M16 10h.01" />
+    <path d="M16 14h.01" />
+    <path d="M8 10h.01" />
+    <path d="M8 14h.01" />
+  </svg>
+);
+
 interface MenuSection {
   title: string;
   items: MenuItem[];
@@ -97,6 +113,7 @@ const menuSections: MenuSection[] = [
     title: '관리자',
     items: [
       { label: '사용자 관리', path: '/admin/users', icon: <IconUsers /> },
+      { label: '부서 관리', path: '/admin/departments', icon: <IconBuilding /> },
       { label: '공통코드 관리', path: '/admin/common-codes', icon: <IconCode /> },
       { label: '시스템 설정', path: '/admin/settings', icon: <IconSettings /> },
     ],

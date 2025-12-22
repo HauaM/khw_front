@@ -18,6 +18,7 @@ import ManualReviewDetailPage from '@/pages/reviews/ManualReviewDetailPage';
 import UserManagementPage from '@/pages/admin/UserManagementPage';
 import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
 import CommonCodeManagementPage from '@/pages/admin/CommonCodeManagementPage';
+import DepartmentManagementPage from '@/pages/admin/DepartmentManagementPage';
 import AuthLayout from '@/components/common/AuthLayout';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
@@ -54,6 +55,7 @@ const AppRouter: React.FC = () => {
             <Route path="users" element={<UserManagementPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />
             <Route path="common-codes" element={<CommonCodeManagementPage />} />
+            <Route path="departments" element={<DepartmentManagementPage />} />
           </Route>
         </Route>
 
