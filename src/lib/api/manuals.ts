@@ -4,6 +4,7 @@ import {
   ManualDraft,
   ManualDraftUpdateRequest,
   ManualDraftResponse,
+  ManualDraftCreateResponse,
   ManualSearchParams,
   ManualSearchResultApi,
   ManualSearchResult,
@@ -72,10 +73,10 @@ export const convertApiResponseToManualDraft = (
  * 상담으로부터 메뉴얼 초안 생성
  * OpenAPI: POST /api/v1/manuals/draft
  * @param payload - ManualDraftCreateFromConsultationRequest
- * @returns ApiResponse<ManualDraftResponse>
+ * @returns ApiResponse<ManualDraftCreateResponse>
  */
 export const createManualDraft = (payload: ManualDraftCreatePayload) =>
-  api.post<ApiResponse<ManualDraftResponse>>('/api/v1/manuals/draft', payload, {
+  api.post<ApiResponse<ManualDraftCreateResponse>>('/api/v1/manuals/draft', payload, {
     // 메뉴얼 생성은 시간이 오래 걸릴 수 있어 요청 타임아웃을 넉넉히 120초로 설정
     timeout: 120_000,
   });

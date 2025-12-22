@@ -257,12 +257,12 @@ const ConsultationCreateForm: React.FC<ConsultationCreateFormProps> = ({
         throw new Error('메뉴얼 초안 생성 실패: 응답 데이터 없음');
       }
 
-      const convertedDraft = convertApiResponseToManualDraft(response.data);
+      const convertedDraft = convertApiResponseToManualDraft(response.data.draft_entry);
 
       setIsModalOpen(false);
       showToast('메뉴얼 초안 작성 페이지로 이동합니다.', 'success');
       setTimeout(() => {
-        navigate(`/manuals/draft/${response.data.id}`, {
+        navigate(`/manuals/draft/${response.data.draft_entry.id}`, {
           state: { draft: convertedDraft },
         });
       }, 400);

@@ -10,6 +10,8 @@ import {
   ConsultationSearchParams,
   PaginationInfo,
 } from '@/types/consultations';
+import { api } from '@/lib/api/axiosClient';
+import { ApiResponse } from '@/types/api';
 
 interface ApiConsultation {
   id: string;
@@ -37,13 +39,6 @@ interface ConsultationSearchApiResultData {
   query?: string;
 }
 
-interface ConsultationSearchApiResponse {
-  success: boolean;
-  data?: ConsultationSearchApiResultData | null;
-  error?: {
-    message?: string;
-  } | null;
-}
 
 const BRANCH_MAP: Record<string, string> = {
   '001': '본점영업부',
@@ -149,42 +144,20 @@ const ConsultationSearchPage: React.FC = () => {
       };
 
       try {
-        const base = import.meta.env.VITE_API_BASE_URL || window.location.origin;
-        const url = new URL('/api/v1/consultations/search', base);
-        const searchParams = new URLSearchParams();
-        searchParams.set('query', normalizedParams.query);
-        if (normalizedParams.branchCode) searchParams.set('branch_code', normalizedParams.branchCode);
-        if (normalizedParams.businessType) searchParams.set('business_type', normalizedParams.businessType);
-        if (normalizedParams.errorCode) searchParams.set('error_code', normalizedParams.errorCode);
-        if (normalizedParams.startDate) searchParams.set('start_date', normalizedParams.startDate);
-        if (normalizedParams.endDate) searchParams.set('end_date', normalizedParams.endDate);
-        searchParams.set('top_k', String(normalizedParams.itemsPerPage ?? DEFAULT_TOP_K));
+        // Query string 생성
+        const queryString = new URLSearchParams();
+        queryString.set('query', normalizedParams.query);
+        if (normalizedParams.branchCode) queryString.set('branch_code', normalizedParams.branchCode);
+        if (normalizedParams.businessType) queryString.set('business_type', normalizedParams.businessType);
+        if (normalizedParams.errorCode) queryString.set('error_code', normalizedParams.errorCode);
+        if (normalizedParams.startDate) queryString.set('start_date', normalizedParams.startDate);
+        if (normalizedParams.endDate) queryString.set('end_date', normalizedParams.endDate);
+        queryString.set('top_k', String(normalizedParams.itemsPerPage ?? DEFAULT_TOP_K));
 
-        url.search = searchParams.toString();
-
-        const res = await fetch(url.toString(), {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!res.ok) {
-          // 실패 응답을 API 공통 규격에 맞춰 파싱 시도
-          try {
-            const payload = (await res.json()) as ConsultationSearchApiResponse;
-            if (payload && payload.success === false) {
-              showApiErrorToast(payload);
-              throw new Error(payload.error?.message || `검색 실패: ${res.status}`);
-            }
-          } catch (parseErr) {
-            // JSON이 아니거나 파싱 실패 시 본문 텍스트로 fallback
-            const errorText = await res.text();
-            throw new Error(`검색 실패: ${res.status} ${errorText}`);
-          }
-        }
-
-        const payload: ConsultationSearchApiResponse = await res.json();
+        // api 헬퍼를 사용하여 요청 (Authorization 헤더 자동 포함)
+        const payload = await api.get<ApiResponse<ConsultationSearchApiResultData>>(
+          `/api/v1/consultations/search?${queryString.toString()}`
+        );
         if (!payload.success) {
           showApiErrorToast(payload);
           throw new Error(payload.error?.message ?? '상담 검색에 실패했습니다.');

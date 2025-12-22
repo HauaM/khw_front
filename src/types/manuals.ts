@@ -69,6 +69,24 @@ export interface ManualDraftResponse {
   source_consultation_id: string;
   created_at: string;
   updated_at: string;
+  business_type?: string;
+  business_type_name?: string;
+  error_code?: string;
+  version_id?: string | null;
+}
+
+/**
+ * POST /api/v1/manuals/draft 응답 타입
+ * 상담으로부터 메뉴얼 초안 생성 시 반환되는 전체 응답 구조
+ */
+export interface ManualDraftCreateResponse {
+  comparison_type: 'new' | 'update';
+  draft_entry: ManualDraftResponse;
+  existing_manual: ManualDraftResponse | null;
+  review_task_id: string;
+  similarity_score: number | null;
+  comparison_version: string;
+  message: string;
 }
 
 /**
