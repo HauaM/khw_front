@@ -33,8 +33,10 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState<TypeAheadOption[]>(options);
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // selectedCode에 해당하는 label 찾기
   const selectedLabel = selectedCode && options.find(opt => opt.code === selectedCode)?.label;
@@ -53,7 +55,18 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
         (item.label || '').toLowerCase().includes(term)
     );
     setFilteredOptions(filtered);
+    setHighlightedIndex(-1); // 필터링 시 하이라이트 초기화
   }, [searchTerm, options]);
+
+  // 하이라이트된 항목이 변경되면 스크롤 조정
+  useEffect(() => {
+    if (highlightedIndex >= 0 && optionRefs.current[highlightedIndex]) {
+      optionRefs.current[highlightedIndex]?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    }
+  }, [highlightedIndex]);
 
   // 외부 클릭으로 드롭다운 닫기
   useEffect(() => {
@@ -77,6 +90,7 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
       setSearchTerm('');
       setIsFocused(false);
       setIsOpen(false);
+      setHighlightedIndex(-1);
     },
     [onChange]
   );
@@ -87,10 +101,59 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
       setSearchTerm('');
       setIsFocused(false);
       setIsOpen(false);
+      setHighlightedIndex(-1);
     }
   }, [onAddNew, searchTerm]);
 
   const showAddNewOption = allowCreate && searchTerm.trim() !== '' && filteredOptions.length === 0;
+
+  // 키보드 이벤트 핸들러
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!isOpen) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          setIsOpen(true);
+          e.preventDefault();
+        }
+        return;
+      }
+
+      const totalOptions = filteredOptions.length + (showAddNewOption ? 1 : 0);
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setHighlightedIndex((prev) => (prev < totalOptions - 1 ? prev + 1 : prev));
+          break;
+
+        case 'ArrowUp':
+          e.preventDefault();
+          setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+          break;
+
+        case 'Enter':
+          e.preventDefault();
+          if (highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
+            const option = filteredOptions[highlightedIndex];
+            handleSelect(option.code, option.label);
+          } else if (highlightedIndex === filteredOptions.length && showAddNewOption) {
+            handleAddNew();
+          }
+          break;
+
+        case 'Escape':
+          e.preventDefault();
+          setIsOpen(false);
+          setHighlightedIndex(-1);
+          inputRef.current?.blur();
+          break;
+
+        default:
+          break;
+      }
+    },
+    [isOpen, filteredOptions, showAddNewOption, highlightedIndex, handleSelect, handleAddNew]
+  );
 
   return (
     <div ref={containerRef} className="relative">
@@ -104,6 +167,7 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
             setSearchTerm(e.currentTarget.value);
             setIsOpen(true);
           }}
+          onKeyDown={handleKeyDown}
           onFocus={() => {
             setIsFocused(true);
             handleInputClick();
@@ -151,13 +215,17 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
           ) : (
             <>
               {/* 옵션 목록 */}
-              {filteredOptions.map((option) => (
+              {filteredOptions.map((option, index) => (
                 <div
                   key={option.code}
+                  ref={(el) => (optionRefs.current[index] = el)}
                   onClick={() => handleSelect(option.code, option.label)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
                   className={[
                     'cursor-pointer px-3 py-2 transition-colors',
-                    selectedCode === option.code
+                    highlightedIndex === index
+                      ? 'bg-blue-100 text-[#005BAC]'
+                      : selectedCode === option.code
                       ? 'bg-blue-50 text-[#005BAC] font-semibold'
                       : 'hover:bg-blue-50',
                   ].join(' ')}
@@ -170,8 +238,13 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
               {/* "새 항목 추가" 옵션 */}
               {showAddNewOption && (
                 <div
+                  ref={(el) => (optionRefs.current[filteredOptions.length] = el)}
                   onClick={handleAddNew}
-                  className="flex cursor-pointer items-center gap-2 border-t border-gray-200 px-3 py-2 text-[#005BAC] transition-colors hover:bg-blue-50"
+                  onMouseEnter={() => setHighlightedIndex(filteredOptions.length)}
+                  className={[
+                    'flex cursor-pointer items-center gap-2 border-t border-gray-200 px-3 py-2 text-[#005BAC] transition-colors',
+                    highlightedIndex === filteredOptions.length ? 'bg-blue-100' : 'hover:bg-blue-50',
+                  ].join(' ')}
                 >
                   <svg
                     className="h-4 w-4 flex-shrink-0"
