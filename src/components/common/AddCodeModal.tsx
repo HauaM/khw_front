@@ -38,8 +38,8 @@ const AddCodeModal: React.FC<AddCodeModalProps> = ({
 
     if (!code.trim()) {
       newErrors.code = `${codeTypeLabel} 코드는 필수입니다.`;
-    } else if (!/^[A-Z_]+$/.test(code)) {
-      newErrors.code = '코드는 영문 대문자와 언더스코어(_)만 사용할 수 있습니다.';
+    } else if (!/^[A-Z0-9_]+$/.test(code)) {
+      newErrors.code = '코드는 영문 대문자, 숫자, 언더스코어(_)만 사용할 수 있습니다.';
     }
 
     setErrors(newErrors);
@@ -141,7 +141,7 @@ const AddCodeModal: React.FC<AddCodeModalProps> = ({
             <span className="mt-1 text-[12px] text-red-600">{errors.code}</span>
           )}
           <span className="mt-1 text-[12px] text-gray-600">
-            영문 대문자와 언더스코어(_)만 사용하세요.
+            영문 대문자, 숫자, 언더스코어(_)만 사용하세요.
           </span>
         </div>
 
