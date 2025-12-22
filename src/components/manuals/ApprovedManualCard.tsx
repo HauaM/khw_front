@@ -34,9 +34,8 @@ const ApprovedManualCard: React.FC<ApprovedManualCardProps> = ({ manual, isHighl
   return (
     <div
       id={`manual-${manual.id}`}
-      className={`rounded-lg border bg-white p-4 shadow-sm transition-all ${
-        isHighlighted ? 'border-primary-500 shadow-lg' : 'border-gray-200'
-      }`}
+      className={`rounded-lg border bg-white p-4 shadow-sm transition-all ${isHighlighted ? 'border-primary-500 shadow-lg' : 'border-gray-200'
+        }`}
     >
       <div className="flex items-start justify-between gap-3 border-b border-gray-200 pb-3 mb-4">
         <div className="flex-1 space-y-1">
@@ -46,23 +45,20 @@ const ApprovedManualCard: React.FC<ApprovedManualCardProps> = ({ manual, isHighl
             </span>
             <h3 className="text-base font-semibold text-gray-900">{manual.topic}</h3>
           </div>
-          <p className="text-xs text-gray-400 font-mono">ID: {manual.id}</p>
+          <div className='flex items-center gap-2'>
+            <span className="text-xs text-gray-400 font-mono">ID: {manual.id}</span>
+            <button
+              type="button"
+              onClick={onViewConsultation}
+              className="inline-flex items-center justify-center text-primary-500 hover:text-primary-600 transition"
+              title="원본 상담 보기"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={onViewConsultation}
-          title="상담 원본 보기"
-          className="rounded-md p-1.5 text-primary-500 transition hover:bg-primary-50"
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-        </button>
       </div>
 
       <div className="mb-4 space-y-2">
@@ -102,7 +98,7 @@ const ApprovedManualCard: React.FC<ApprovedManualCardProps> = ({ manual, isHighl
         <span className="text-gray-300">•</span>
         <span>생성 {formatDateTime(manual.created_at)}</span>
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -84,6 +84,20 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
     setIsOpen(true);
   }, []);
 
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.currentTarget.value;
+      setSearchTerm(newValue);
+      setIsOpen(true);
+
+      // 사용자가 입력을 모두 지운 경우 선택 해제
+      if (newValue === '' && selectedCode) {
+        onChange('', '');
+      }
+    },
+    [selectedCode, onChange]
+  );
+
   const handleSelect = useCallback(
     (code: string, label: string) => {
       onChange(code, label);
@@ -163,10 +177,7 @@ const TypeAheadSelectBox: React.FC<TypeAheadSelectBoxProps> = ({
           ref={inputRef}
           type="text"
           value={displayValue}
-          onChange={(e) => {
-            setSearchTerm(e.currentTarget.value);
-            setIsOpen(true);
-          }}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => {
             setIsFocused(true);
