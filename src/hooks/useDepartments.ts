@@ -18,7 +18,7 @@ export const useDepartments = (params?: {
 }) => {
   return useApiQuery<DepartmentResponse[]>(
     ['departments', params],
-    () => getDepartments(params),
+    () => getDepartments(params) as any,
     {
       autoShowError: true,
       autoShowFeedback: false,
@@ -34,7 +34,7 @@ export const useCreateDepartment = () => {
 
   return useApiMutation(
     (data: { department_code: string; department_name: string; is_active?: boolean }) =>
-      createDepartment(data),
+      createDepartment(data) as any,
     {
       successMessage: '부서가 성공적으로 등록되었습니다.',
       autoShowError: true,
@@ -60,7 +60,7 @@ export const useUpdateDepartment = () => {
     ({ id, data }: {
       id: string;
       data: { department_code: string; department_name: string; is_active?: boolean };
-    }) => updateDepartment(id, data),
+    }) => updateDepartment(id, data) as any,
     {
       successMessage: '부서가 성공적으로 수정되었습니다.',
       autoShowError: true,

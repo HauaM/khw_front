@@ -1,5 +1,6 @@
 import axiosClient, { api } from './axiosClient';
 import { ApiUser, AuthUser, TokenResponse, UserRole } from '@/types/auth';
+import type { ApiResponse } from '@/types/api';
 
 export interface LoginPayload {
   username: string;

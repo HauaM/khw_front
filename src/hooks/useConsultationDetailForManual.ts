@@ -1,7 +1,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useApiQuery } from '@/hooks/useApiQuery';
 import { getConsultationDetail } from '@/lib/api/consultations';
-import type { ConsultationDetail } from '@/types/consultations';
+import type { ConsultationDetail, BusinessType } from '@/types/consultations';
 import type { ConsultationResponse } from '@/lib/api/consultations';
 
 /**
@@ -20,7 +20,7 @@ const mapToDetail = (response: ConsultationResponse): ConsultationDetail => ({
   consultation_date: response.consultation_date ?? undefined,
   branch_code: response.branch_code,
   employee_id: response.employee_id,
-  business_type: response.business_type ?? undefined,
+  business_type: (response.business_type ?? undefined) as BusinessType | null | undefined,
   error_code: response.error_code ?? undefined,
   metadata_fields: response.metadata_fields ?? undefined,
 });
@@ -46,10 +46,10 @@ export const useConsultationDetailForManual = (
     }
   );
 
-  const detail = query.data ? mapToDetail(query.data) : null;
+  const detail = query.data ? mapToDetail(query.data as ConsultationResponse) : null;
 
   return {
     ...query,
     data: detail,
-  };
+  } as UseConsultationDetailForManualResult;
 };

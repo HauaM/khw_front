@@ -34,7 +34,7 @@ const useCreateManualDraft = (options?: UseCreateManualDraftOptions) => {
           throw new Error('메뉴얼 초안 생성 실패: 응답 데이터 없음');
         }
 
-        options?.onSuccess?.(response.data);
+        options?.onSuccess?.(response.data as unknown as ManualDraftResponse);
         return response.data;
       } catch (err) {
         const normalizedError =

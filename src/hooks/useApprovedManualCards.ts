@@ -18,7 +18,7 @@ export const useApprovedManualCards = (manualId: string | null) => {
   );
 
   return {
-    data: query.data || [],
+    data: (query.data as ManualCardItem[]) || [],
     isLoading: query.isLoading,
     error: query.error instanceof Error ? query.error : null,
   };

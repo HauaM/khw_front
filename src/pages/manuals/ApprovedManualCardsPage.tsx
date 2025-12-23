@@ -5,6 +5,9 @@ import ApprovedManualCardList from '@/components/manuals/ApprovedManualCardList'
 import { useApprovedManualCards } from '@/hooks/useApprovedManualCards';
 import { useToast } from '@/hooks/useToast';
 import ConsultationDetailModal from '@/components/modals/ConsultationDetailModal';
+import type { ManualCardItem } from '@/types/manuals';
+
+type ManualListItem = ManualCardItem;
 
 const DEFAULT_BUSINESS_TYPE = 'INTERNET_BANKING';
 const DEFAULT_ERROR_CODE = 'E001';
@@ -34,9 +37,9 @@ const ApprovedManualCardsPage: React.FC = () => {
   const filteredManuals = useMemo(() => {
     if (!filterTerm) return manuals;
     const normalized = filterTerm.toLowerCase();
-    return manuals.filter((manual) => {
+    return manuals.filter((manual: ManualListItem) => {
       const topicMatches = manual.topic.toLowerCase().includes(normalized);
-      const keywordMatches = manual.keywords.some((keyword) =>
+      const keywordMatches = manual.keywords.some((keyword: string) =>
         keyword.toLowerCase().includes(normalized)
       );
       const idMatches = manual.id === filterTerm;
@@ -57,7 +60,7 @@ const ApprovedManualCardsPage: React.FC = () => {
 
       const targetElement = cardRefs.current[targetId];
       if (!targetElement) {
-        const suggestions = manuals.slice(0, SUGGESTION_LIMIT).map((manual) => manual.id);
+        const suggestions = manuals.slice(0, SUGGESTION_LIMIT).map((manual: ManualListItem) => manual.id);
         const suggestionMessage = suggestions.length
           ? `\n사용 가능한 ID:\n- ${suggestions.join('\n- ')}`
           : '';
@@ -94,9 +97,9 @@ const ApprovedManualCardsPage: React.FC = () => {
       setFilterTerm(trimmed);
 
       const normalized = trimmed.toLowerCase();
-      const matchedManuals = manuals.filter((manual) => {
+      const matchedManuals = manuals.filter((manual: ManualListItem) => {
         const topicMatches = manual.topic.toLowerCase().includes(normalized);
-        const keywordMatches = manual.keywords.some((keyword) =>
+        const keywordMatches = manual.keywords.some((keyword: string) =>
           keyword.toLowerCase().includes(normalized)
         );
         const idMatches = manual.id === trimmed;

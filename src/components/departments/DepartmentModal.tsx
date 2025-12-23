@@ -32,7 +32,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
     if (isOpen && mode === 'edit' && department) {
       setDepartmentCode(department.department_code);
       setDepartmentName(department.department_name);
-      setIsActive(department.is_active);
+      setIsActive(department.is_active ?? true);
     } else if (isOpen && mode === 'create') {
       setDepartmentCode('');
       setDepartmentName('');

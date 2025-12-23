@@ -70,16 +70,17 @@ export const useUsers = (initialParams?: UserSearchFormParams) => {
   };
 
   // API 응답이 배열로 직접 오는 경우와 페이지네이션 객체로 오는 경우 모두 처리
-  const isArrayResponse = Array.isArray(query.data);
-  const users = isArrayResponse ? query.data : query.data?.items || [];
-  const total = isArrayResponse ? users.length : query.data?.total || 0;
+  const queryData = query.data as any;
+  const isArrayResponse = Array.isArray(queryData);
+  const users = isArrayResponse ? queryData : (queryData?.items || []);
+  const total = isArrayResponse ? users.length : (queryData?.total || 0);
 
   return {
     users,
     total,
-    page: isArrayResponse ? 1 : query.data?.page || searchParams.page || 1,
-    pageSize: isArrayResponse ? users.length : query.data?.page_size || searchParams.page_size || 20,
-    totalPages: isArrayResponse ? 1 : query.data?.total_pages || 0,
+    page: isArrayResponse ? 1 : (queryData?.page || searchParams.page || 1),
+    pageSize: isArrayResponse ? users.length : (queryData?.page_size || searchParams.page_size || 20),
+    totalPages: isArrayResponse ? 1 : (queryData?.total_pages || 0),
     isLoading: query.isLoading || query.isFetching,
     error: query.error instanceof Error ? query.error : null,
     searchParams,

@@ -6,21 +6,27 @@ import { api } from './axiosClient';
  * 부서 목록 조회 (관리자)
  * GET /api/v1/admin/departments
  */
-export const getDepartments = (params?: {
+export const getDepartments = async (params?: {
   is_active?: boolean;
   department_code?: string;
   department_name?: string;
-}) => api.get<DepartmentResponse[]>('/api/v1/admin/departments', { params });
+}) => {
+  const response = await api.get<ApiResponse<DepartmentResponse[]>>('/api/v1/admin/departments', { params });
+  return response.data;
+};
 
 /**
  * 부서 생성
  * POST /api/v1/admin/departments
  */
-export const createDepartment = (data: {
+export const createDepartment = async (data: {
   department_code: string;
   department_name: string;
   is_active?: boolean;
-}) => api.post<DepartmentResponse>('/api/v1/admin/departments', data);
+}) => {
+  const response = await api.post<ApiResponse<DepartmentResponse>>('/api/v1/admin/departments', data);
+  return response.data;
+};
 
 /**
  * 부서 수정
@@ -29,11 +35,14 @@ export const createDepartment = (data: {
  * @param id - 부서 ID (UUID)
  * @param data - 수정할 부서 정보 (DepartmentUpdate)
  */
-export const updateDepartment = (id: string, data: {
+export const updateDepartment = async (id: string, data: {
   department_code: string;
   department_name: string;
   is_active?: boolean;
-}) => api.put<DepartmentResponse>(`/api/v1/admin/departments/${id}`, data);
+}) => {
+  const response = await api.put<ApiResponse<DepartmentResponse>>(`/api/v1/admin/departments/${id}`, data);
+  return response.data;
+};
 
 /**
  * 부서 삭제

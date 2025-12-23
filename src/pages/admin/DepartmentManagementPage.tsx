@@ -22,7 +22,8 @@ const DepartmentManagementPage: React.FC = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<DepartmentResponse | null>(null);
 
   // React Query 훅들
-  const { data: departments = [], isLoading } = useDepartments(searchParams);
+  const { data: departmentsData, isLoading } = useDepartments(searchParams);
+  const departments = (departmentsData as DepartmentResponse[]) || [];
   const createMutation = useCreateDepartment();
   const updateMutation = useUpdateDepartment();
   const deleteMutation = useDeleteDepartment();

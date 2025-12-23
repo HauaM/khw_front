@@ -2,6 +2,7 @@
  * 공통코드 관리 페이지의 상태 관리 훅
  */
 import { useCallback, useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 import { useToast } from '@/hooks/useToast';
 import {
   CommonCodeGroup,
@@ -18,6 +19,21 @@ import {
   deactivateCommonCodeItem,
   getErrorMessage,
 } from '@/lib/api/commonCodes';
+
+/**
+ * unknown 타입을 Error 또는 AxiosError로 안전하게 변환
+ */
+const toError = (error: unknown): Error | AxiosError => {
+  if (error instanceof Error) {
+    return error;
+  }
+  if (typeof error === 'object' && error !== null) {
+    if ('isAxiosError' in error) {
+      return error as AxiosError;
+    }
+  }
+  return new Error(String(error));
+};
 
 export interface UseCommonCodeManagementResult {
   // 데이터
@@ -167,7 +183,7 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
       setGroups(response.data || []);
     } catch (error) {
       console.error('Failed to load groups:', error);
-      const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(toError(error));
       showToast(`그룹 목록 조회 실패: ${errorMessage}`, 'error');
     } finally {
       setIsLoadingGroups(false);
@@ -182,7 +198,7 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
         setCodeItems(response.data || []);
       } catch (error) {
         console.error('Failed to load code items:', error);
-        const errorMessage = getErrorMessage(error);
+        const errorMessage = getErrorMessage(toError(error));
         showToast(`코드 항목 조회 실패: ${errorMessage}`, 'error');
       } finally {
         setIsLoadingItems(false);
@@ -302,7 +318,7 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
         closeGroupModal();
       } catch (error) {
         console.error('Failed to save group:', error);
-        const errorMessage = getErrorMessage(error);
+        const errorMessage = getErrorMessage(toError(error));
         showToast(`그룹 저장 실패: ${errorMessage}`, 'error');
       } finally {
         setIsSaving(false);
@@ -326,7 +342,7 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
         closeDeleteGroupDialog();
       } catch (error) {
         console.error('Failed to delete group:', error);
-        const errorMessage = getErrorMessage(error);
+        const errorMessage = getErrorMessage(toError(error));
         showToast(`그룹 삭제 실패: ${errorMessage}`, 'error');
       } finally {
         setIsSaving(false);
@@ -359,7 +375,7 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
         closeItemModal();
       } catch (error) {
         console.error('Failed to save item:', error);
-        const errorMessage = getErrorMessage(error);
+        const errorMessage = getErrorMessage(toError(error));
         showToast(`코드 저장 실패: ${errorMessage}`, 'error');
       } finally {
         setIsSaving(false);
@@ -381,7 +397,7 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
         closeDeleteDialog();
       } catch (error) {
         console.error('Failed to deactivate item:', error);
-        const errorMessage = getErrorMessage(error);
+        const errorMessage = getErrorMessage(toError(error));
         showToast(`코드 삭제 실패: ${errorMessage}`, 'error');
       } finally {
         setIsSaving(false);

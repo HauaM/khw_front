@@ -34,7 +34,7 @@ export const useScrollToRow = (options: UseScrollToRowOptions = {}) => {
     onToast,
   } = options;
 
-  const highlightTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const highlightTimerRef = useRef<number | null>(null);
   const highlightedIdRef = useRef<string | null>(null);
 
   /**

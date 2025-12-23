@@ -6,7 +6,7 @@ import { useApiQuery } from '@/hooks/useApiQuery';
 import { useApiMutation } from '@/hooks/useApiMutation';
 import { getDepartments } from '@/lib/api/departments';
 import { deleteUser } from '@/lib/api/users';
-import type { UserResponse } from '@/types/users';
+import type { UserResponse, DepartmentResponse } from '@/types/users';
 import type { TypeAheadOption } from '@/components/common/TypeAheadSelectBox';
 import UserSearchPanel from '@/components/admin/UserSearchPanel';
 import UserTable from '@/components/admin/UserTable';
@@ -33,7 +33,7 @@ const UserManagementPage: React.FC = () => {
     refetch,
   } = useUsers();
 
-  const departmentQuery = useApiQuery(['departments'], () => getDepartments({ is_active: true }), {
+  const departmentQuery = useApiQuery(['departments'], () => getDepartments({ is_active: true }) as any, {
     autoShowFeedback: false,
     autoShowError: true,
     queryOptions: {
@@ -41,12 +41,12 @@ const UserManagementPage: React.FC = () => {
     },
   });
 
-  const departments = useMemo(() => departmentQuery.data || [], [departmentQuery.data]);
+  const departments = useMemo(() => (departmentQuery.data as DepartmentResponse[]) || [], [departmentQuery.data]);
 
   const searchDepartmentOptions: TypeAheadOption[] = useMemo(() => {
     return [
       { code: '', label: '전체' },
-      ...departments.map((dept) => ({
+      ...departments.map((dept: DepartmentResponse) => ({
         code: dept.department_code,
         label: dept.department_name,
       })),
@@ -54,7 +54,7 @@ const UserManagementPage: React.FC = () => {
   }, [departments]);
 
   const formDepartmentOptions: TypeAheadOption[] = useMemo(() => {
-    return departments.map((dept) => ({
+    return departments.map((dept: DepartmentResponse) => ({
       code: dept.id,
       label: `${dept.department_name} (${dept.department_code})`,
     }));
@@ -75,7 +75,7 @@ const UserManagementPage: React.FC = () => {
 
   // 수정 버튼
   const handleEdit = (userId: number) => {
-    const target = users.find((user) => user.id === userId) || null;
+    const target = users.find((user: UserResponse) => user.id === userId) || null;
     if (!target) {
       toast.error('선택한 사용자를 찾을 수 없습니다.');
       return;
