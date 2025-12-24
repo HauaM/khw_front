@@ -119,7 +119,7 @@ const ReviewTaskListPage: React.FC = () => {
     <main className="space-y-6">
       {/* 페이지 헤더 */}
       <section>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">메뉴얼 검토</h1>
+        <h1 className="mb-2 text-2xl font-bold text-gray-900">메뉴얼 검토</h1>
         <p className="text-sm text-gray-600">
           승인·반려를 기다리는 메뉴얼 검토 Task를 조회합니다
         </p>

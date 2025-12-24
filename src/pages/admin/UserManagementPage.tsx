@@ -116,8 +116,8 @@ const UserManagementPage: React.FC = () => {
   return (
     <div className="flex-1 overflow-auto">
       {/* Page Header */}
-      <div className='mb-6'>
-        <h1 className="text-3xl font-bold text-gray-900">사용자 관리</h1>
+      <div className='mb-6 gap-2'>
+        <h1 className="text-2xl font-bold text-gray-900">사용자 관리</h1>
         <p className="text-sm text-gray-600 mt-1">
           시스템에서 사용하는 사용자 그룹 및 사용자 정보를 관리합니다.
         </p>

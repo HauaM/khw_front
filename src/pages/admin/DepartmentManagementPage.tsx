@@ -86,6 +86,14 @@ const DepartmentManagementPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-bold text-gray-900">부서 관리</h1>
+        <p className="text-sm text-gray-600">
+          시스템에서 사용하는 부서 그룹 및 부서 정보를 관리합니다.
+        </p>
+      </div>
+
       {/* 검색 패널 */}
       <DepartmentSearchForm onSearch={handleSearch} onReset={handleReset} />
 

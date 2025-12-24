@@ -63,7 +63,7 @@ const CommonCodeManagementPage: React.FC = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">공통코드 관리</h1>
+        <h1 className="text-2xl font-bold text-gray-900">공통코드 관리</h1>
         <p className="text-sm text-gray-600 mt-1">
           시스템에서 사용하는 공통코드 그룹 및 코드 항목을 관리합니다.
         </p>

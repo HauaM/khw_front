@@ -78,7 +78,7 @@ export const convertApiResponseToManualDraft = (
 export const createManualDraft = (payload: ManualDraftCreatePayload) =>
   api.post<ApiResponse<ManualDraftCreateResponse>>('/api/v1/manuals/draft', payload, {
     // 메뉴얼 생성은 시간이 오래 걸릴 수 있어 요청 타임아웃을 넉넉히 120초로 설정
-    timeout: 120_000,
+    timeout: 360_000,
   });
 
 /**
