@@ -2,6 +2,10 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
+# Vite envs are baked at build time; provide a default for container builds.
+ARG VITE_API_BASE_URL=/api
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 # 의존성 캐시를 위해 먼저 복사
 COPY package*.json ./
 # yarn을 쓰면: COPY yarn.lock ./

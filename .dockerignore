@@ -1,0 +1,33 @@
+# node / package manager
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+
+# build output (Docker 안에서 다시 빌드함)
+dist
+
+# git
+.git
+.gitignore
+
+# env & secrets
+.env
+.env.*
+*.pem
+*.key
+
+# IDE / OS
+.vscode
+.idea
+.DS_Store
+.claude
+.serena
+Thumbs.db
+
+# test & docs
+coverage
+*.md
+
+# docker files themselves (선택)
+docker-compose.yml
