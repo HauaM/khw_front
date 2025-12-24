@@ -15,7 +15,7 @@ import { ApiResponseError, getUserFriendlyErrorMessage } from '@/lib/api/respons
 import { useToast } from './useToast';
 import { useFeedback } from './useFeedback';
 
-interface ApiMutationOptions<TData, _TVariables> {
+interface ApiMutationOptions<TData, _TVariables = unknown> {
   /** 피드백 메시지 자동 표시 여부 (기본값: true) */
   autoShowFeedback?: boolean;
   /** 에러 메시지 자동 표시 여부 (기본값: true) */
@@ -41,9 +41,9 @@ interface ApiMutationOptions<TData, _TVariables> {
  *   { successMessage: '저장되었습니다.' }
  * );
  */
-export function useApiMutation<TData, _TVariables = void>(
-  mutationFn: (variables: _TVariables) => Promise<ApiResponse<TData>>,
-  options: ApiMutationOptions<TData, _TVariables> = {}
+export function useApiMutation<TData, TVariables = void>(
+  mutationFn: (variables: TVariables) => Promise<ApiResponse<TData>>,
+  options: ApiMutationOptions<TData, TVariables> = {}
 ) {
   const {
     autoShowFeedback = true,
@@ -60,7 +60,7 @@ export function useApiMutation<TData, _TVariables = void>(
 
   return useMutation({
     ...mutationOptions,
-    mutationFn: async (variables: _TVariables) => {
+    mutationFn: async (variables: TVariables) => {
       const response = await mutationFn(variables);
 
       if (!isApiSuccess(response)) {

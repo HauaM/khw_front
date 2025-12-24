@@ -14,7 +14,7 @@ import { ApiResponseError, getUserFriendlyErrorMessage } from '@/lib/api/respons
 import { useToast } from './useToast';
 import { useFeedback } from './useFeedback';
 
-interface ApiQueryOptions<_T> {
+interface ApiQueryOptions<_T = unknown> {
   /** 피드백 메시지 자동 표시 여부 (기본값: true) */
   autoShowFeedback?: boolean;
   /** 에러 메시지 자동 표시 여부 (기본값: true) */
@@ -37,11 +37,11 @@ interface ApiQueryOptions<_T> {
  *   { autoShowError: true }
  * );
  */
-export function useApiQuery<_T>(
+export function useApiQuery<T>(
   queryKey: any[],
-  queryFn: () => Promise<ApiResponse<_T>>,
-  options: ApiQueryOptions<_T> = {}
-) {
+  queryFn: () => Promise<ApiResponse<T>>,
+  options: ApiQueryOptions<T> = {}
+): ReturnType<typeof useQuery<T, Error>> {
   const {
     autoShowFeedback = true,
     autoShowError = true,

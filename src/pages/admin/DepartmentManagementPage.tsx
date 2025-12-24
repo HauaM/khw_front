@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import DepartmentSearchForm from '@/components/departments/DepartmentSearchForm';
 import DepartmentTable from '@/components/departments/DepartmentTable';
 import DepartmentModal from '@/components/departments/DepartmentModal';
@@ -11,6 +12,7 @@ import {
 import type { DepartmentResponse } from '@/types/users';
 
 const DepartmentManagementPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useState<{
     department_name?: string;
     department_code?: string;
@@ -23,7 +25,7 @@ const DepartmentManagementPage: React.FC = () => {
 
   // React Query 훅들
   const { data: departmentsData, isLoading } = useDepartments(searchParams);
-  const departments = (departmentsData as DepartmentResponse[]) || [];
+  const departments: DepartmentResponse[] = departmentsData || [];
   const createMutation = useCreateDepartment();
   const updateMutation = useUpdateDepartment();
   const deleteMutation = useDeleteDepartment();
@@ -38,6 +40,8 @@ const DepartmentManagementPage: React.FC = () => {
 
   const handleReset = () => {
     setSearchParams({});
+    // 캐시를 무효화하고 다시 조회
+    queryClient.invalidateQueries({ queryKey: ['departments'] });
   };
 
   const handleOpenCreateModal = () => {

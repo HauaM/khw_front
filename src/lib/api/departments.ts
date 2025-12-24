@@ -10,9 +10,10 @@ export const getDepartments = async (params?: {
   is_active?: boolean;
   department_code?: string;
   department_name?: string;
-}) => {
+}): Promise<ApiResponse<DepartmentResponse[]>> => {
+  // api.get()이 이미 .then((res) => res.data)를 수행하므로 response가 곧 ApiResponse
   const response = await api.get<ApiResponse<DepartmentResponse[]>>('/api/v1/admin/departments', { params });
-  return response.data;
+  return response as unknown as ApiResponse<DepartmentResponse[]>;
 };
 
 /**
@@ -23,9 +24,9 @@ export const createDepartment = async (data: {
   department_code: string;
   department_name: string;
   is_active?: boolean;
-}) => {
+}): Promise<ApiResponse<DepartmentResponse>> => {
   const response = await api.post<ApiResponse<DepartmentResponse>>('/api/v1/admin/departments', data);
-  return response.data;
+  return response as unknown as ApiResponse<DepartmentResponse>;
 };
 
 /**
@@ -39,9 +40,9 @@ export const updateDepartment = async (id: string, data: {
   department_code: string;
   department_name: string;
   is_active?: boolean;
-}) => {
+}): Promise<ApiResponse<DepartmentResponse>> => {
   const response = await api.put<ApiResponse<DepartmentResponse>>(`/api/v1/admin/departments/${id}`, data);
-  return response.data;
+  return response as unknown as ApiResponse<DepartmentResponse>;
 };
 
 /**
@@ -49,6 +50,22 @@ export const updateDepartment = async (id: string, data: {
  * DELETE /api/v1/admin/departments/{department_id}
  *
  * @param id - 부서 ID (UUID)
- * @returns 204 No Content
+ * @returns 204 No Content or ApiResponse
  */
-export const deleteDepartment = (id: string) => api.delete(`/api/v1/admin/departments/${id}`);
+export const deleteDepartment = async (id: string): Promise<ApiResponse<null>> => {
+  const response = await api.delete(`/api/v1/admin/departments/${id}`);
+  // DELETE는 204 No Content일 수 있으므로, 빈 응답이면 success 객체를 생성
+  if (!response || typeof response !== 'object' || !('success' in response)) {
+    return {
+      success: true,
+      data: null,
+      error: null,
+      meta: {
+        requestId: '',
+        timestamp: new Date().toISOString(),
+      },
+      feedback: [],
+    };
+  }
+  return response as unknown as ApiResponse<null>;
+};

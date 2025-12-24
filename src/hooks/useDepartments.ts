@@ -18,7 +18,7 @@ export const useDepartments = (params?: {
 }) => {
   return useApiQuery<DepartmentResponse[]>(
     ['departments', params],
-    () => getDepartments(params) as any,
+    () => getDepartments(params),
     {
       autoShowError: true,
       autoShowFeedback: false,
