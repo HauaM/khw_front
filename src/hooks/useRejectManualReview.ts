@@ -1,63 +1,56 @@
 /**
- * 메뉴얼 검토 반려 훅
+ * 메뉴얼 검토 반려 훅 (API 공통 규격 적용)
  * 검토 Task를 반려 처리하는 기능을 제공합니다.
+ *
+ * useApiMutation 패턴 적용:
+ * - 자동 피드백/에러 처리
+ * - React Query의 useMutation 기반
+ * - retry 로직, optimistic updates 지원
  */
 
-import { useState } from 'react';
-import { rejectManualReviewTask } from '@/lib/api/manualReviewTasks';
+import { useApiMutation } from '@/hooks/useApiMutation';
+import { rejectManualReviewTaskApi } from '@/lib/api/manualReviewTasks';
+import { BackendManualReviewTask } from '@/types/reviews';
+
+interface RejectManualReviewVariables {
+  taskId: string;
+  reviewNotes: string;
+}
 
 interface UseRejectManualReviewOptions {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
 
-export interface UseRejectManualReviewResult {
-  isLoading: boolean;
-  error: Error | null;
-  mutate: (taskId: string, reason: string) => Promise<void>;
-}
-
 /**
  * 메뉴얼 검토 반려 훅
  *
  * @param options 콜백 옵션 (onSuccess, onError)
- * @returns { isLoading, error, mutate }
+ * @returns React Query mutation 결과
  *
- * TODO: 추후 React Query useMutation으로 교체
- * - 자동 error handling
- * - retry 로직
- * - optimistic updates 지원
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = useRejectManualReview({
+ *   onSuccess: () => navigate('/reviews')
+ * });
+ *
+ * mutate({ taskId, reviewNotes: '반려 사유...' });
+ * ```
  */
-export function useRejectManualReview(
-  options?: UseRejectManualReviewOptions
-): UseRejectManualReviewResult {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const mutate = async (taskId: string, reason: string) => {
-    if (!reason || reason.trim().length < 10) {
-      const error = new Error('반려 사유는 최소 10글자 이상이어야 합니다');
-      setError(error);
-      options?.onError?.(error);
-      return;
+export function useRejectManualReview(options?: UseRejectManualReviewOptions) {
+  return useApiMutation<BackendManualReviewTask, RejectManualReviewVariables>(
+    ({ taskId, reviewNotes }) => rejectManualReviewTaskApi(taskId, reviewNotes),
+    {
+      successMessage: '검토가 반려되었습니다.',
+      autoShowError: true,
+      autoShowFeedback: true,
+      errorMessages: {
+        'VALIDATION.ERROR': '반려 사유는 최소 10글자 이상이어야 합니다.',
+        'RESOURCE.NOT_FOUND': '해당 검토 작업을 찾을 수 없습니다.',
+        'AUTH.FORBIDDEN': '반려 권한이 없습니다.',
+      },
+      onApiSuccess: options?.onSuccess,
+      onApiError: options?.onError,
     }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      await rejectManualReviewTask(taskId, reason);
-
-      options?.onSuccess?.();
-    } catch (err) {
-      const errorObj =
-        err instanceof Error ? err : new Error('Failed to reject manual review');
-      setError(errorObj);
-      options?.onError?.(errorObj);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return { isLoading, error, mutate };
+  );
 }

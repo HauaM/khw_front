@@ -1,67 +1,58 @@
 /**
- * 메뉴얼 검토 승인 훅
+ * 메뉴얼 검토 승인 훅 (API 공통 규격 적용)
  * 검토 Task를 승인 처리하는 기능을 제공합니다.
+ *
+ * useApiMutation 패턴 적용:
+ * - 자동 피드백/에러 처리
+ * - React Query의 useMutation 기반
+ * - retry 로직, optimistic updates 지원
  */
 
-import { useState } from 'react';
-import { approveManualReviewTask } from '@/lib/api/manualReviewTasks';
+import { useApiMutation } from '@/hooks/useApiMutation';
+import { approveManualReviewTaskApi } from '@/lib/api/manualReviewTasks';
+import { BackendManualReviewTask } from '@/types/reviews';
+
+interface ApproveManualReviewVariables {
+  taskId: string;
+  employeeId: string;
+  reviewNotes?: string;
+}
 
 interface UseApproveManualReviewOptions {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
 
-export interface UseApproveManualReviewResult {
-  isLoading: boolean;
-  error: Error | null;
-  mutate: (taskId: string, employeeId: string, reviewNotes?: string) => Promise<void>;
-}
-
 /**
  * 메뉴얼 검토 승인 훅
  *
  * @param options 콜백 옵션 (onSuccess, onError)
- * @returns { isLoading, error, mutate }
+ * @returns React Query mutation 결과
  *
- * TODO: 추후 React Query useMutation으로 교체
- * - 자동 error handling
- * - retry 로직
- * - optimistic updates 지원
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = useApproveManualReview({
+ *   onSuccess: () => navigate('/reviews')
+ * });
+ *
+ * mutate({ taskId, employeeId, reviewNotes });
+ * ```
  */
-export function useApproveManualReview(
-  options?: UseApproveManualReviewOptions
-): UseApproveManualReviewResult {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const mutate = async (
-    taskId: string,
-    employeeId: string,
-    reviewNotes?: string
-  ) => {
-    if (!employeeId || employeeId.trim() === '') {
-      const error = new Error('Employee ID is required');
-      setError(error);
-      options?.onError?.(error);
-      return;
+export function useApproveManualReview(options?: UseApproveManualReviewOptions) {
+  return useApiMutation<BackendManualReviewTask, ApproveManualReviewVariables>(
+    ({ taskId, employeeId, reviewNotes }) =>
+      approveManualReviewTaskApi(taskId, employeeId, reviewNotes),
+    {
+      successMessage: '검토가 승인되었습니다.',
+      autoShowError: true,
+      autoShowFeedback: true,
+      errorMessages: {
+        'VALIDATION.ERROR': '입력값이 올바르지 않습니다.',
+        'RESOURCE.NOT_FOUND': '해당 검토 작업을 찾을 수 없습니다.',
+        'AUTH.FORBIDDEN': '승인 권한이 없습니다.',
+      },
+      onApiSuccess: options?.onSuccess,
+      onApiError: options?.onError,
     }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      await approveManualReviewTask(taskId, employeeId, reviewNotes);
-
-      options?.onSuccess?.();
-    } catch (err) {
-      const errorObj =
-        err instanceof Error ? err : new Error('Failed to approve manual review');
-      setError(errorObj);
-      options?.onError?.(errorObj);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return { isLoading, error, mutate };
+  );
 }

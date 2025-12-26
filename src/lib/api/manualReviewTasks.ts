@@ -6,9 +6,8 @@
  * - POST /api/v1/manual-review/tasks/{task_id}/reject (Task 반려)
  */
 
-import { axiosClient } from '@/lib/api/axiosClient';
+import { api } from '@/lib/api/axiosClient';
 import { ApiResponse } from '@/types/api';
-import { extractApiSuccess } from '@/lib/api/responseHandler';
 import {
   ManualReviewTask,
   BackendManualReviewTask,
@@ -17,6 +16,7 @@ import {
   ManualReviewDetail,
   ManualEntry,
   BusinessType,
+  ManualReviewComparison,
 } from '@/types/reviews';
 
 /**
@@ -53,17 +53,35 @@ export function transformBackendTask(task: BackendManualReviewTask): ManualRevie
 }
 
 /**
- * 메뉴얼 검토 Task 목록 조회
+ * 메뉴얼 검토 Task 목록 조회 (API 응답)
  * OpenAPI: GET /api/v1/manual-review/tasks
+ * @param params 쿼리 파라미터
+ * @returns API 응답 (ApiResponse<BackendManualReviewTask[]>)
+ */
+export async function fetchManualReviewTasksApi(
+  params?: ManualReviewTaskQueryParams
+): Promise<ApiResponse<BackendManualReviewTask[]>> {
+  return api.get<ApiResponse<BackendManualReviewTask[]>>(
+    '/api/v1/manual-review/tasks',
+    {
+      params: {
+        status: params?.status || undefined,
+        limit: params?.limit || 100,
+      },
+    }
+  );
+}
+
+/**
+ * 메뉴얼 검토 Task 목록 조회 (레거시 - 변환된 데이터)
+ * @deprecated fetchManualReviewTasksApi + useApiQuery 사용 권장
  * @param params 쿼리 파라미터
  * @returns Task 목록
  */
 export async function fetchManualReviewTasks(
   params?: ManualReviewTaskQueryParams
 ): Promise<ManualReviewTasksResponse> {
-  // OpenAPI: GET /api/v1/manual-review/tasks
-  // status는 optional(str | None)이므로, undefined일 때는 자동으로 제외됨
-  const response = await axiosClient.get<ApiResponse<BackendManualReviewTask[]>>(
+  const apiResponse = await api.get<ApiResponse<BackendManualReviewTask[]>>(
     '/api/v1/manual-review/tasks',
     {
       params: {
@@ -73,8 +91,8 @@ export async function fetchManualReviewTasks(
     }
   );
 
-  // API 응답 추출 (에러면 자동으로 throw)
-  const backendTasks = extractApiSuccess<BackendManualReviewTask[]>(response);
+  // API 응답에서 데이터 추출
+  const backendTasks = apiResponse.success ? apiResponse.data : [];
   const tasks = backendTasks.map(transformBackendTask);
 
   return {
@@ -86,16 +104,31 @@ export async function fetchManualReviewTasks(
 }
 
 /**
- * 메뉴얼 엔트리 조회 (ManualEntry)
- * OpenAPI: GET /api/v1/manuals (목록에서 필터링)
+ * 메뉴얼 목록 조회 (API 응답)
+ * OpenAPI: GET /api/v1/manuals
+ * @returns API 응답 (ApiResponse<ManualEntry[]>)
+ */
+export async function fetchManualsApi(): Promise<ApiResponse<ManualEntry[]>> {
+  return api.get<ApiResponse<ManualEntry[]>>(
+    '/api/v1/manuals',
+    {
+      params: {
+        limit: 100,
+        status_filter: undefined,
+      },
+    }
+  );
+}
+
+/**
+ * 메뉴얼 엔트리 조회 (레거시 - 필터링)
+ * @deprecated fetchManualsApi + useApiQuery 사용 권장
  * @param entryId 엔트리 ID (uuid)
  * @returns 메뉴얼 엔트리 정보
  */
 export async function fetchManualEntry(entryId: string): Promise<ManualEntry | null> {
   try {
-    // OpenAPI: GET /api/v1/manuals (목록에서 필터링)
-    // status_filter는 optional(ManualStatus | None)이므로 undefined일 때 자동으로 제외됨
-    const response = await axiosClient.get<ApiResponse<ManualEntry[]>>(
+    const apiResponse = await api.get<ApiResponse<ManualEntry[]>>(
       '/api/v1/manuals',
       {
         params: {
@@ -105,8 +138,8 @@ export async function fetchManualEntry(entryId: string): Promise<ManualEntry | n
       }
     );
 
-    // API 응답 추출
-    const manuals = extractApiSuccess<ManualEntry[]>(response);
+    // API 응답에서 데이터 추출
+    const manuals = apiResponse.success ? apiResponse.data : [];
     const entry = manuals.find((manual) => manual.id === entryId);
 
     return entry || null;
@@ -118,16 +151,32 @@ export async function fetchManualEntry(entryId: string): Promise<ManualEntry | n
 }
 
 /**
- * 메뉴얼 검토 상세 정보 조회
+ * 메뉴얼 검토 상세 정보 조회 (신규 - API 공통 규격 적용)
+ * 단일 엔드포인트로 모든 데이터를 조회합니다.
+ *
+ * @param taskId - 검토 Task ID
+ * @returns API 응답 (ApiResponse<ManualReviewComparison>)
+ */
+export async function fetchManualReviewComparison(
+  taskId: string
+): Promise<ApiResponse<ManualReviewComparison>> {
+  return api.get<ApiResponse<ManualReviewComparison>>(
+    `/api/v1/manual-review/tasks/${taskId}`
+  );
+}
+
+/**
+ * 메뉴얼 검토 상세 정보 조회 (레거시)
  * task_id로 검토 Task를 조회하고, old_entry_id와 new_entry_id로 메뉴얼 데이터를 병렬 조회
  * OpenAPI: GET /api/v1/manual-review/tasks
  *
+ * @deprecated 새로운 fetchManualReviewComparison 사용 권장
  * @param taskId Task ID
  * @returns 검토 상세 정보 (메뉴얼 데이터 포함)
  */
 export async function fetchManualReviewDetail(taskId: string): Promise<ManualReviewDetail> {
   // 1. Task 조회
-  const tasksResponse = await axiosClient.get<ApiResponse<BackendManualReviewTask[]>>(
+  const apiResponse = await api.get<ApiResponse<BackendManualReviewTask[]>>(
     '/api/v1/manual-review/tasks',
     {
       params: {
@@ -137,8 +186,8 @@ export async function fetchManualReviewDetail(taskId: string): Promise<ManualRev
     }
   );
 
-  // API 응답 추출 (에러면 자동으로 throw)
-  const backendTasks = extractApiSuccess<BackendManualReviewTask[]>(tasksResponse);
+  // API 응답에서 데이터 추출
+  const backendTasks = apiResponse.success ? apiResponse.data : [];
 
   const backendTask = backendTasks.find((t) => t.id === taskId);
   if (!backendTask) {
@@ -178,8 +227,36 @@ export async function fetchManualReviewDetail(taskId: string): Promise<ManualRev
 }
 
 /**
- * 메뉴얼 검토 Task 승인
+ * 메뉴얼 검토 Task 승인 (API 응답)
  * OpenAPI: POST /api/v1/manual-review/tasks/{task_id}/approve
+ * @param taskId Task ID
+ * @param employeeId 검토자 employee_id (사용자 ID)
+ * @param reviewNotes 검토 의견
+ * @returns API 응답 (ApiResponse<BackendManualReviewTask>)
+ */
+export async function approveManualReviewTaskApi(
+  taskId: string,
+  employeeId: string,
+  reviewNotes?: string
+): Promise<ApiResponse<BackendManualReviewTask>> {
+  const requestBody: Record<string, string | boolean> = {
+    employee_id: employeeId,
+    create_new_version: true,
+  };
+
+  if (reviewNotes !== undefined) {
+    requestBody.review_notes = reviewNotes;
+  }
+
+  return api.post<ApiResponse<BackendManualReviewTask>>(
+    `/api/v1/manual-review/tasks/${taskId}/approve`,
+    requestBody
+  );
+}
+
+/**
+ * 메뉴얼 검토 Task 승인 (레거시)
+ * @deprecated approveManualReviewTaskApi + useApiMutation 사용 권장
  * @param taskId Task ID
  * @param employeeId 검토자 employee_id (사용자 ID)
  * @param reviewNotes 검토 의견
@@ -190,30 +267,49 @@ export async function approveManualReviewTask(
   employeeId: string,
   reviewNotes?: string
 ): Promise<BackendManualReviewTask> {
-  // ManualReviewApproval 스키마: employee_id (검토자의 employee_id), create_new_version, notes
   const requestBody: Record<string, string | boolean> = {
     employee_id: employeeId,
     create_new_version: true,
   };
 
-  // review_notes가 있을 경우만 포함 (undefined 제외)
   if (reviewNotes !== undefined) {
     requestBody.review_notes = reviewNotes;
   }
 
-  const response = await axiosClient.post<ApiResponse<BackendManualReviewTask>>(
+  const apiResponse = await api.post<ApiResponse<BackendManualReviewTask>>(
     `/api/v1/manual-review/tasks/${taskId}/approve`,
     requestBody
   );
 
-  // API 응답 추출 (에러면 자동으로 throw)
-  const approvedTask = extractApiSuccess<BackendManualReviewTask>(response);
-  return approvedTask;
+  // API 응답에서 데이터 추출
+  if (apiResponse.success) {
+    return apiResponse.data;
+  }
+  throw new Error(apiResponse.error?.message || 'Approval failed');
 }
 
 /**
- * 메뉴얼 검토 Task 반려
+ * 메뉴얼 검토 Task 반려 (API 응답)
  * OpenAPI: POST /api/v1/manual-review/tasks/{task_id}/reject
+ * @param taskId Task ID
+ * @param reviewNotes 반려 사유 (최소 10글자)
+ * @returns API 응답 (ApiResponse<BackendManualReviewTask>)
+ */
+export async function rejectManualReviewTaskApi(
+  taskId: string,
+  reviewNotes: string
+): Promise<ApiResponse<BackendManualReviewTask>> {
+  return api.post<ApiResponse<BackendManualReviewTask>>(
+    `/api/v1/manual-review/tasks/${taskId}/reject`,
+    {
+      review_notes: reviewNotes,
+    }
+  );
+}
+
+/**
+ * 메뉴얼 검토 Task 반려 (레거시)
+ * @deprecated rejectManualReviewTaskApi + useApiMutation 사용 권장
  * @param taskId Task ID
  * @param reviewNotes 반려 사유 (최소 10글자)
  * @returns 반려된 Task 정보
@@ -222,33 +318,51 @@ export async function rejectManualReviewTask(
   taskId: string,
   reviewNotes: string
 ): Promise<BackendManualReviewTask> {
-  // ManualReviewRejection 스키마: review_notes만 필요
-  const response = await axiosClient.post<ApiResponse<BackendManualReviewTask>>(
+  const apiResponse = await api.post<ApiResponse<BackendManualReviewTask>>(
     `/api/v1/manual-review/tasks/${taskId}/reject`,
     {
       review_notes: reviewNotes,
     }
   );
 
-  // API 응답 추출 (에러면 자동으로 throw)
-  const rejectedTask = extractApiSuccess<BackendManualReviewTask>(response);
-  return rejectedTask;
+  // API 응답에서 데이터 추출
+  if (apiResponse.success) {
+    return apiResponse.data;
+  }
+  throw new Error(apiResponse.error?.message || 'Rejection failed');
 }
 
 /**
- * 메뉴얼 검토 Task 시작 (TODO → IN_PROGRESS)
+ * 메뉴얼 검토 Task 시작 (API 응답)
  * OpenAPI: PUT /api/v1/manual-review/tasks/{task_id}
  * FR-6: 검토 태스크 시작 (TODO → IN_PROGRESS)
+ * @param taskId Task ID
+ * @returns API 응답 (ApiResponse<BackendManualReviewTask>)
+ */
+export async function startManualReviewTaskApi(
+  taskId: string
+): Promise<ApiResponse<BackendManualReviewTask>> {
+  return api.put<ApiResponse<BackendManualReviewTask>>(
+    `/api/v1/manual-review/tasks/${taskId}`,
+    {}
+  );
+}
+
+/**
+ * 메뉴얼 검토 Task 시작 (레거시)
+ * @deprecated startManualReviewTaskApi + useApiMutation 사용 권장
  * @param taskId Task ID
  * @returns 시작된 Task 정보
  */
 export async function startManualReviewTask(taskId: string): Promise<BackendManualReviewTask> {
-  const response = await axiosClient.put<ApiResponse<BackendManualReviewTask>>(
+  const apiResponse = await api.put<ApiResponse<BackendManualReviewTask>>(
     `/api/v1/manual-review/tasks/${taskId}`,
     {}
   );
 
-  // API 응답 추출 (에러면 자동으로 throw)
-  const startedTask = extractApiSuccess<BackendManualReviewTask>(response);
-  return startedTask;
+  // API 응답에서 데이터 추출
+  if (apiResponse.success) {
+    return apiResponse.data;
+  }
+  throw new Error(apiResponse.error?.message || 'Start task failed');
 }

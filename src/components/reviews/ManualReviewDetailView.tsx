@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ManualReviewDetail } from '@/types/reviews';
+import { ManualReviewComparison } from '@/types/reviews';
+import { ApiFeedback } from '@/types/api';
 import { useToast } from '@/components/common/Toast';
 import Modal from '@/components/common/Modal';
 import { useApproveManualReview } from '@/hooks/useApproveManualReview';
@@ -8,11 +9,13 @@ import { useRejectManualReview } from '@/hooks/useRejectManualReview';
 import { getCurrentReviewerId } from '@/lib/api/auth';
 
 interface ManualReviewDetailViewProps {
-  detail: ManualReviewDetail;
+  detail: ManualReviewComparison;
+  feedback?: ApiFeedback[];
 }
 
 const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
   detail,
+  feedback = [],
 }) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -20,7 +23,7 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
-  const { isLoading: isApproving, mutate: mutateApprove } =
+  const { isPending: isApproving, mutate: mutateApprove } =
     useApproveManualReview({
       onSuccess: () => {
         showToast(
@@ -39,7 +42,7 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
       },
     });
 
-  const { isLoading: isRejecting, mutate: mutateReject } =
+  const { isPending: isRejecting, mutate: mutateReject } =
     useRejectManualReview({
       onSuccess: () => {
         setShowRejectModal(false);
@@ -65,7 +68,7 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
     navigate('/reviews/tasks');
   };
 
-  const handleApprove = async () => {
+  const handleApprove = () => {
     // 현재 로그인한 사용자의 ID를 JWT 토큰에서 추출
     const reviewerId = getCurrentReviewerId();
 
@@ -74,11 +77,22 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
       return;
     }
 
-    await mutateApprove(detail.task_id, reviewerId);
+    const taskId = detail.review_task_id;
+    if (!taskId) {
+      showToast('Task ID를 찾을 수 없습니다.', 'error');
+      return;
+    }
+
+    mutateApprove({ taskId, employeeId: reviewerId });
   };
 
-  const handleReject = async () => {
-    await mutateReject(detail.task_id, rejectReason);
+  const handleReject = () => {
+    const taskId = detail.review_task_id;
+    if (!taskId) {
+      showToast('Task ID를 찾을 수 없습니다.', 'error');
+      return;
+    }
+    mutateReject({ taskId, reviewNotes: rejectReason });
   };
 
   const formatDate = (dateString?: string): string => {
@@ -92,7 +106,9 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   };
 
-  const highlightChanges = (text: string): string => {
+  const highlightChanges = (text: string | undefined): string => {
+    if (!text) return '';
+
     const keywords = ['공동인증서', 'v3.2.5', 'iOS 16', 'Android', '백업', '복원'];
     let highlighted = text;
 
@@ -109,6 +125,8 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
 
   const getStatusBadgeColor = () => {
     switch (detail.status) {
+      case 'TODO':
+        return 'bg-gray-100 text-gray-700';
       case 'IN_PROGRESS':
         return 'bg-blue-100 text-blue-700';
       case 'DONE':
@@ -122,6 +140,8 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
 
   const getStatusText = () => {
     switch (detail.status) {
+      case 'TODO':
+        return '대기중';
       case 'IN_PROGRESS':
         return '검토중';
       case 'DONE':
@@ -129,9 +149,14 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
       case 'REJECTED':
         return '반려';
       default:
-        return '대기중';
+        return '알 수 없음';
     }
   };
+
+  // AI 분석 피드백 추출
+  const aiAnalysis = feedback.find(
+    (f) => f.code === 'AI_ANALYSIS_RESULT' || f.code === 'AI_COMPARISON_SUMMARY'
+  );
 
   return (
     <>
@@ -152,7 +177,7 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
             메뉴얼 검토 상세
           </h2>
           <span className="font-mono text-xs font-medium text-blue-700">
-            {detail.task_id}
+            {detail.review_task_id || 'N/A'}
           </span>
         </div>
         <span
@@ -165,16 +190,17 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
       {/* Info Card */}
       <div className="mb-6 flex flex-wrap gap-6 rounded-lg bg-white px-5 py-4 shadow-sm">
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-semibold text-gray-600">비교 항목</span>
+          <span className="text-xs font-semibold text-gray-600">비교 유형</span>
           <span className="text-sm text-gray-900">
-            {detail.old_entry_id ? `${detail.old_entry_id.slice(0, 8)}...` : 'N/A'} →{' '}
-            {detail.new_entry_id.slice(0, 8)}...
+            {detail.comparison_type === 'similar' && '유사'}
+            {detail.comparison_type === 'supplement' && '보완'}
+            {detail.comparison_type === 'new' && '신규'}
           </span>
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-gray-600">유사도</span>
           <span className="text-sm text-gray-900">
-            {(detail.similarity * 100).toFixed(1)}%
+            {(detail.similarity_score * 100).toFixed(1)}%
           </span>
         </div>
         <div className="flex flex-col gap-1">
@@ -185,12 +211,12 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
         </div>
       </div>
 
-      {/* Diff Summary Card */}
-      {detail.diff_text && (
-        <div className="mb-6 rounded-lg border-l-4 border-yellow-500 bg-yellow-50 px-5 py-4">
+      {/* AI Analysis Card */}
+      {aiAnalysis && (
+        <div className="mb-6 rounded-lg border-l-4 border-blue-500 bg-blue-50 px-5 py-4">
           <div className="mb-3 flex items-center gap-2">
             <svg
-              className="h-5 w-5 text-yellow-600"
+              className="h-5 w-5 text-blue-600"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -201,19 +227,19 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
               <path d="M2 12l10 5 10-5" />
             </svg>
             <h3 className="m-0 text-sm font-semibold text-gray-900">
-              변경 사항 요약 (AI 분석)
+              AI 분석 결과
             </h3>
           </div>
           <p className="m-0 whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
-            {detail.diff_text}
+            {aiAnalysis.message}
           </p>
         </div>
       )}
 
       {/* Comparison Container */}
       <div className="mb-6 grid gap-6 xl:grid-cols-2">
-        {/* Old Manual Panel */}
-        {detail.old_manual ? (
+        {/* Existing Manual Panel */}
+        {detail.existing_manual ? (
           <div className="flex flex-col rounded-lg bg-white shadow-sm">
             <div className="flex items-center justify-between border-b-2 border-red-700 bg-red-50 px-5 py-4">
               <h3 className="m-0 flex items-center gap-2 text-sm font-semibold text-red-700">
@@ -230,23 +256,28 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
                 기존 메뉴얼
               </h3>
               <span className="bg-gray-100 px-2 py-1 font-mono text-xs font-medium text-gray-700">
-                {detail.old_manual.id.slice(0, 8)}...
+                {detail.existing_manual.id.slice(0, 8)}...
               </span>
             </div>
             <div className="space-y-6 px-5 py-4">
               <FieldSection
+                label="Keywords"
+                content={detail.existing_manual.keywords?.join(', ')}
+                isHighlighted={false}
+              />
+              <FieldSection
                 label="Topic"
-                content={detail.old_manual.topic}
+                content={detail.existing_manual.topic}
                 isHighlighted={false}
               />
               <FieldSection
                 label="Background"
-                content={detail.old_manual.background}
+                content={detail.existing_manual.background}
                 isHighlighted={false}
               />
               <FieldSection
                 label="Guideline"
-                content={detail.old_manual.guideline}
+                content={detail.existing_manual.guideline}
                 isHighlighted={false}
               />
             </div>
@@ -269,87 +300,60 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
               </h3>
             </div>
             <div className="flex items-center justify-center px-5 py-12 text-sm text-gray-500">
-              {detail.old_manual_summary ? (
-                <p className="whitespace-pre-wrap">{detail.old_manual_summary}</p>
-              ) : (
-                'AI 분석 요약'
-              )}
+              신규 메뉴얼 (기존 메뉴얼 없음)
             </div>
           </div>
         )}
 
-        {/* New Manual Panel */}
-        {detail.new_manual ? (
-          <div className="flex flex-col rounded-lg bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b-2 border-green-700 bg-green-50 px-5 py-4">
-              <h3 className="m-0 flex items-center gap-2 text-sm font-semibold text-green-700">
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="12" y1="18" x2="12" y2="12" />
-                  <line x1="9" y1="15" x2="15" y2="15" />
-                </svg>
-                신규 초안
-              </h3>
-              <span className="bg-gray-100 px-2 py-1 font-mono text-xs font-medium text-gray-700">
-                {detail.new_manual.id.slice(0, 8)}...
-              </span>
-            </div>
-            <div className="space-y-6 px-5 py-4">
-              <FieldSection
-                label="Topic"
-                content={detail.new_manual.topic}
-                isHighlighted={true}
-                highlightedContent={highlightChanges(detail.new_manual.topic)}
-              />
-              <FieldSection
-                label="Background"
-                content={detail.new_manual.background}
-                isHighlighted={true}
-                highlightedContent={highlightChanges(detail.new_manual.background)}
-              />
-              <FieldSection
-                label="Guideline"
-                content={detail.new_manual.guideline}
-                isHighlighted={true}
-                highlightedContent={highlightChanges(detail.new_manual.guideline)}
-              />
-            </div>
+        {/* Draft Entry Panel */}
+        <div className="flex flex-col rounded-lg bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b-2 border-green-700 bg-green-50 px-5 py-4">
+            <h3 className="m-0 flex items-center gap-2 text-sm font-semibold text-green-700">
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="12" y1="18" x2="12" y2="12" />
+                <line x1="9" y1="15" x2="15" y2="15" />
+              </svg>
+              신규 초안
+            </h3>
+            <span className="bg-gray-100 px-2 py-1 font-mono text-xs font-medium text-gray-700">
+              {detail.draft_entry.id.slice(0, 8)}...
+            </span>
           </div>
-        ) : (
-          <div className="flex flex-col rounded-lg bg-white shadow-sm">
-            <div className="border-b-2 border-green-700 bg-green-50 px-5 py-4">
-              <h3 className="m-0 flex items-center gap-2 text-sm font-semibold text-green-700">
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="12" y1="18" x2="12" y2="12" />
-                  <line x1="9" y1="15" x2="15" y2="15" />
-                </svg>
-                신규 초안
-              </h3>
-            </div>
-            <div className="flex items-center justify-center px-5 py-12 text-sm text-gray-500">
-              {detail.new_manual_summary ? (
-                <p className="whitespace-pre-wrap">{detail.new_manual_summary}</p>
-              ) : (
-                'AI 분석 요약'
-              )}
-            </div>
+          <div className="space-y-6 px-5 py-4">
+            <FieldSection
+              label="Keywords"
+              content={detail.draft_entry.keywords?.join(', ')}
+              isHighlighted={true}
+              highlightedContent={highlightChanges(detail.draft_entry.keywords?.join(', '))}
+            />
+            <FieldSection
+              label="Topic"
+              content={detail.draft_entry.topic}
+              isHighlighted={true}
+              highlightedContent={highlightChanges(detail.draft_entry.topic)}
+            />
+            <FieldSection
+              label="Background"
+              content={detail.draft_entry.background}
+              isHighlighted={true}
+              highlightedContent={highlightChanges(detail.draft_entry.background)}
+            />
+            <FieldSection
+              label="Guideline"
+              content={detail.draft_entry.guideline}
+              isHighlighted={true}
+              highlightedContent={highlightChanges(detail.draft_entry.guideline)}
+            />
           </div>
-        )}
+        </div>
       </div>
 
       {/* Action Bar - 대기중, 검토중 상태일 때만 표시 */}
@@ -461,7 +465,7 @@ const ManualReviewDetailView: React.FC<ManualReviewDetailViewProps> = ({
 
 interface FieldSectionProps {
   label: string;
-  content: string;
+  content: string | undefined;
   isHighlighted?: boolean;
   highlightedContent?: string;
 }
@@ -473,6 +477,18 @@ const FieldSection: React.FC<FieldSectionProps> = ({
   highlightedContent,
 }) => {
   const iconMap: Record<string, React.ReactNode> = {
+    Keywords: (
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+        <line x1="7" y1="7" x2="7.01" y2="7" />
+      </svg>
+    ),
     Topic: (
       <svg
         className="h-4 w-4"
@@ -512,6 +528,9 @@ const FieldSection: React.FC<FieldSectionProps> = ({
     ),
   };
 
+  // content가 없을 때 기본 메시지 표시
+  const displayContent = content || '(내용 없음)';
+
   return (
     <div>
       <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-700">
@@ -525,7 +544,7 @@ const FieldSection: React.FC<FieldSectionProps> = ({
         />
       ) : (
         <div className="min-h-[60px] whitespace-pre-wrap rounded-md border border-gray-200 bg-gray-50 px-3 py-3 text-sm leading-relaxed text-gray-800">
-          {content}
+          {displayContent}
         </div>
       )}
     </div>

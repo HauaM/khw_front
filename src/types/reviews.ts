@@ -142,3 +142,38 @@ export interface UseManualReviewDetailResult {
   isError: boolean;
   error: Error | null;
 }
+
+/**
+ * 메뉴얼 비교 타입 (similar, supplement, new)
+ */
+export type ComparisonType = "similar" | "supplement" | "new";
+
+/**
+ * 메뉴얼 검토 비교 데이터 (단일 상세 조회용)
+ * 백엔드 API: GET /api/v1/manual-review/tasks/{taskId}
+ *
+ * 이 타입은 API 공통 규격을 따르는 새로운 상세 조회 엔드포인트를 위한 타입입니다.
+ * 기존 ManualReviewDetail 대신 사용하며, 백엔드에서 조합된 데이터를 받습니다.
+ */
+export interface ManualReviewComparison {
+  /** 비교 유형 */
+  comparison_type: ComparisonType;
+  /** 신규 초안 정보 */
+  draft_entry: ManualEntry;
+  /** 기존 메뉴얼 정보 (없으면 null) */
+  existing_manual: ManualEntry | null;
+  /** 유사도 점수 (0.0 ~ 1.0) */
+  similarity_score: number;
+  /** 검토 Task ID */
+  review_task_id: string | null;
+  /** 검토 상태 */
+  status: ManualReviewStatus;
+  /** 검토자 ID */
+  reviewer_id?: string | null;
+  /** 검토 노트 */
+  review_notes?: string | null;
+  /** 생성 시간 */
+  created_at?: string;
+  /** 업데이트 시간 */
+  updated_at?: string;
+}
