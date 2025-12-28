@@ -85,7 +85,7 @@ const ApprovedManualCard: React.FC<ApprovedManualCardProps> = ({ manual, isHighl
       <div className="mb-4">
         <p className="text-xs font-semibold text-gray-700">처리 가이드라인</p>
         <div className="mt-1 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
-          <ol className="space-y-2 pl-4 text-sm text-gray-900">
+          <ol className="space-y-2 text-sm text-gray-900">
             {guidelineSteps.map((step, index) => (
               <li key={`${manual.id}-step-${index}`}>{step}</li>
             ))}

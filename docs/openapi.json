@@ -447,7 +447,7 @@
           "manuals"
         ],
         "summary": "Create manual draft from consultation (v2.1 with comparison)",
-        "description": "상담 기반 메뉴얼 초안 생성 + 비교 + 리뷰 태스크\n\nFR-2, FR-9, FR-11: 메뉴얼 초안 생성 및 비교 분석\n\n**요청:**\n```json\n{\n  \"consultation_id\": \"uuid-xxx\",\n  \"enforce_hallucination_check\": true,\n  \"compare_with_manual_id\": \"uuid-yyy\"\n}\n```\n\n**응답 - 3가지 경로 (201 Created):**\n\n**1️⃣ SIMILAR (기존 메뉴얼과 매우 유사):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"comparison_type\": \"similar\",\n    \"draft_entry\": {\n      \"id\": \"uuid-draft-1\",\n      \"business_type\": \"인터넷뱅킹\",\n      \"error_code\": \"E001\",\n      \"topic\": \"로그인 실패\",\n      \"keywords\": [\"로그인\", \"인증\", \"실패\"],\n      \"background\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\",\n      \"guidelines\": [{\"title\": \"조치1\", \"description\": \"비밀번호 초기화...\"}],\n      \"status\": \"DRAFT\",\n      \"version\": null,\n      \"created_at\": \"2024-12-16T10:35:00Z\"\n    },\n    \"existing_manual\": {\n      \"id\": \"uuid-existing-1\",\n      \"business_type\": \"인터넷뱅킹\",\n      \"error_code\": \"E001\",\n      \"topic\": \"로그인 오류\",\n      \"keywords\": [\"로그인\", \"인증\"],\n      \"background\": \"로그인 인증 실패\",\n      \"guidelines\": [{\"title\": \"조치1\", \"description\": \"비밀번호 초기화...\"}],\n      \"status\": \"APPROVED\",\n      \"version\": \"v1.6\",\n      \"created_at\": \"2024-12-15T09:00:00Z\"\n    },\n    \"similarity_score\": 0.97,\n    \"review_task_id\": null,\n    \"message\": \"기존 메뉴얼(v1.6)과 99% 유사합니다. 기존 메뉴얼 사용을 권장합니다.\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**2️⃣ SUPPLEMENT (기존 메뉴얼 개선/보충):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"comparison_type\": \"supplement\",\n    \"draft_entry\": {...},\n    \"existing_manual\": {...},\n    \"similarity_score\": 0.82,\n    \"review_task_id\": \"uuid-task-123\",\n    \"message\": \"기존 메뉴얼(v1.6)의 내용을 보충했습니다. 검토 태스크가 생성되었습니다.\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**3️⃣ NEW (신규 메뉴얼):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"comparison_type\": \"new\",\n    \"draft_entry\": {...},\n    \"existing_manual\": null,\n    \"similarity_score\": null,\n    \"review_task_id\": \"uuid-task-456\",\n    \"message\": \"신규 메뉴얼 초안으로 생성되었습니다. 검토 태스크가 생성되었습니다.\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**에러 응답:**\n- 404 Not Found: 상담/메뉴얼을 찾을 수 없음\n- 400 Bad Request: 비즈니스 로직 오류\n- 422 Unprocessable Entity: 검증 실패\n- 500 Internal Server Error: LLM/VectorStore 오류\n\n**주요 필드 설명:**\n- comparison_type: \"similar\"|\"supplement\"|\"new\"\n  - similar: 기존 메뉴얼과 유사도 95% 이상 (리뷰 태스크 미생성)\n  - supplement: 유사도 70~95% (리뷰 태스크 생성, 개선 내용 검토)\n  - new: 유사 메뉴얼 없음 (리뷰 태스크 생성, 새 항목 검토)\n- review_task_id: 검토 필요 시 자동 생성 (similar만 null)\n- draft_entry: 생성된 초안 (DRAFT 상태)\n- existing_manual: 기존 버전 (similar/supplement만 포함)\n\n**프론트엔드 처리:**\n1. comparison_type별로 UI 다르게 표시\n2. SIMILAR: 기존 메뉴얼 사용 권장, 초안 자동 버림\n3. SUPPLEMENT/NEW: 검토 태스크 목록으로 이동, 승인/거절 대기",
+        "description": "상담 기반 메뉴얼 초안 생성 + 비교 + 리뷰 태스크\n\nFR-2, FR-9, FR-11: 메뉴얼 초안 생성 및 비교 분석\n\n**요청:**\n```json\n{\n  \"consultation_id\": \"uuid-xxx\",\n  \"enforce_hallucination_check\": true,\n  \"compare_with_manual_id\": \"uuid-yyy\"\n}\n```\n\n**응답 - 3가지 경로 (201 Created):**\n\n**1️⃣ SIMILAR (기존 메뉴얼과 매우 유사):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"comparison_type\": \"similar\",\n    \"draft_entry\": {\n      \"id\": \"uuid-draft-1\",\n      \"business_type\": \"인터넷뱅킹\",\n      \"error_code\": \"E001\",\n      \"topic\": \"로그인 실패\",\n      \"keywords\": [\"로그인\", \"인증\", \"실패\"],\n      \"background\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\",\n      \"guideline\": \"비밀번호 초기화...\",\n      \"status\": \"DRAFT\",\n      \"version_id\": null,\n      \"source_consultation_id\": \"uuid-consult-1\",\n      \"created_at\": \"2024-12-16T10:35:00Z\",\n      \"updated_at\": \"2024-12-16T10:35:00Z\"\n    },\n    \"existing_manual\": {\n      \"id\": \"uuid-existing-1\",\n      \"business_type\": \"인터넷뱅킹\",\n      \"error_code\": \"E001\",\n      \"topic\": \"로그인 오류\",\n      \"keywords\": [\"로그인\", \"인증\"],\n      \"background\": \"로그인 인증 실패\",\n      \"guideline\": \"비밀번호 초기화...\",\n      \"status\": \"APPROVED\",\n      \"version_id\": \"uuid-version-1\",\n      \"source_consultation_id\": \"uuid-consult-0\",\n      \"created_at\": \"2024-12-15T09:00:00Z\",\n      \"updated_at\": \"2024-12-15T09:00:00Z\"\n    },\n    \"similarity_score\": 0.97,\n    \"review_task_id\": null,\n    \"message\": \"기존 메뉴얼(v1.6)과 99% 유사합니다. 기존 메뉴얼 사용을 권장합니다.\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**2️⃣ SUPPLEMENT (기존 메뉴얼 개선/보충):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"comparison_type\": \"supplement\",\n    \"draft_entry\": {...},\n    \"existing_manual\": {...},\n    \"similarity_score\": 0.82,\n    \"review_task_id\": \"uuid-task-123\",\n    \"message\": \"기존 메뉴얼(v1.6)의 내용을 보충했습니다. 검토 태스크가 생성되었습니다.\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**3️⃣ NEW (신규 메뉴얼):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"comparison_type\": \"new\",\n    \"draft_entry\": {...},\n    \"existing_manual\": null,\n    \"similarity_score\": null,\n    \"review_task_id\": \"uuid-task-456\",\n    \"message\": \"신규 메뉴얼 초안으로 생성되었습니다. 검토 태스크가 생성되었습니다.\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**에러 응답:**\n- 404 Not Found: 상담/메뉴얼을 찾을 수 없음\n- 400 Bad Request: 비즈니스 로직 오류\n- 422 Unprocessable Entity: 검증 실패\n- 500 Internal Server Error: LLM/VectorStore 오류\n\n**주요 필드 설명:**\n- comparison_type: \"similar\"|\"supplement\"|\"new\"\n  - similar: 기존 메뉴얼과 유사도 95% 이상 (리뷰 태스크 미생성)\n  - supplement: 유사도 70~95% (리뷰 태스크 생성, 개선 내용 검토)\n  - new: 유사 메뉴얼 없음 (리뷰 태스크 생성, 새 항목 검토)\n- review_task_id: 검토 필요 시 자동 생성 (similar만 null)\n- draft_entry: 생성된 초안 (DRAFT 상태)\n- existing_manual: 기존 버전 (similar/supplement만 포함)\n\n**프론트엔드 처리:**\n1. comparison_type별로 UI 다르게 표시\n2. SIMILAR: 기존 메뉴얼 사용 권장, 초안 자동 버림\n3. SUPPLEMENT/NEW: 검토 태스크 목록으로 이동, 승인/거절 대기",
         "operationId": "create_manual_draft_api_v1_manuals_draft_post",
         "requestBody": {
           "content": {
@@ -465,22 +465,55 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ManualDraftCreateResponse"
+                  "$ref": "#/components/schemas/ResponseEnvelope_ManualDraftCreateResponse_"
                 },
                 "example": {
                   "success": true,
                   "data": {
                     "comparison_type": "supplement",
+                    "id": "uuid-draft-response",
+                    "created_at": "2024-12-16T10:35:00Z",
+                    "updated_at": "2024-12-16T10:35:00Z",
                     "draft_entry": {
                       "id": "uuid-draft",
-                      "topic": "로그인 실패"
+                      "created_at": "2024-12-16T10:35:00Z",
+                      "updated_at": "2024-12-16T10:35:00Z",
+                      "keywords": [
+                        "로그인",
+                        "인증",
+                        "실패"
+                      ],
+                      "topic": "로그인 실패",
+                      "background": "고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상",
+                      "guideline": "비밀번호 초기화\n\n계정 확인",
+                      "business_type": "인터넷뱅킹",
+                      "error_code": "E001",
+                      "source_consultation_id": "uuid-consult-1",
+                      "status": "DRAFT",
+                      "business_type_name": "인터넷뱅킹"
                     },
                     "existing_manual": {
                       "id": "uuid-existing",
-                      "topic": "로그인 오류"
+                      "created_at": "2024-12-15T09:00:00Z",
+                      "updated_at": "2024-12-15T09:00:00Z",
+                      "keywords": [
+                        "로그인",
+                        "인증"
+                      ],
+                      "topic": "로그인 오류",
+                      "background": "로그인 인증 실패",
+                      "guideline": "비밀번호 초기화",
+                      "business_type": "인터넷뱅킹",
+                      "error_code": "E001",
+                      "source_consultation_id": "uuid-consult-0",
+                      "version_id": "uuid-version-1",
+                      "status": "APPROVED",
+                      "business_type_name": "인터넷뱅킹"
                     },
                     "similarity_score": 0.82,
-                    "review_task_id": "uuid-task-123"
+                    "review_task_id": "uuid-task-123",
+                    "comparison_version": "v2.1",
+                    "message": "기존 메뉴얼(v1.6)의 내용을 보충했습니다. 검토자가 확인 후 승인합니다."
                   },
                   "meta": {
                     "requestId": "req-uuid-xxx",
@@ -1092,313 +1125,6 @@
         }
       }
     },
-    "/api/v1/manuals/{manual_id}/diff": {
-      "get": {
-        "tags": [
-          "manuals"
-        ],
-        "summary": "Diff manual versions in the same group",
-        "description": "메뉴얼 버전 간 차이 비교\n\nFR-14: 메뉴얼 버전 비교\n\n**경로 파라미터:**\n- manual_id: 메뉴얼 ID (UUID)\n\n**쿼리 파라미터:**\n- base_version: 비교 기준 버전 (예: \"v1.5\")\n- compare_version: 비교 대상 버전 (예: \"v1.6\")\n- summarize: 변경사항 요약 여부 (기본값: false)\n\n**응답 (200 OK):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"manual_id\": \"uuid-xxx\",\n    \"base_version\": \"v1.5\",\n    \"compare_version\": \"v1.6\",\n    \"differences\": {\n      \"added_entries\": [\n        {\n          \"field\": \"guidelines[2]\",\n          \"value\": {\n            \"title\": \"계정 확인\",\n            \"description\": \"계정이 잠금 상태인지 확인합니다\"\n          }\n        }\n      ],\n      \"modified_entries\": [\n        {\n          \"field\": \"background\",\n          \"old_value\": \"로그인 인증 실패\",\n          \"new_value\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\"\n        }\n      ],\n      \"removed_entries\": []\n    },\n    \"summary\": \"배경 정보 수정, 가이드라인 1개 추가\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**에러 응답:**\n- 404 Not Found: 메뉴얼 또는 버전을 찾을 수 없음\n- 400 Bad Request: 유효하지 않은 버전",
-        "operationId": "diff_manual_versions_api_v1_manuals__manual_id__diff_get",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "manual_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Manual Id"
-            }
-          },
-          {
-            "name": "base_version",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Base Version"
-            }
-          },
-          {
-            "name": "compare_version",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Compare Version"
-            }
-          },
-          {
-            "name": "summarize",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Summarize"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ManualVersionDiffResponse"
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "manual_id": "uuid-xxx",
-                    "base_version": "v1.5",
-                    "compare_version": "v1.6",
-                    "differences": {
-                      "added_entries": [],
-                      "modified_entries": []
-                    }
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - 유효하지 않은 입력",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "error": {
-                    "code": "ValidationError",
-                    "message": "입력값이 유효하지 않습니다",
-                    "details": {
-                      "field": "error message"
-                    },
-                    "hint": "필드를 확인해주세요"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - 리소스를 찾을 수 없음",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "error": {
-                    "code": "RecordNotFoundError",
-                    "message": "요청한 리소스를 찾을 수 없습니다"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error - 서버 오류",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "error": {
-                    "code": "INTERNAL.UNEXPECTED",
-                    "message": "예기치 않은 서버 오류가 발생했습니다",
-                    "hint": "관리자에게 문의해주세요"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/manuals/drafts/{draft_id}/diff-with-active": {
-      "get": {
-        "tags": [
-          "manuals"
-        ],
-        "summary": "Diff draft set with active version",
-        "description": "초안 vs 운영 버전 비교\n\nFR-14: 메뉴얼 초안 검토 전 변화 미리보기\n\n**경로 파라미터:**\n- draft_id: 초안 메뉴얼 ID (UUID)\n\n**쿼리 파라미터:**\n- summarize: 변경사항 요약 여부 (기본값: false)\n\n**응답 (200 OK):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"manual_id\": \"uuid-xxx\",\n    \"base_version\": \"v1.6\",\n    \"compare_version\": \"DRAFT\",\n    \"differences\": {\n      \"added_entries\": [...],\n      \"modified_entries\": [...],\n      \"removed_entries\": []\n    },\n    \"summary\": \"배경 정보 수정, 가이드라인 1개 추가\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**용도:**\n- 검토자가 초안 승인 전 변화 확인\n- 현재 운영 버전과의 차이 시각화\n\n**에러 응답:**\n- 404 Not Found: 초안을 찾을 수 없음\n- 400 Bad Request: 초안이 DRAFT 상태가 아님",
-        "operationId": "diff_draft_with_active_api_v1_manuals_drafts__draft_id__diff_with_active_get",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "draft_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Draft Id"
-            }
-          },
-          {
-            "name": "summarize",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Summarize"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ManualVersionDiffResponse"
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "manual_id": "uuid-xxx",
-                    "base_version": "v1.6",
-                    "compare_version": "DRAFT",
-                    "differences": {
-                      "added_entries": []
-                    }
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - 유효하지 않은 입력",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "error": {
-                    "code": "ValidationError",
-                    "message": "입력값이 유효하지 않습니다",
-                    "details": {
-                      "field": "error message"
-                    },
-                    "hint": "필드를 확인해주세요"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - 리소스를 찾을 수 없음",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "error": {
-                    "code": "RecordNotFoundError",
-                    "message": "요청한 리소스를 찾을 수 없습니다"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error - 서버 오류",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "error": {
-                    "code": "INTERNAL.UNEXPECTED",
-                    "message": "예기치 않은 서버 오류가 발생했습니다",
-                    "hint": "관리자에게 문의해주세요"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/manuals": {
       "get": {
         "tags": [
@@ -1705,7 +1431,7 @@
           "manuals"
         ],
         "summary": "Update manual entry",
-        "description": "메뉴얼 초안 수정\n\n    FR-4: 메뉴얼 초안 편집\n\n    **경로 파라미터:**\n    - manual_id: 메뉴얼 ID (UUID)\n\n    **요청:**\n    ```json\n    {\n      \"topic\": \"로그인 오류 해결 방법\",\n      \"keywords\": [\"로그인\", \"인증\", \"실패\"],\n      \"background\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\",\n      \"guideline\": \"비밀번호 초기화\n\n계정 확인\"\n    }\n    ```\n\n    **응답 (200 OK):**\n    ```json\n    {\n      \"success\": true,\n      \"data\": {\n        \"id\": \"uuid-xxx\",\n        \"business_type\": \"인터넷뱅킹\",\n        \"error_code\": \"E001\",\n        \"topic\": \"로그인 오류 해결 방법\",\n        \"keywords\": [\"로그인\", \"인증\", \"실패\"],\n        \"background\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\",\n        \"guidelines\": [{\"title\": \"비밀번호 초기화\", \"description\": \"...\"}],\n        \"status\": \"DRAFT\",\n        \"version\": null,\n        \"created_at\": \"2024-12-16T10:35:00Z\"\n      },\n      \"error\": null,\n      \"meta\": {...},\n      \"feedback\": []\n    }\n    ```\n\n    **요청 필드:**\n    - topic: 메뉴얼 제목 (5-200자, 선택사항)\n    - keywords: 검색 키워드 배열 (1-3개, 선택사항)\n    - background: 배경 정보 (최소 10자, 선택사항)\n    - guideline: 조치사항 (줄바꿈으로 구분, 선택사항)\n\n    **제약사항:**\n    - DRAFT 상태인 메뉴얼만 수정 가능\n    - APPROVED 상태로의 변경은 /approve 엔드포인트 사용\n    - 검토 중(IN_PROGRESS) 상태에서는 수정 불가\n\n    **에러 응답:**\n    - 404 Not Found: 메뉴얼을 찾을 수 없음\n    - 400 Bad Request: DRAFT 상태가 아님, 검증 실패",
+        "description": "메뉴얼 초안 수정\n\n    FR-4: 메뉴얼 초안 편집\n\n    **경로 파라미터:**\n    - manual_id: 메뉴얼 ID (UUID)\n\n    **요청:**\n    ```json\n    {\n      \"topic\": \"로그인 오류 해결 방법\",\n      \"keywords\": [\"로그인\", \"인증\", \"실패\"],\n      \"background\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\",\n      \"guideline\": \"비밀번호 초기화\n\n계정 확인\"\n    }\n    ```\n\n    **응답 (200 OK):**\n    ```json\n    {\n      \"success\": true,\n      \"data\": {\n        \"id\": \"uuid-xxx\",\n        \"business_type\": \"인터넷뱅킹\",\n        \"error_code\": \"E001\",\n        \"topic\": \"로그인 오류 해결 방법\",\n        \"keywords\": [\"로그인\", \"인증\", \"실패\"],\n        \"background\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\",\n        \"guideline\": \"비밀번호 초기화\n\n계정 확인\",\n        \"status\": \"DRAFT\",\n        \"version_id\": null,\n        \"source_consultation_id\": \"uuid-consult-1\",\n        \"created_at\": \"2024-12-16T10:35:00Z\",\n        \"updated_at\": \"2024-12-16T10:40:00Z\"\n      },\n      \"error\": null,\n      \"meta\": {...},\n      \"feedback\": []\n    }\n    ```\n\n    **요청 필드:**\n    - topic: 메뉴얼 제목 (5-200자, 선택사항)\n    - keywords: 검색 키워드 배열 (1-3개, 선택사항)\n    - background: 배경 정보 (최소 10자, 선택사항)\n    - guideline: 조치사항 (줄바꿈으로 구분, 선택사항)\n\n    **제약사항:**\n    - DRAFT 상태인 메뉴얼만 수정 가능\n    - APPROVED 상태로의 변경은 /approve 엔드포인트 사용\n    - 검토 중(IN_PROGRESS) 상태에서는 수정 불가\n\n    **에러 응답:**\n    - 404 Not Found: 메뉴얼을 찾을 수 없음\n    - 400 Bad Request: DRAFT 상태가 아님, 검증 실패",
         "operationId": "update_manual_api_v1_manuals__manual_id__put",
         "security": [
           {
@@ -1837,7 +1563,7 @@
           "manuals"
         ],
         "summary": "Get manual detail",
-        "description": "메뉴얼 상세 조회\n\n**경로 파라미터:**\n- manual_id: 메뉴얼 ID (UUID)\n\n**응답 (200 OK):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uuid-xxx\",\n    \"business_type\": \"인터넷뱅킹\",\n    \"error_code\": \"E001\",\n    \"topic\": \"로그인 실패\",\n    \"keywords\": [\"로그인\", \"인증\", \"실패\"],\n    \"background\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\",\n    \"guidelines\": [{\"title\": \"비밀번호 초기화\", \"description\": \"...\"}],\n    \"status\": \"APPROVED\",\n    \"version\": \"v1.6\",\n    \"created_at\": \"2024-12-05T10:00:00Z\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**에러 응답:**\n- 404 Not Found: 메뉴얼을 찾을 수 없음",
+        "description": "메뉴얼 상세 조회\n\n**경로 파라미터:**\n- manual_id: 메뉴얼 ID (UUID)\n\n**응답 (200 OK):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uuid-xxx\",\n    \"business_type\": \"인터넷뱅킹\",\n    \"error_code\": \"E001\",\n    \"topic\": \"로그인 실패\",\n    \"keywords\": [\"로그인\", \"인증\", \"실패\"],\n    \"background\": \"고객이 올바른 자격증명으로 로그인 시도 시 실패하는 현상\",\n    \"guideline\": \"비밀번호 초기화\",\n    \"status\": \"APPROVED\",\n    \"version_id\": \"uuid-version-1\",\n    \"source_consultation_id\": \"uuid-consult-1\",\n    \"created_at\": \"2024-12-05T10:00:00Z\",\n    \"updated_at\": \"2024-12-05T10:10:00Z\"\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**에러 응답:**\n- 404 Not Found: 메뉴얼을 찾을 수 없음",
         "operationId": "get_manual_detail_api_v1_manuals__manual_id__get",
         "security": [
           {
@@ -2377,6 +2103,369 @@
         }
       }
     },
+    "/api/v1/manual-review/tasks/{task_id}": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Get manual review task detail",
+        "description": "메뉴얼 검토 태스크 상세 조회\n\n기존/신규 메뉴얼 정보를 포함한 상세 결과를 반환합니다.",
+        "operationId": "get_review_task_detail_api_v1_manual_review_tasks__task_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualReviewTaskDetailResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "uuid-task-1",
+                    "comparison_type": "similar",
+                    "status": "TODO",
+                    "draft_entry": {
+                      "id": "uuid-manual-draft",
+                      "topic": "카드 결제 승인 요청 시 한도 초과 메시지 발생",
+                      "guideline": "고객 카드 한도 확인 후 일시 상향하도록 안내"
+                    },
+                    "similarity_score": 0.92,
+                    "review_task_id": "uuid-task-1",
+                    "message": "기존 메뉴얼과 유사합니다. 기존 메뉴얼을 참고하세요."
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - 리소스를 찾을 수 없음",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "RecordNotFoundError",
+                    "message": "요청한 리소스를 찾을 수 없습니다"
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - 서버 오류",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "INTERNAL.UNEXPECTED",
+                    "message": "예기치 않은 서버 오류가 발생했습니다",
+                    "hint": "관리자에게 문의해주세요"
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Start manual review task",
+        "description": "메뉴얼 검토 태스크 시작\n\nFR-6: 검토 태스크 상태 변경 (TODO → IN_PROGRESS)\n\n**경로 파라미터:**\n- task_id: 태스크 ID (UUID)\n\n**요청:**\n```\nPUT /manual-review/tasks/{task_id}\n```\n\n**응답 (200 OK):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uuid-task-1\",\n    \"status\": \"IN_PROGRESS\",\n    \"reviewer_id\": \"reviewer-001\",\n    \"review_notes\": null,\n    \"comparison_type\": \"supplement\",\n    \"new_entry_id\": \"uuid-manual-draft\",\n    \"old_entry_id\": \"uuid-manual-existing\",\n    ...\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**동작:**\n1. 태스크 상태를 TODO → IN_PROGRESS로 변경\n2. 검토자 ID 자동 할당 (현재 사용자)\n3. 초안 메뉴얼 상태를 DRAFT → IN_PROGRESS로 변경\n4. 다른 사용자가 같은 초안을 수정하지 못하도록 보호\n\n**용도:**\n- 검토자가 태스크 클릭 후 검토 시작할 때\n- 동시 검토 방지 (한 명만 IN_PROGRESS 가능)\n- 미완성 초안이 노출되지 않도록 보호\n\n**제약사항:**\n- TODO 상태인 태스크만 시작 가능\n- 이미 IN_PROGRESS/DONE/REJECTED인 경우 오류\n\n**에러 응답:**\n- 404 Not Found: 태스크를 찾을 수 없음\n- 400 Bad Request: 태스크가 TODO 상태가 아님",
+        "operationId": "start_review_task_api_v1_manual_review_tasks__task_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualReviewTaskResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "uuid-task-1",
+                    "status": "IN_PROGRESS",
+                    "reviewer_id": "reviewer-001"
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - 유효하지 않은 입력",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "ValidationError",
+                    "message": "입력값이 유효하지 않습니다",
+                    "details": {
+                      "field": "error message"
+                    },
+                    "hint": "필드를 확인해주세요"
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - 리소스를 찾을 수 없음",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "RecordNotFoundError",
+                    "message": "요청한 리소스를 찾을 수 없습니다"
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - 서버 오류",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "INTERNAL.UNEXPECTED",
+                    "message": "예기치 않은 서버 오류가 발생했습니다",
+                    "hint": "관리자에게 문의해주세요"
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Update manual review task",
+        "description": "메뉴얼 검토 태스크 수정\n\nstatus/review_notes 수정 및 comparison_type=NEW 전환을 지원합니다.",
+        "operationId": "update_review_task_api_v1_manual_review_tasks__task_id__patch",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualReviewTaskUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualReviewTaskResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "uuid-task-1",
+                    "status": "TODO",
+                    "review_notes": "NEW로 전환합니다."
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - 유효하지 않은 입력",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "ValidationError",
+                    "message": "입력값이 유효하지 않습니다",
+                    "details": {
+                      "field": "error message"
+                    },
+                    "hint": "필드를 확인해주세요"
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - 리소스를 찾을 수 없음",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "RecordNotFoundError",
+                    "message": "요청한 리소스를 찾을 수 없습니다"
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - 서버 오류",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "INTERNAL.UNEXPECTED",
+                    "message": "예기치 않은 서버 오류가 발생했습니다",
+                    "hint": "관리자에게 문의해주세요"
+                  },
+                  "meta": {
+                    "requestId": "req-uuid-xxx",
+                    "timestamp": "2024-12-16T10:35:00Z"
+                  },
+                  "feedback": []
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/manual-review/tasks/{task_id}/approve": {
       "post": {
         "tags": [
@@ -2665,130 +2754,6 @@
         }
       }
     },
-    "/api/v1/manual-review/tasks/{task_id}": {
-      "put": {
-        "tags": [
-          "tasks"
-        ],
-        "summary": "Start manual review task",
-        "description": "메뉴얼 검토 태스크 시작\n\nFR-6: 검토 태스크 상태 변경 (TODO → IN_PROGRESS)\n\n**경로 파라미터:**\n- task_id: 태스크 ID (UUID)\n\n**요청:**\n```\nPUT /manual-review/tasks/{task_id}\n```\n\n**응답 (200 OK):**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uuid-task-1\",\n    \"status\": \"IN_PROGRESS\",\n    \"reviewer_id\": \"reviewer-001\",\n    \"review_notes\": null,\n    \"comparison_type\": \"supplement\",\n    \"new_entry_id\": \"uuid-manual-draft\",\n    \"old_entry_id\": \"uuid-manual-existing\",\n    ...\n  },\n  \"error\": null,\n  \"meta\": {...},\n  \"feedback\": []\n}\n```\n\n**동작:**\n1. 태스크 상태를 TODO → IN_PROGRESS로 변경\n2. 검토자 ID 자동 할당 (현재 사용자)\n3. 초안 메뉴얼 상태를 DRAFT → IN_PROGRESS로 변경\n4. 다른 사용자가 같은 초안을 수정하지 못하도록 보호\n\n**용도:**\n- 검토자가 태스크 클릭 후 검토 시작할 때\n- 동시 검토 방지 (한 명만 IN_PROGRESS 가능)\n- 미완성 초안이 노출되지 않도록 보호\n\n**제약사항:**\n- TODO 상태인 태스크만 시작 가능\n- 이미 IN_PROGRESS/DONE/REJECTED인 경우 오류\n\n**에러 응답:**\n- 404 Not Found: 태스크를 찾을 수 없음\n- 400 Bad Request: 태스크가 TODO 상태가 아님",
-        "operationId": "start_review_task_api_v1_manual_review_tasks__task_id__put",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "task_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Task Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ManualReviewTaskResponse"
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "id": "uuid-task-1",
-                    "status": "IN_PROGRESS",
-                    "reviewer_id": "reviewer-001"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - 유효하지 않은 입력",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "error": {
-                    "code": "ValidationError",
-                    "message": "입력값이 유효하지 않습니다",
-                    "details": {
-                      "field": "error message"
-                    },
-                    "hint": "필드를 확인해주세요"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - 리소스를 찾을 수 없음",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "error": {
-                    "code": "RecordNotFoundError",
-                    "message": "요청한 리소스를 찾을 수 없습니다"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error - 서버 오류",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "error": {
-                    "code": "INTERNAL.UNEXPECTED",
-                    "message": "예기치 않은 서버 오류가 발생했습니다",
-                    "hint": "관리자에게 문의해주세요"
-                  },
-                  "meta": {
-                    "requestId": "req-uuid-xxx",
-                    "timestamp": "2024-12-16T10:35:00Z"
-                  },
-                  "feedback": []
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/auth/signup": {
       "post": {
         "tags": [
@@ -2883,8 +2848,7 @@
     "/api/v1/admin/common-codes/groups": {
       "post": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Groups"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 그룹 생성",
         "description": "새로운 공통코드 그룹 생성\n\n- **group_code**: 그룹 고유 코드 (예: BUSINESS_TYPE, ERROR_CODE)\n- **group_name**: 그룹 이름 (예: 업무 구분, 에러코드)\n- **description**: 그룹 설명 (선택사항)\n- **is_active**: 활성화 여부 (기본값: true)\n\n에러:\n- 400: group_code 중복\n- 422: 입력 데이터 검증 실패",
@@ -2929,8 +2893,7 @@
       },
       "get": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Groups"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 그룹 목록 조회",
         "description": "공통코드 그룹 목록 조회 (페이징)",
@@ -3014,8 +2977,7 @@
     "/api/v1/admin/common-codes/groups/search": {
       "get": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Groups"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 그룹 검색",
         "description": "그룹 코드 또는 그룹 이름으로 검색",
@@ -3093,8 +3055,7 @@
     "/api/v1/admin/common-codes/groups/{group_id}": {
       "get": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Groups"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 그룹 조회 (항목 포함)",
         "description": "ID로 그룹과 하위 항목을 함께 조회",
@@ -3143,8 +3104,7 @@
       },
       "put": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Groups"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 그룹 수정",
         "description": "공통코드 그룹 수정 (부분 업데이트 지원)",
@@ -3203,8 +3163,7 @@
       },
       "delete": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Groups"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 그룹 삭제",
         "description": "공통코드 그룹 삭제 (하위 항목도 함께 삭제)",
@@ -3258,8 +3217,7 @@
     "/api/v1/admin/common-codes/groups/{group_id}/items": {
       "post": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Items"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 항목 생성",
         "description": "공통코드 항목 생성",
@@ -3318,8 +3276,7 @@
       },
       "get": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Items"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 항목 목록 조회",
         "description": "그룹의 공통코드 항목 목록 조회",
@@ -3409,8 +3366,7 @@
     "/api/v1/admin/common-codes/items/{item_id}": {
       "get": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Items"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 항목 조회",
         "description": "ID로 공통코드 항목 조회",
@@ -3459,8 +3415,7 @@
       },
       "put": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Items"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 항목 수정",
         "description": "공통코드 항목 수정 (부분 업데이트 지원)",
@@ -3519,8 +3474,7 @@
       },
       "delete": {
         "tags": [
-          "common-codes",
-          "Admin - Common Code Items"
+          "Admin - Common Codes"
         ],
         "summary": "공통코드 항목 삭제",
         "description": "공통코드 항목 삭제",
@@ -3574,17 +3528,11 @@
     "/api/v1/common-codes/{group_code}": {
       "get": {
         "tags": [
-          "common-codes",
           "Public - Common Codes"
         ],
         "summary": "공통코드 조회 (그룹 코드)",
         "description": "그룹 코드로 공통코드 항목 조회 (프론트엔드용)\n\n응답 예시:\n```json\n{\n  \"group_code\": \"BUSINESS_TYPE\",\n  \"items\": [\n    {\"code_key\": \"RETAIL\", \"code_value\": \"리테일\"},\n    {\"code_key\": \"LOAN\", \"code_value\": \"대출\"}\n  ]\n}\n```\n\n참고: 데이터가 없어도 200 OK와 빈 items 배열을 반환합니다.",
         "operationId": "get_codes_by_group_api_v1_common_codes__group_code__get",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
         "parameters": [
           {
             "name": "group_code",
@@ -3627,7 +3575,6 @@
     "/api/v1/common-codes/bulk": {
       "post": {
         "tags": [
-          "common-codes",
           "Public - Common Codes"
         ],
         "summary": "공통코드 일괄 조회",
@@ -3670,12 +3617,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/admin/departments": {
@@ -5494,65 +5436,6 @@
         "title": "ManualDetailResponse",
         "description": "Manual detail response for specific version\n\nRFP Reference: GET /api/v1/manuals/{manual_id}/versions/{version}"
       },
-      "ManualDiffEntrySnapshot": {
-        "properties": {
-          "logical_key": {
-            "type": "string",
-            "title": "Logical Key"
-          },
-          "keywords": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Keywords"
-          },
-          "topic": {
-            "type": "string",
-            "title": "Topic"
-          },
-          "background": {
-            "type": "string",
-            "title": "Background"
-          },
-          "guideline": {
-            "type": "string",
-            "title": "Guideline"
-          },
-          "business_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Business Type"
-          },
-          "error_code": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Error Code"
-          }
-        },
-        "type": "object",
-        "required": [
-          "logical_key",
-          "keywords",
-          "topic",
-          "background",
-          "guideline"
-        ],
-        "title": "ManualDiffEntrySnapshot",
-        "description": "메뉴얼 항목 스냅샷 (Diff용)."
-      },
       "ManualDraftCreateFromConsultationRequest": {
         "properties": {
           "consultation_id": {
@@ -5677,6 +5560,126 @@
         ],
         "title": "ManualDraftCreateResponse",
         "description": "FR-2/FR-11(v2.1): 메뉴얼 초안 생성 응답 (개선된 버전)\n\n3가지 경로:\n1. SIMILAR: 기존 메뉴얼 반환, draft 미생성\n2. SUPPLEMENT: 초안 생성 + 자동 병합 + 리뷰 태스크 생성\n3. NEW: 초안 생성 + 리뷰 태스크 생성"
+      },
+      "ManualEntryDetailResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keywords"
+          },
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "background": {
+            "type": "string",
+            "title": "Background"
+          },
+          "guideline": {
+            "type": "string",
+            "title": "Guideline",
+            "description": "조치사항/가이드라인 텍스트"
+          },
+          "business_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Type"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "source_consultation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Consultation Id"
+          },
+          "version_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ManualStatus"
+          },
+          "business_type_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Type Name",
+            "description": "업무구분 이름 (공통코드값)"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version",
+            "description": "버전 번호 (있을 경우 반환)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "keywords",
+          "topic",
+          "background",
+          "guideline",
+          "source_consultation_id",
+          "version_id",
+          "status"
+        ],
+        "title": "ManualEntryDetailResponse",
+        "description": "Manual entry detail response for review task detail."
       },
       "ManualEntryResponse": {
         "properties": {
@@ -5876,36 +5879,6 @@
         "title": "ManualGuidelineItem",
         "description": "메뉴얼 가이드라인 항목."
       },
-      "ManualModifiedEntry": {
-        "properties": {
-          "logical_key": {
-            "type": "string",
-            "title": "Logical Key"
-          },
-          "before": {
-            "$ref": "#/components/schemas/ManualDiffEntrySnapshot"
-          },
-          "after": {
-            "$ref": "#/components/schemas/ManualDiffEntrySnapshot"
-          },
-          "changed_fields": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Changed Fields"
-          }
-        },
-        "type": "object",
-        "required": [
-          "logical_key",
-          "before",
-          "after",
-          "changed_fields"
-        ],
-        "title": "ManualModifiedEntry",
-        "description": "수정된 메뉴얼 항목 정보."
-      },
       "ManualReviewApproval": {
         "properties": {
           "employee_id": {
@@ -5952,6 +5925,104 @@
         ],
         "title": "ManualReviewRejection",
         "description": "Schema for rejecting manual review\n\nRFP Reference: POST /tasks/manual-review/{id}/reject"
+      },
+      "ManualReviewTaskDetailResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "comparison_type": {
+            "$ref": "#/components/schemas/ComparisonType",
+            "description": "비교 결과 타입: similar/supplement/new"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskStatus",
+            "description": "검토 태스크 상태"
+          },
+          "draft_entry": {
+            "$ref": "#/components/schemas/ManualEntryDetailResponse",
+            "description": "신규 초안(또는 검토 대상) 메뉴얼 상세"
+          },
+          "existing_manual": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ManualEntryDetailResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "비교 대상 기존 메뉴얼 상세 (없으면 null)"
+          },
+          "similarity_score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similarity Score",
+            "description": "유사도 점수 (0~1)"
+          },
+          "review_task_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Task Id",
+            "description": "리뷰 태스크 ID"
+          },
+          "comparison_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comparison Version",
+            "description": "비교 로직 버전 식별자"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "사용자 친화적 메시지"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "updated_at",
+          "id",
+          "comparison_type",
+          "status",
+          "draft_entry",
+          "message"
+        ],
+        "title": "ManualReviewTaskDetailResponse",
+        "description": "Manual review task detail response.\n\nRFP Reference: GET /api/v1/manual-review/tasks/{task_id}"
       },
       "ManualReviewTaskResponse": {
         "properties": {
@@ -6212,6 +6283,44 @@
         "title": "ManualReviewTaskResponse",
         "description": "Manual review task response\n\nRFP Reference: GET /tasks/manual-review"
       },
+      "ManualReviewTaskUpdate": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TaskStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Notes"
+          },
+          "comparison_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ComparisonType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ManualReviewTaskUpdate",
+        "description": "Schema for updating manual review task status/notes."
+      },
       "ManualSearchResult": {
         "properties": {
           "manual": {
@@ -6243,67 +6352,6 @@
         ],
         "title": "ManualStatus",
         "description": "메뉴얼 상태 Enum (FR-4 승인/반려 흐름 반영)"
-      },
-      "ManualVersionDiffResponse": {
-        "properties": {
-          "base_version": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Base Version"
-          },
-          "compare_version": {
-            "type": "string",
-            "title": "Compare Version"
-          },
-          "added_entries": {
-            "items": {
-              "$ref": "#/components/schemas/ManualDiffEntrySnapshot"
-            },
-            "type": "array",
-            "title": "Added Entries"
-          },
-          "removed_entries": {
-            "items": {
-              "$ref": "#/components/schemas/ManualDiffEntrySnapshot"
-            },
-            "type": "array",
-            "title": "Removed Entries"
-          },
-          "modified_entries": {
-            "items": {
-              "$ref": "#/components/schemas/ManualModifiedEntry"
-            },
-            "type": "array",
-            "title": "Modified Entries"
-          },
-          "llm_summary": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Llm Summary"
-          }
-        },
-        "type": "object",
-        "required": [
-          "base_version",
-          "compare_version",
-          "added_entries",
-          "removed_entries",
-          "modified_entries"
-        ],
-        "title": "ManualVersionDiffResponse",
-        "description": "버전 간 메뉴얼 Diff 결과."
       },
       "ManualVersionInfo": {
         "properties": {
@@ -6393,6 +6441,50 @@
         ],
         "title": "ManualVersionResponse",
         "description": "Manual version response for version list (v2.1 개선)\n\n기존 /{manual_id}/versions와 새로운 /versions 쿼리 엔드포인트에서\n모두 사용 가능하도록 구조화\n\nRFP Reference: GET /api/v1/manuals/{manual_id}/versions, GET /api/v1/manuals/versions"
+      },
+      "ResponseEnvelope_ManualDraftCreateResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ManualDraftCreateResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResponseError"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          },
+          "feedback": {
+            "items": {
+              "$ref": "#/components/schemas/ResponseFeedback"
+            },
+            "type": "array",
+            "title": "Feedback"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "meta"
+        ],
+        "title": "ResponseEnvelope[ManualDraftCreateResponse]"
       },
       "ResponseEnvelope_list_ManualSearchResult__": {
         "properties": {
