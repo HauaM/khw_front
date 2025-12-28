@@ -7,12 +7,24 @@ import Spinner from '@/components/common/Spinner';
 import { useToast } from '@/contexts/ToastContext';
 
 /**
+ * location.state 타입 정의
+ */
+interface ManualDraftLocationState {
+  draft?: ManualDraft;
+  comparisonType?: 'new' | 'similar' | 'supplement';
+  existingManual?: ManualDraft | null;
+  similarityScore?: number | null;
+}
+
+/**
  * 메뉴얼 초안 결과 페이지
  *
  * 2가지 사용 시나리오:
  * 1. 초안 생성 직후 (권장):
- *    - `location.state.draft`로 초안 데이터 전달
- *    - 예: navigate('/manuals/draft/DRAFT-001', { state: { draft: createdDraft } })
+ *    - `location.state`로 초안 데이터 및 비교 정보 전달
+ *    - 예: navigate('/manuals/draft/DRAFT-001', {
+ *        state: { draft, comparisonType, existingManual, similarityScore }
+ *      })
  *
  * 2. 저장된 초안 재조회:
  *    - URL 파라미터 `:id`로 접근 시 API에서 데이터를 조회하고, 없으면 mock을 사용합니다.
@@ -21,8 +33,11 @@ const ManualDraftResultPage: React.FC = () => {
   const location = useLocation();
   const params = useParams<{ id: string }>();
   const draftId = params.id ?? '';
-  const locationState = (location.state as { draft?: ManualDraft } | null) ?? {};
+  const locationState = (location.state as ManualDraftLocationState | null) ?? {};
   const draftFromState = locationState.draft;
+  const comparisonTypeFromState = locationState.comparisonType;
+  const existingManualFromState = locationState.existingManual;
+  const similarityScoreFromState = locationState.similarityScore;
   const { showToast } = useToast();
   const toastShownRef = React.useRef(false);
 
@@ -94,7 +109,13 @@ const ManualDraftResultPage: React.FC = () => {
   }
 
   return (
-    <ManualDraftResultView draft={currentDraft} onSaved={handleSaved} />
+    <ManualDraftResultView
+      draft={currentDraft}
+      comparisonType={comparisonTypeFromState}
+      existingManual={existingManualFromState}
+      similarityScore={similarityScoreFromState}
+      onSaved={handleSaved}
+    />
   );
 };
 

@@ -333,6 +333,31 @@ export async function rejectManualReviewTask(
 }
 
 /**
+ * 메뉴얼 검토 Task 업데이트 (comparison_type을 NEW로 전환)
+ * OpenAPI: PATCH /api/v1/manual-review/tasks/{task_id}
+ * @param taskId Task ID
+ * @param comparisonType 변경할 comparison_type ('new' | 'similar' | 'supplement')
+ * @returns 업데이트된 Task
+ */
+export async function updateManualReviewTaskComparisonType(
+  taskId: string,
+  comparisonType: 'new' | 'similar' | 'supplement'
+): Promise<BackendManualReviewTask> {
+  const apiResponse = await api.patch<ApiResponse<BackendManualReviewTask>>(
+    `/api/v1/manual-review/tasks/${taskId}`,
+    {
+      comparison_type: comparisonType,
+    }
+  );
+
+  // API 응답에서 데이터 추출
+  if (apiResponse.success) {
+    return apiResponse.data;
+  }
+  throw new Error(apiResponse.error?.message || 'Update failed');
+}
+
+/**
  * 메뉴얼 검토 Task 시작 (API 응답)
  * OpenAPI: PUT /api/v1/manual-review/tasks/{task_id}
  * FR-6: 검토 태스크 시작 (TODO → IN_PROGRESS)

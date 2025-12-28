@@ -80,7 +80,7 @@ export interface ManualDraftResponse {
  * 상담으로부터 메뉴얼 초안 생성 시 반환되는 전체 응답 구조
  */
 export interface ManualDraftCreateResponse {
-  comparison_type: 'new' | 'update';
+  comparison_type: 'new' | 'similar' | 'supplement';
   draft_entry: ManualDraftResponse;
   existing_manual: ManualDraftResponse | null;
   review_task_id: string;
