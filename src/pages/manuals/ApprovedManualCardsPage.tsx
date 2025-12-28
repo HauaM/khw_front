@@ -9,8 +9,6 @@ import type { ManualCardItem } from '@/types/manuals';
 
 type ManualListItem = ManualCardItem;
 
-const DEFAULT_BUSINESS_TYPE = 'INTERNET_BANKING';
-const DEFAULT_ERROR_CODE = 'E001';
 const HIGHLIGHT_DURATION = 3000;
 const SUGGESTION_LIMIT = 5;
 const FALLBACK_MANUAL_ID = '3c4a6bbf-6d3a-4f6c-92cb-7e1e7ab2f0f9';
@@ -34,6 +32,26 @@ const ApprovedManualCardsPage: React.FC = () => {
 
   const { data: manuals, isLoading, error } = useApprovedManualCards(manualIdForRequest);
   const [filterTerm, setFilterTerm] = useState('');
+
+  // 안전하게 첫 번째 데이터에서 업무구분과 에러코드 추출
+  const displayInfo = useMemo(() => {
+    if (isLoading) {
+      return {
+        businessType: '조회 중...',
+        errorCode: '조회 중...'
+      };
+    }
+    if (manuals.length === 0) {
+      return {
+        businessType: '정보 없음',
+        errorCode: '정보 없음'
+      };
+    }
+    return {
+      businessType: manuals[0].business_type || '정보 없음',
+      errorCode: manuals[0].error_code || '정보 없음'
+    };
+  }, [manuals, isLoading]);
   const filteredManuals = useMemo(() => {
     if (!filterTerm) return manuals;
     const normalized = filterTerm.toLowerCase();
@@ -151,8 +169,8 @@ const ApprovedManualCardsPage: React.FC = () => {
       <header className="space-y-1">
         <h1 className="text-3xl font-semibold text-gray-900">메뉴얼 상세 조회</h1>
         <p className="text-sm text-gray-600">
-          업무구분: <span className="font-semibold text-gray-900">{DEFAULT_BUSINESS_TYPE}</span> / 에러코드:{' '}
-          <span className="font-semibold text-gray-900">{DEFAULT_ERROR_CODE}</span>
+          업무구분: <span className="font-semibold text-gray-900">{displayInfo.businessType}</span> / 에러코드:{' '}
+          <span className="font-semibold text-gray-900">{displayInfo.errorCode}</span>
         </p>
       </header>
       <ApprovedManualHeader onSearch={handleSearch} onClear={handleClearFilter} />
