@@ -446,23 +446,103 @@ error({ message: '저장 실패', code: 'ERR_001' });
 
 ---
 
-## 🔗 주요 API 패턴
+## 🔗 API 공통 규격 및 사용 패턴
 
-### 상담 관련
+**⚠️ 중요:** 백엔드 API 통신 시 공통 규격을 반드시 따라야 합니다.
+
+### API 공통 응답 구조
+
+#### 성공 응답
+```json
+{
+  "success": true,
+  "data": { /* 실제 데이터 */ },
+  "error": null,
+  "meta": { "requestId": "...", "timestamp": "..." },
+  "feedback": [/* 선택적 피드백 메시지 */]
+}
+```
+
+#### 실패 응답
+```json
+{
+  "success": false,
+  "data": null,
+  "error": {
+    "code": "AUTH.INVALID_TOKEN",
+    "message": "유효하지 않은 토큰입니다.",
+    "details": {},
+    "hint": "다시 로그인해 주세요."
+  },
+  "meta": { "requestId": "...", "timestamp": "..." },
+  "feedback": []
+}
+```
+
+### API 레이어 작성법
+
+```typescript
+// lib/api/manuals.ts
+import { ApiResponse } from '@/types/api';
+
+export const getManualDetail = async (id: string) => {
+  const response = await api.get<ApiResponse<Manual>>(`/api/v1/manuals/${id}`);
+  return response;
+};
+```
+
+### React Query 통합
+
+#### 조회 (useApiQuery)
+```typescript
+import { useApiQuery } from '@/hooks/useApiQuery';
+
+const { data, isLoading, error } = useApiQuery(
+  ['manual', id],
+  () => getManualDetail(id),
+  {
+    successMessage: '메뉴얼을 불러왔습니다.',
+    autoShowError: true,
+  }
+);
+```
+
+#### 생성/수정/삭제 (useApiMutation)
+```typescript
+import { useApiMutation } from '@/hooks/useApiMutation';
+
+const { mutate, isPending } = useApiMutation(
+  (data) => createManualDraft(data),
+  {
+    successMessage: '저장되었습니다.',
+    errorMessages: {
+      'VALIDATION.ERROR': '입력값이 올바르지 않습니다.',
+    },
+    onSuccess: (data, feedbacks) => {
+      // 성공 후 처리
+    },
+  }
+);
+```
+
+### 주요 API 엔드포인트
+
+#### 상담 관련
 - `GET /api/v1/consultations/search` - 상담 검색
 - `GET /api/v1/consultations/{id}` - 상담 상세 조회
 
-### 메뉴얼 관련
+#### 메뉴얼 관련
 - `POST /api/v1/manuals/draft` - 메뉴얼 초안 생성
 - `GET /api/v1/manuals/draft/{id}` - 초안 조회
 - `PUT /api/v1/manuals/{id}` - 메뉴얼 수정
 - `GET /api/v1/manuals/search` - 메뉴얼 검색
 - `POST /api/v1/manual-review/tasks/{id}/approve` - 검토 승인
 
-### 공통코드 관련
+#### 공통코드 관련
 - `GET /api/v1/common-codes` - 공통코드 목록 조회
 
-**자세한 API 문서:** `docs/openapi.json`
+**자세한 가이드:** [`docs/API_COMMON_USAGE.md`](docs/API_COMMON_USAGE.md)
+**API 명세:** [`docs/openapi.json`](docs/openapi.json)
 
 ---
 
@@ -565,6 +645,8 @@ npm run lint -- --fix    # 자동 수정 (ESLint)
 [ ] 색상은 primary-500 등 이름으로 참조했는가?
 [ ] 로딩/에러 상태를 처리했는가?
 [ ] API는 lib/api/에서 불러왔는가?
+[ ] API 공통 규격(ApiResponse)을 따랐는가?
+[ ] useApiQuery/useApiMutation을 사용했는가?
 [ ] 커스텀 훅을 사용했는가?
 [ ] TypeScript 타입을 정의했는가?
 ```
@@ -597,6 +679,7 @@ npm run lint -- --fix    # 자동 수정 (ESLint)
 
 | 문서 | 목적 |
 |------|------|
+| [API_COMMON_USAGE.md](docs/API_COMMON_USAGE.md) | **API 공통 규격 및 사용 가이드** |
 | [UI_UX_STYLE_GUIDE.md](docs/UI_UX_STYLE_GUIDE.md) | 스타일링 표준 및 컴포넌트 가이드 |
 | [TAILWIND_COLOR_REFERENCE.md](docs/TAILWIND_COLOR_REFERENCE.md) | 색상 팔레트 및 사용 패턴 |
 | [STYLE_STANDARDIZATION_CHECKLIST.md](docs/STYLE_STANDARDIZATION_CHECKLIST.md) | 표준화 작업 체크리스트 |
