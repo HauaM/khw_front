@@ -6,7 +6,7 @@ import ConsultationDetailBasicInfo from '@/components/consultations/Consultation
 import ConsultationDetailContent from '@/components/consultations/ConsultationDetailContent';
 import ConsultationMetadataTable from '@/components/consultations/ConsultationMetadataTable';
 import Spinner from '@/components/common/Spinner';
-import Toast, { useToast } from '@/components/common/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import useCreateManualDraft from '@/hooks/useCreateManualDraft';
 
 interface ConsultationDetailModalProps {
@@ -66,7 +66,7 @@ const ConsultationDetailModal: React.FC<ConsultationDetailModalProps> = ({
   onManualDraftCreated,
   isNew = true,
 }) => {
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
   const [consultation, setConsultation] = useState<SearchConsultation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -249,17 +249,6 @@ const ConsultationDetailModal: React.FC<ConsultationDetailModalProps> = ({
             <ConsultationDetailContent consultation={convertedData} />
             <ConsultationMetadataTable metadata={convertedData.metadata_fields} />
           </div>
-
-          {/* Toasts */}
-          {toasts.map((toast) => (
-            <Toast
-              key={toast.id}
-              message={toast.message}
-              type={toast.type}
-              isOpen
-              onClose={() => removeToast(toast.id)}
-            />
-          ))}
         </div>
       </div>
     </>

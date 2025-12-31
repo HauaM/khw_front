@@ -4,7 +4,7 @@ import ConsultationSearchForm from '@/components/search/ConsultationSearchForm';
 import ConsultationResultTable from '@/components/table/ConsultationResultTable';
 import ConsultationDetailModal from '@/components/modals/ConsultationDetailModal';
 import Spinner from '@/components/common/Spinner';
-import { useToast } from '@/components/common/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import {
   Consultation,
   ConsultationSearchParams,

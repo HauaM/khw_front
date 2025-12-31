@@ -6,7 +6,6 @@ import ConsultationDetailBasicInfo from '@/components/consultations/Consultation
 import ConsultationDetailContent from '@/components/consultations/ConsultationDetailContent';
 import ConsultationMetadataTable from '@/components/consultations/ConsultationMetadataTable';
 import Spinner from '@/components/common/Spinner';
-import Toast, { useToast } from '@/components/common/Toast';
 import useConsultationDetail from '@/hooks/useConsultationDetail';
 
 interface LocationState {
@@ -47,8 +46,6 @@ const ConsultationDetailPage: React.FC = () => {
   const convertedStateData = convertSearchResultToApiFormat(stateConsultation);
   const { data: apiData, isLoading, isError, error } = useConsultationDetail(convertedStateData ? undefined : id);
   const data = convertedStateData || apiData;
-
-  const { toasts, removeToast } = useToast();
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -98,16 +95,6 @@ const ConsultationDetailPage: React.FC = () => {
           <ConsultationMetadataTable metadata={data.metadata_fields} />
         </>
       )}
-
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          isOpen
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
     </div>
   );
 };

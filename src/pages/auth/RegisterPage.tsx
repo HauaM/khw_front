@@ -1,23 +1,17 @@
 import React from 'react';
 import RegisterForm from '@/components/auth/RegisterForm';
-import Toast, { useToast } from '@/components/common/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import useAuthRedirectIfLoggedIn from '@/hooks/useAuthRedirectIfLoggedIn';
 
 const RegisterPage: React.FC = () => {
   useAuthRedirectIfLoggedIn();
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   return (
-    <>
-      <div className="space-y-8">
-        <AuthHeader title="회원가입" subtitle="KWH 시스템 계정을 생성합니다" />
-        <RegisterForm onShowToast={showToast} />
-      </div>
-
-      {toasts.map((toast) => (
-        <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
-      ))}
-    </>
+    <div className="space-y-8">
+      <AuthHeader title="회원가입" subtitle="KWH 시스템 계정을 생성합니다" />
+      <RegisterForm onShowToast={showToast} />
+    </div>
   );
 };
 

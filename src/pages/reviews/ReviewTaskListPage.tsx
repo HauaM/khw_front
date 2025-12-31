@@ -33,6 +33,7 @@ const ReviewTaskListPage: React.FC = () => {
 
   // 필터링된 Task 계산
   const filteredTasks = useMemo(() => {
+    if (!tasks) return [];
     //let filtered = tasks;
     let filtered = tasks.filter((task) => task.status !== 'TODO');
     
@@ -71,6 +72,14 @@ const ReviewTaskListPage: React.FC = () => {
 
   // 통계 데이터 계산
   const stats = useMemo(() => {
+    if (!tasks) {
+      return {
+        todo: 0,
+        inProgress: 0,
+        done: 0,
+        rejected: 0,
+      };
+    }
     return {
       todo: tasks.filter((t) => t.status === 'TODO').length,
       inProgress: tasks.filter((t) => t.status === 'IN_PROGRESS').length,

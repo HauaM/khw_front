@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ManualDraft } from '@/types/manuals';
-import { useToast } from '@/components/common/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import Spinner from '@/components/common/Spinner';
 import Modal from '@/components/common/Modal';
-import Toast from '@/components/common/Toast';
 import { useSaveManualDraft } from '@/hooks/useSaveManualDraft';
 import { useStartManualReviewTask } from '@/hooks/useStartManualReviewTask';
 import { guidelinesToString, deleteManualDraft, fetchManualReviewTasksByManualId } from '@/lib/api/manuals';
@@ -32,7 +31,7 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({
   onSaved
 }) => {
   const navigate = useNavigate();
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
   const { mutate: saveDraft } = useSaveManualDraft();
 
   // 상태 관리
@@ -305,18 +304,6 @@ const ManualDraftResultView: React.FC<ManualDraftResultViewProps> = ({
 
   return (
     <>
-      {/* 토스트 컨테이너 */}
-      <div className="fixed inset-0 pointer-events-none">
-        {toasts.map((toast) => (
-          <Toast
-            key={toast.id}
-            message={toast.message}
-            type={toast.type}
-            isOpen
-            onClose={() => removeToast(toast.id)}
-          />
-        ))}
-      </div>
 
       {/* 페이지 헤더 */}
       <div className="mb-6 flex items-start justify-between">

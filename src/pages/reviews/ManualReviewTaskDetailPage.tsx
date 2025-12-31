@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchManualReviewDetail } from '@/lib/api/manualReviewTasks';
 import { ManualReviewDetail } from '@/types/reviews';
-import { useToast } from '@/components/common/Toast';
+import { useToast } from '@/contexts/ToastContext';
 
 const ManualReviewTaskDetailPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();

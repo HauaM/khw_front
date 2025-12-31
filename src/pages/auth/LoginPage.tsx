@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import LoginForm from '@/components/auth/LoginForm';
-import Toast, { useToast } from '@/components/common/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import useAuthRedirectIfLoggedIn from '@/hooks/useAuthRedirectIfLoggedIn';
 
 const LoginPage: React.FC = () => {
@@ -9,19 +9,13 @@ const LoginPage: React.FC = () => {
 
   const location = useLocation();
   const prefillEmployeeId = (location.state as { employeeId?: string } | undefined)?.employeeId ?? '';
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   return (
-    <>
-      <div className="space-y-8">
-        <AuthHeader title="KWH 지식관리시스템" subtitle="광주은행 헬프데스크 위키" />
-        <LoginForm initialEmployeeId={prefillEmployeeId} onShowToast={showToast} />
-      </div>
-
-      {toasts.map((toast) => (
-        <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
-      ))}
-    </>
+    <div className="space-y-8">
+      <AuthHeader title="KWH 지식관리시스템" subtitle="광주은행 헬프데스크 위키" />
+      <LoginForm initialEmployeeId={prefillEmployeeId} onShowToast={showToast} />
+    </div>
   );
 };
 

@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **프로젝트명:** KWH 지식관리시스템 (광주은행)
 **설명:** 광주은행 헬프데스크 위키 지식관리시스템의 프론트엔드
 **총 코드 라인:** ~3,200줄
-**최종 업데이트:** 2025-12-12
+**최종 업데이트:** 2025-12-31
 
 ### 주요 기능
 - 상담 조회 및 검색
@@ -354,6 +354,96 @@ const MyComponent: React.FC<MyComponentProps> = ({ title, onAction }) => {
 };
 ```
 
+### Toast 메시지 사용 (중요!)
+
+**⚠️ Toast는 절대 개별 페이지/컴포넌트에서 렌더링하지 않습니다!**
+
+#### 전역 Toast 시스템 구조
+
+```typescript
+// App.tsx (이미 설정됨 - 수정하지 말 것)
+<ToastProvider>
+  <AppRouter />
+  <ToastContainer />  {/* 전역 Toast 렌더링 */}
+</ToastProvider>
+```
+
+#### 올바른 사용법 ✅
+
+```typescript
+// 페이지 또는 컴포넌트에서
+import { useToast } from '@/contexts/ToastContext';
+// 또는
+import { useToast } from '@/hooks/useToast';
+
+const MyPage: React.FC = () => {
+  const { showToast, success, error, info, warning } = useToast();
+
+  const handleSave = async () => {
+    try {
+      await saveData();
+      success('저장되었습니다!');
+      // 또는
+      showToast('저장되었습니다!', 'success');
+    } catch (err) {
+      error({ message: '저장 실패', code: 'ERR_001' });
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={handleSave}>저장</button>
+      {/* ❌ Toast 컴포넌트를 여기서 렌더링하지 말 것! */}
+    </div>
+  );
+};
+```
+
+#### 금지된 사용법 ❌
+
+```typescript
+// ❌ 절대 하지 말 것!
+import Toast from '@/components/common/Toast';
+
+const BadPage: React.FC = () => {
+  const { toasts, removeToast } = useToast();
+
+  return (
+    <div>
+      {/* ❌ 개별 페이지에서 Toast 렌더링 금지 */}
+      {toasts.map((toast) => (
+        <Toast key={toast.id} {...toast} onClose={() => removeToast(toast.id)} />
+      ))}
+    </div>
+  );
+};
+```
+
+#### Toast API
+
+```typescript
+const { showToast, success, error, info, warning } = useToast();
+
+// 일반 메시지
+showToast('메시지 내용', 'info', 3000);  // type, duration(ms) 선택
+
+// 단축 메서드
+success('성공 메시지');           // 3초 표시
+error('에러 메시지');             // 5초 표시
+info('정보 메시지');              // 3초 표시
+warning('경고 메시지');           // 4초 표시
+
+// 에러 코드와 함께
+error({ message: '저장 실패', code: 'ERR_001' });
+```
+
+#### 주의사항
+
+- **Toast 컴포넌트는 App.tsx의 ToastContainer에서만 렌더링됩니다**
+- **각 페이지/컴포넌트에서는 useToast 훅만 사용**하여 메시지를 표시합니다
+- Toast는 우측 상단에 자동으로 표시되며, 설정된 시간 후 자동으로 사라집니다
+- 여러 Toast가 동시에 표시될 수 있으며, 순서대로 쌓입니다
+
 ---
 
 ## 🔗 주요 API 패턴
@@ -454,6 +544,7 @@ npm run lint -- --fix    # 자동 수정 (ESLint)
 - styled-components 제거 (ManualDraftListPage)
 - 색상 하드코딩 제거
 - 스타일 가이드 문서 작성
+- Toast 시스템 전역화 (2025-12-31)
 
 ### 🔄 진행 중
 - 일부 TypeScript 타입 오류 (기존 이슈)
@@ -533,6 +624,6 @@ npm run lint -- --fix    # 자동 수정 (ESLint)
 
 ---
 
-**최종 업데이트:** 2025-12-12
+**최종 업데이트:** 2025-12-31
 **담당자:** Frontend Team
 **버전:** 1.0

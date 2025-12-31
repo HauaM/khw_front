@@ -4,15 +4,14 @@
  * LLM으로 생성된 DRAFT 메뉴얼을 조회하고, 승인/삭제를 위한 기초 정보를 제공합니다.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchManualReviewTasks } from '@/lib/api/manualReviewTasks';
+import { useManualReviewTasks } from '@/hooks/useManualReviewTasks';
 import ManualDraftTable, { ManualDraftTableRow } from '@/components/manuals/ManualDraftTable';
 import { ManualReviewTask } from '@/types/reviews';
 
-
 // ─────────────────────────────────────────────────────────────────
-// Component
+// Helper
 // ─────────────────────────────────────────────────────────────────
 
 const mapTaskToRow = (task: ManualReviewTask): ManualDraftTableRow => ({
@@ -27,42 +26,26 @@ const mapTaskToRow = (task: ManualReviewTask): ManualDraftTableRow => ({
   source_consultation_id: task.source_consultation_id,
 });
 
+// ─────────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────────
+
 const ManualDraftListPage: React.FC = () => {
   const navigate = useNavigate();
 
-  // State
-  const [drafts, setDrafts] = useState<ManualDraftTableRow[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // useApiQuery 패턴 사용 - 자동 에러/피드백 처리
+  const { data: tasks, isLoading } = useManualReviewTasks({
+    filters: {
+      status: 'TODO',
+      businessType: '전체',
+      startDate: '',
+      endDate: '',
+    },
+  });
 
-  // Fetch drafts
-  const fetchDrafts = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetchManualReviewTasks({
-        limit: 100,
-        status: 'TODO',
-      });
-
-      setDrafts(response.data.map(mapTaskToRow));
-      setTotalCount(response.data.length);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '초안 목록을 불러올 수 없습니다.';
-      setError(errorMessage);
-      setDrafts([]);
-      setTotalCount(0);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Initial load
-  useEffect(() => {
-    fetchDrafts();
-  }, [fetchDrafts]);
+  // 데이터 변환
+  const drafts = tasks ? tasks.map(mapTaskToRow) : [];
+  const totalCount = drafts.length;
 
   // Render
   return (
@@ -75,15 +58,8 @@ const ManualDraftListPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Error Alert */}
-      {error && (
-        <div className="p-3 bg-red-50 border-l-4 border-red-700 rounded text-red-700 text-sm font-medium">
-          {error}
-        </div>
-      )}
-
       {/* Table */}
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center p-10 text-gray-600 text-sm">
           불러오는 중...
         </div>

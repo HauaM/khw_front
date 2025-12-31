@@ -12,7 +12,6 @@ import {
   ManualReviewTask,
   BackendManualReviewTask,
   ManualReviewTaskQueryParams,
-  ManualReviewTasksResponse,
   ManualReviewDetail,
   ManualEntry,
   BusinessType,
@@ -70,37 +69,6 @@ export async function fetchManualReviewTasksApi(
       },
     }
   );
-}
-
-/**
- * 메뉴얼 검토 Task 목록 조회 (레거시 - 변환된 데이터)
- * @deprecated fetchManualReviewTasksApi + useApiQuery 사용 권장
- * @param params 쿼리 파라미터
- * @returns Task 목록
- */
-export async function fetchManualReviewTasks(
-  params?: ManualReviewTaskQueryParams
-): Promise<ManualReviewTasksResponse> {
-  const apiResponse = await api.get<ApiResponse<BackendManualReviewTask[]>>(
-    '/api/v1/manual-review/tasks',
-    {
-      params: {
-        status: params?.status || undefined,
-        limit: params?.limit || 100,
-      },
-    }
-  );
-
-  // API 응답에서 데이터 추출
-  const backendTasks = apiResponse.success ? apiResponse.data : [];
-  const tasks = backendTasks.map(transformBackendTask);
-
-  return {
-    data: tasks,
-    total: tasks.length,
-    page: params?.page || 1,
-    limit: params?.limit || 10,
-  };
 }
 
 /**

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ManualReviewComparison } from '@/types/reviews';
 import { ApiFeedback } from '@/types/api';
-import { useToast } from '@/components/common/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import Modal from '@/components/common/Modal';
 import { useApproveManualReview } from '@/hooks/useApproveManualReview';
 import { useRejectManualReview } from '@/hooks/useRejectManualReview';
