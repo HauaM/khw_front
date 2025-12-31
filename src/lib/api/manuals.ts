@@ -82,6 +82,28 @@ export const createManualDraft = (payload: ManualDraftCreatePayload) =>
   });
 
 /**
+ * 메뉴얼 초안 비교 결과 조회
+ * OpenAPI: GET /api/v1/manuals/draft/{manual_id}
+ *
+ * POST /api/v1/manuals/draft와 동일한 ManualDraftCreateResponse를 반환하여
+ * 초안 생성 후뿐만 아니라 저장된 초안 재조회 시에도 비교 정보를 제공합니다.
+ *
+ * @param manualId - 메뉴얼 초안 ID (UUID)
+ * @returns ApiResponse<ManualDraftCreateResponse> - 비교 정보 포함
+ *
+ * 응답 구조:
+ * - comparison_type: 'new' | 'similar' | 'supplement'
+ * - draft_entry: ManualDraftResponse (초안 전체 데이터)
+ * - existing_manual: ManualDraftResponse | null (기존 메뉴얼 전체 데이터)
+ * - similarity_score: number | null (유사도 점수)
+ * - review_task_id: string (검토 작업 ID)
+ * - comparison_version: string
+ * - message: string
+ */
+export const getManualDraftComparison = (manualId: string) =>
+  api.get<ApiResponse<ManualDraftCreateResponse>>(`/api/v1/manuals/draft/${manualId}`);
+
+/**
  * 메뉴얼 초안 업데이트
  * OpenAPI: PUT /api/v1/manuals/{manual_id}
  *

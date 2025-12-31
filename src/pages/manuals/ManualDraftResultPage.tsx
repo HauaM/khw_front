@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { ManualDraft } from '@/types/manuals';
-import { useManualDraft } from '@/hooks/useManualDraft';
+import { useManualDraftComparison } from '@/hooks/useManualDraftComparison';
+import { convertApiResponseToManualDraft } from '@/lib/api/manuals';
 import ManualDraftResultView from '@/components/manuals/ManualDraftResultView';
 import Spinner from '@/components/common/Spinner';
 import { useToast } from '@/contexts/ToastContext';
@@ -22,38 +23,65 @@ interface ManualDraftLocationState {
  * 2가지 사용 시나리오:
  * 1. 초안 생성 직후 (권장):
  *    - `location.state`로 초안 데이터 및 비교 정보 전달
+ *    - 네트워크 요청 없이 즉시 표시
  *    - 예: navigate('/manuals/draft/DRAFT-001', {
  *        state: { draft, comparisonType, existingManual, similarityScore }
  *      })
  *
- * 2. 저장된 초안 재조회:
- *    - URL 파라미터 `:id`로 접근 시 API에서 데이터를 조회하고, 없으면 mock을 사용합니다.
+ * 2. 저장된 초안 재조회 (목록→상세, URL 직접 접근):
+ *    - GET /api/v1/manuals/draft/{manual_id}로 비교 정보 포함 조회
+ *    - comparison_type, draft_entry, existing_manual, similarity_score 모두 포함
  */
 const ManualDraftResultPage: React.FC = () => {
   const location = useLocation();
   const params = useParams<{ id: string }>();
   const draftId = params.id ?? '';
   const locationState = (location.state as ManualDraftLocationState | null) ?? {};
-  const draftFromState = locationState.draft;
-  const comparisonTypeFromState = locationState.comparisonType;
-  const existingManualFromState = locationState.existingManual;
-  const similarityScoreFromState = locationState.similarityScore;
   const { showToast } = useToast();
   const toastShownRef = React.useRef(false);
 
-  // 라우트 상태에서 전달받은 draft가 있으면 사용, 없으면 API/모의 데이터를 로드
-  const { data: fetchedDraft, isLoading, isError, error } = useManualDraft(draftId);
-  const [currentDraft, setCurrentDraft] = useState<ManualDraft | null>(
-    draftFromState || fetchedDraft || null
+  // location.state에 데이터가 있는지 확인
+  const hasStateData = !!locationState.draft && !!locationState.comparisonType;
+
+  // location.state가 없을 때만 API 호출
+  const { data: comparisonData, isLoading, error } = useManualDraftComparison(
+    draftId,
+    !hasStateData // location.state가 없을 때만 enabled
   );
 
-  // API/모의 draft가 업데이트되면 currentDraft도 업데이트 (draftFromState가 없을 때만)
-  React.useEffect(() => {
-    if (!draftFromState && fetchedDraft) {
-      setCurrentDraft(fetchedDraft);
-    }
-  }, [fetchedDraft, draftFromState]);
+  // Draft 데이터 결정 (state 우선, 없으면 API 응답)
+  const draft = hasStateData
+    ? locationState.draft!
+    : comparisonData
+    ? convertApiResponseToManualDraft(comparisonData.draft_entry)
+    : null;
 
+  // 비교 정보 결정
+  const comparisonType = hasStateData
+    ? locationState.comparisonType!
+    : comparisonData?.comparison_type;
+
+  const existingManual = hasStateData
+    ? locationState.existingManual
+    : comparisonData?.existing_manual
+    ? convertApiResponseToManualDraft(comparisonData.existing_manual)
+    : null;
+
+  const similarityScore = hasStateData
+    ? locationState.similarityScore
+    : comparisonData?.similarity_score;
+
+  // Draft 상태 관리 (저장 후 업데이트용)
+  const [currentDraft, setCurrentDraft] = useState<ManualDraft | null>(draft);
+
+  // draft가 변경되면 currentDraft 업데이트
+  React.useEffect(() => {
+    if (draft) {
+      setCurrentDraft(draft);
+    }
+  }, [draft]);
+
+  // ID 검증
   React.useEffect(() => {
     if (!draftId && !toastShownRef.current) {
       showToast('메뉴얼 ID가 누락되었습니다. URL을 확인해주세요.', 'error');
@@ -66,8 +94,8 @@ const ManualDraftResultPage: React.FC = () => {
     setCurrentDraft(updatedDraft);
   };
 
-  // 로딩 중 (라우트 상태에서 데이터를 받지 못한 경우)
-  if (!draftFromState && isLoading) {
+  // 로딩 중 (API 호출 중일 때만)
+  if (!hasStateData && isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Spinner size="lg" className="mb-4 text-primary-500" />
@@ -77,7 +105,7 @@ const ManualDraftResultPage: React.FC = () => {
   }
 
   // 에러 발생
-  if (!draftFromState && (isError || !currentDraft)) {
+  if (!hasStateData && error) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <svg className="mb-4 h-12 w-12 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -86,9 +114,7 @@ const ManualDraftResultPage: React.FC = () => {
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <h3 className="mb-2 text-lg font-semibold text-gray-900">초안을 불러올 수 없습니다</h3>
-        <p className="text-gray-600">
-          {error?.message || '초안 데이터를 불러올 수 없습니다. 초안 생성 페이지로 돌아가세요.'}
-        </p>
+        <p className="text-gray-600">초안 데이터를 불러올 수 없습니다. 초안 생성 페이지로 돌아가세요.</p>
       </div>
     );
   }
@@ -111,9 +137,9 @@ const ManualDraftResultPage: React.FC = () => {
   return (
     <ManualDraftResultView
       draft={currentDraft}
-      comparisonType={comparisonTypeFromState}
-      existingManual={existingManualFromState}
-      similarityScore={similarityScoreFromState}
+      comparisonType={comparisonType}
+      existingManual={existingManual}
+      similarityScore={similarityScore}
       onSaved={handleSaved}
     />
   );
