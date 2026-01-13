@@ -28,3 +28,4 @@ CMD ["nginx", "-g", "daemon off;"]
 
 # docker 빌드 
 # docker build -t khw-frontend:latest .
+# docker save -o khw-frontend_latest_20260113.tar khw-frontend:latest
