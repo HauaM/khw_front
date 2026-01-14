@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from '@/layouts/AppLayout';
-import DashboardPage from '@/pages/dashboard/DashboardPage';
 import ConsultationCreatePage from '@/pages/consultations/ConsultationCreatePage';
 import ConsultationSearchPage from '@/pages/consultations/ConsultationSearchPage';
 import ConsultationDetailPage from '@/pages/consultations/ConsultationDetailPage';
@@ -31,7 +30,7 @@ const AppRouter: React.FC = () => {
         {/* 인증이 필요한 경로 - ProtectedRoute로 보호 */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<AppLayout />}>
-            <Route index element={<DashboardPage />} />
+            <Route index element={<Navigate to="/manuals/search" replace />} />
             <Route path="consultations">
               <Route path="new" element={<ConsultationCreatePage />} />
               <Route path="search" element={<ConsultationSearchPage />} />

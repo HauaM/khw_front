@@ -214,10 +214,35 @@ function buildItemRequestBody(payload: CommonCodeItemPayload) {
 }
 
 /**
- * 모든 공통코드 그룹 조회 (페이징)
- * API: GET /api/v1/admin/common-codes/groups
+ * 모든 공통코드 그룹 조회 (페이징) - 일반용
+ * API: GET /api/v1/common-codes/groups
  */
 export async function fetchCommonCodeGroups(
+  page: number = 1,
+  pageSize: number = 100
+): Promise<ApiResponse<CommonCodeGroup[]>> {
+  const response = await api.get<ApiResponse<CommonCodeGroupListResponse>>(
+    '/api/v1/common-codes/groups',
+    {
+      params: { page, page_size: pageSize },
+    }
+  );
+
+  if (!response.success) {
+    return response as ApiResponse<CommonCodeGroup[]>;
+  }
+
+  return {
+    ...response,
+    data: response.data.items.map(transformGroup),
+  };
+}
+
+/**
+ * 모든 공통코드 그룹 조회 (페이징) - 관리자용
+ * API: GET /api/v1/admin/common-codes/groups
+ */
+export async function fetchCommonCodeGroupsForAdmin(
   page: number = 1,
   pageSize: number = 100
 ): Promise<ApiResponse<CommonCodeGroup[]>> {

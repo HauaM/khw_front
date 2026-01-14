@@ -9,7 +9,7 @@ import {
   CommonCodeItem,
   CommonCodeGroupPayload,
   CommonCodeItemPayload,
-  fetchCommonCodeGroups,
+  fetchCommonCodeGroupsForAdmin,
   createCommonCodeGroup,
   updateCommonCodeGroup,
   deleteCommonCodeGroup,
@@ -179,7 +179,7 @@ export function useCommonCodeManagement(): UseCommonCodeManagementResult {
   const loadGroups = useCallback(async () => {
     try {
       setIsLoadingGroups(true);
-      const response = await fetchCommonCodeGroups();
+      const response = await fetchCommonCodeGroupsForAdmin();
       setGroups(response.data || []);
     } catch (error) {
       console.error('Failed to load groups:', error);
