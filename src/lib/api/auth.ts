@@ -12,6 +12,7 @@ export interface SignupPayload {
   employee_id: string;
   name: string;
   department: string;
+  department_ids: string[];
   password: string;
   role?: UserRole;
 }

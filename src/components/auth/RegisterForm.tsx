@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Spinner from '@/components/common/Spinner';
+import TypeAheadSelectBox, { TypeAheadOption } from '@/components/common/TypeAheadSelectBox';
 import { ToastType } from '@/components/common/Toast';
 import { RegisterFormValues, UserRole } from '@/types/auth';
 import { authApi } from '@/lib/api/auth';
+import { useDepartments } from '@/hooks/useDepartments';
 
 interface RegisterFormProps {
   onShowToast: (message: string, type?: ToastType) => void;
@@ -12,15 +14,17 @@ interface RegisterFormProps {
 const roleDescriptions: Record<UserRole, string> = {
   CONSULTANT: '상담 내역을 등록하고 메뉴얼 초안을 생성할 수 있습니다',
   REVIEWER: '메뉴얼 초안을 검토하고 승인할 수 있습니다',
-  ADMIN: '시스템 전체를 관리하고 사용자 권한을 설정할 수 있습니다',
+  ADMIN: '',
 };
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onShowToast }) => {
   const navigate = useNavigate();
+  const { data: departments = [], isLoading: departmentsLoading } = useDepartments({ is_active: true });
   const [values, setValues] = useState<RegisterFormValues>({
     employee_id: '',
     name: '',
     department: '',
+    department_ids: [],
     role: '',
     password: '',
     password_confirm: '',
@@ -28,6 +32,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onShowToast }) => {
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormValues, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const timeouts = useRef<number[]>([]);
+
+  // 부서 데이터를 TypeAheadOption으로 변환
+  const departmentOptions: TypeAheadOption[] = departments.map((dept) => ({
+    code: dept.id,
+    label: dept.department_name,
+    description: dept.department_code,
+  }));
 
   useEffect(() => {
     return () => {
@@ -87,6 +98,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onShowToast }) => {
         employee_id: employeeId,
         name,
         department,
+        department_ids: values.department_ids,
         password: values.password,
         role,
       });
@@ -158,15 +170,26 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onShowToast }) => {
           <span>부서</span>
           <span className="text-red-600">*</span>
         </label>
-        <input
-          type="text"
-          name="department"
-          value={values.department}
-          onChange={(e) => setValues({ ...values, department: e.target.value })}
-          placeholder="부서명을 입력하세요"
-          className={`${baseInputClass} ${errors.department ? errorInputClass : normalInputClass}`}
+        <TypeAheadSelectBox
+          options={departmentOptions}
+          selectedCode={values.department_ids[0]}
+          onChange={(code, label) => {
+            // code는 부서 ID, label은 부서명
+            setValues({
+              ...values,
+              department: label || '',
+              department_ids: code ? [code] : [],
+            });
+            // 선택 시 에러 제거
+            if (errors.department) {
+              setErrors({ ...errors, department: undefined });
+            }
+          }}
+          placeholder="부서를 선택하세요"
+          error={errors.department}
+          allowCreate={false}
+          isLoading={departmentsLoading}
         />
-        <p className="text-[12px] text-gray-600">예: 디지털전략부</p>
         {renderError(errors.department)}
       </div>
 
@@ -184,7 +207,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onShowToast }) => {
           <option value="">역할을 선택하세요</option>
           <option value="CONSULTANT">상담사</option>
           <option value="REVIEWER">검토자</option>
-          <option value="ADMIN">관리자</option>
         </select>
         {values.role && <p className="text-[12px] text-gray-600">{roleDescriptions[values.role as UserRole]}</p>}
         {renderError(errors.role)}

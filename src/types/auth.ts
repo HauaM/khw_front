@@ -9,6 +9,7 @@ export interface RegisterFormValues {
   employee_id: string;
   name: string;
   department: string;
+  department_ids: string[];
   role: UserRole | '';
   password: string;
   password_confirm: string;
