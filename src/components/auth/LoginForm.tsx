@@ -125,12 +125,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ initialEmployeeId = '', onShowToa
   };
 
   const handleSSOLogin = () => {
-    onShowToast('SSO 인증 페이지로 이동합니다...', 'success');
-    queueTimeout(() => {
-      // TODO: Replace with real SSO redirect when backend is ready
-      // window.location.href = '/api/auth/sso';
-      console.log('Redirect to SSO provider');
-    }, 1000);
+    onShowToast('개발중입니다.', 'info');
   };
 
   const baseInputClass =
